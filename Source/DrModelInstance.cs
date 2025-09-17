@@ -168,6 +168,13 @@ namespace DigitalRiseModel
 			return _worldTransforms[boneIndex];
 		}
 
+		public Matrix[] GetSkinTransforms(int skinIndex)
+		{
+			UpdateTransforms();
+			
+			return _skinInfos[skinIndex].Transforms;
+		}
+
 		public DrModelInstance Clone()
 		{
 			var result = new DrModelInstance

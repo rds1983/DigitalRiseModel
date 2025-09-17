@@ -65,7 +65,7 @@ namespace DigitalRiseModel
 		{
 			var result = new DrModelBone(bone.Name)
 			{
-				DefaultPose = new SrtTransform(bone.Scale, bone.Rotation, bone.Translation)
+				DefaultPose = new SrtTransform(bone.Translation, bone.Rotation, bone.Scale)
 			};
 
 			if (bone.Mesh != null)
