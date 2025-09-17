@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
-	public class VertexBufferContent
+	internal class VertexBufferContent
 	{
 		private int? _vertexStride;
 		private byte[] _data;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DigitalRiseModel.Storage
 {
-	public class BoneContent
+	internal class BoneContent
 	{
 		public string Name { get; set; }
 		public MeshContent Mesh { get; set; }

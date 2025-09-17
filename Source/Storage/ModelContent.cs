@@ -5,7 +5,7 @@ using System.IO;
 
 namespace DigitalRiseModel.Storage
 {
-	public partial class ModelContent
+	internal partial class ModelContent
 	{
 		private static readonly byte[] DrmSignature = { (byte)'D', (byte)'R', (byte)'M' };
 

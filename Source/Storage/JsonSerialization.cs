@@ -24,7 +24,7 @@ namespace DigitalRiseModel.Storage
 			return (byte)ParseInt(s);
 		}
 
-		public class PointConverter : JsonConverter<Point>
+		internal class PointConverter : JsonConverter<Point>
 		{
 			public static readonly PointConverter Instance = new PointConverter();
 
@@ -49,7 +49,7 @@ namespace DigitalRiseModel.Storage
 			}
 		}
 
-		public class ColorConverter : JsonConverter<Color>
+		internal class ColorConverter : JsonConverter<Color>
 		{
 			public static readonly ColorConverter Instance = new ColorConverter();
 
@@ -74,7 +74,7 @@ namespace DigitalRiseModel.Storage
 			}
 		}
 
-		public class QuaternionConverter : JsonConverter<Quaternion>
+		internal class QuaternionConverter : JsonConverter<Quaternion>
 		{
 			public static readonly QuaternionConverter Instance = new QuaternionConverter();
 
@@ -100,7 +100,7 @@ namespace DigitalRiseModel.Storage
 			}
 		}
 
-		public class MatrixConverter : JsonConverter<Matrix>
+		internal class MatrixConverter : JsonConverter<Matrix>
 		{
 			public static readonly MatrixConverter Instance = new MatrixConverter();
 

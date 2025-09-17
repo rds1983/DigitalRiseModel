@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace DigitalRiseModel.Storage
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct VectorKeyframeContent
+	internal struct VectorKeyframeContent
 	{
 		public double Time;
 		public Vector3 Value;
@@ -19,7 +19,7 @@ namespace DigitalRiseModel.Storage
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public struct QuaternionKeyframeContent
+	internal struct QuaternionKeyframeContent
 	{
 		public double Time;
 		public Quaternion Value;
@@ -31,7 +31,7 @@ namespace DigitalRiseModel.Storage
 		}
 	}
 
-	public class VectorKeyframeChannelContent : SerializableCollection<VectorKeyframeContent>
+	internal class VectorKeyframeChannelContent : SerializableCollection<VectorKeyframeContent>
 	{
 		protected override VectorKeyframeContent LoadItem(BinaryReader reader)
 		{
@@ -45,7 +45,7 @@ namespace DigitalRiseModel.Storage
 		}
 	}
 
-	public class QuaternionKeyframeChannelContent : SerializableCollection<QuaternionKeyframeContent>
+	internal class QuaternionKeyframeChannelContent : SerializableCollection<QuaternionKeyframeContent>
 	{
 		protected override QuaternionKeyframeContent LoadItem(BinaryReader reader)
 		{
@@ -59,7 +59,7 @@ namespace DigitalRiseModel.Storage
 		}
 	}
 
-	public class AnimationChannelContent
+	internal class AnimationChannelContent
 	{
 		public int BoneIndex { get; set; }
 		public VectorKeyframeChannelContent Scales { get; set; } = new VectorKeyframeChannelContent();

@@ -4,13 +4,13 @@ using System.IO;
 
 namespace DigitalRiseModel.Storage
 {
-	public struct SkinJointContent
+	internal struct SkinJointContent
 	{
 		public int BoneIndex { get; set; }
 		public Matrix InverseBindTransform { get; set; }
 	}
 
-	public class SkinContent : SerializableCollection<SkinJointContent>
+	internal class SkinContent : SerializableCollection<SkinJointContent>
 	{
 		protected override SkinJointContent LoadItem(BinaryReader reader)
 		{

@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
-	public class IndexBufferContent
+	internal class IndexBufferContent
 	{
 		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int BufferId { get; set; }

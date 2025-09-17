@@ -1,43 +1,47 @@
 <Project>
-  <Project.ExportOptions Namespace="DigitalRiseModel.Samples.ModelViewer.UI" Class="MainPanel" OutputPath="D:\Projects\Nursia\Samples\ModelViewer\UI" />
+  <Project.ExportOptions Namespace="DigitalRiseModel.Samples.ModelViewer.UI" Class="MainPanel" OutputPath="D:\Projects\DigitalRiseModel\Samples\DigitalRiseModel.Samples.ModelViewer\UI" />
   <Panel>
     <VerticalStackPanel Spacing="8">
-      <HorizontalStackPanel Spacing="8">
-        <TextBox Readonly="True" Width="300" Id="_textPath" />
-        <Button Id="_buttonChange">
-          <Label Text="Change..." />
-        </Button>
-      </HorizontalStackPanel>
       <Grid ColumnSpacing="8" RowSpacing="8">
         <Grid.DefaultRowProportion Type="Auto" />
         <Grid.ColumnsProportions>
           <Proportion Type="Auto" />
           <Proportion Type="Pixels" Value="300" />
+          <Proportion Type="Auto" />
+          <Proportion Type="Auto" />
         </Grid.ColumnsProportions>
-        <Label Text="Animation:" />
-        <ComboView HorizontalAlignment="Stretch" Id="_comboAnimations" Grid.Column="1">
+        <Label Text="Texture:" />
+        <TextBox Readonly="True" Width="300" Id="_textPath" Grid.Column="1" />
+        <Button Id="_buttonChangeTexture" Grid.Column="2">
+          <Label Text="Change..." />
+        </Button>
+        <Button Id="_buttonClearTexture" Grid.Column="3">
+          <Label Text="Clear" />
+        </Button>
+        <Label Text="Color:" Grid.Row="1" />
+        <Image HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Id="_imageColor" Grid.Column="1" Grid.Row="1" />
+        <Button Id="_buttonChangeColor" Grid.Column="2" Grid.Row="1">
+          <Label Text="Change..." />
+        </Button>
+        <Label Text="Animation:" Grid.Row="2" />
+        <ComboView HorizontalAlignment="Stretch" Id="_comboAnimations" Grid.Column="1" Grid.Row="2">
           <Label />
           <Label Text="Move" />
           <Label Text="Attack" />
         </ComboView>
-        <Label Text="Mode:" Grid.Row="1" />
-        <ComboView HorizontalAlignment="Stretch" Id="_comboPlaybackMode" Grid.Column="1" Grid.Row="1">
+        <Label Text="Mode:" Grid.Row="3" />
+        <ComboView HorizontalAlignment="Stretch" Id="_comboPlaybackMode" Grid.Column="1" Grid.Row="3">
           <Label Text="Forward" />
           <Label Text="Backward" />
         </ComboView>
-        <Label Text="Speed:" Grid.Row="2" />
-        <HorizontalStackPanel Spacing="8" Grid.Column="1" Grid.Row="2">
+        <Label Text="Speed:" Grid.Row="4" />
+        <HorizontalStackPanel Spacing="8" Grid.Column="1" Grid.Row="4">
           <HorizontalSlider Minimum="0.1" Maximum="3" Value="1" Id="_sliderSpeed" StackPanel.ProportionType="Fill" />
           <Label Text="1.0" Width="40" Id="_labelSpeed" />
         </HorizontalStackPanel>
-        <HorizontalStackPanel Spacing="8" Grid.Row="3" Grid.ColumnSpan="2">
-          <CheckButton IsChecked="True" CheckContentSpacing="8" Id="_checkLoop">
-            <Label Text="Loop" />
-          </CheckButton>
-          <CheckButton IsChecked="True" CheckContentSpacing="8" Id="_checkCrossfade">
-            <Label Text="Crossfade" />
-          </CheckButton>
-        </HorizontalStackPanel>
+        <CheckButton IsChecked="True" CheckContentSpacing="8" Id="_checkCrossfade" Grid.Row="5" Grid.ColumnSpan="2">
+          <Label Text="Crossfade" />
+        </CheckButton>
       </Grid>
       <HorizontalStackPanel Spacing="8">
         <Button Width="100" VerticalAlignment="Stretch" Id="_buttonPlayStop">
@@ -46,31 +50,6 @@
         <HorizontalSlider Width="300" Id="_sliderTime" />
         <Label Text="0.0" Id="_labelTime" />
       </HorizontalStackPanel>
-      <HorizontalStackPanel Spacing="8">
-        <ToggleButton Id="_buttonBoundingBoxes">
-          <Label Text="Bounding Boxes" />
-        </ToggleButton>
-        <ToggleButton Id="_buttonShadowMap">
-          <Label Text="Shadow Map" />
-        </ToggleButton>
-      </HorizontalStackPanel>
     </VerticalStackPanel>
-    <Grid ColumnSpacing="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Left="-4" Id="_panelStatistics">
-      <Grid.DefaultRowProportion Type="Auto" />
-      <Grid.ColumnsProportions>
-        <Proportion Type="Auto" />
-        <Proportion Type="Fill" />
-      </Grid.ColumnsProportions>
-      <Label Text="Effects Switches:" />
-      <Label Text="Draw Calls:" Grid.Row="1" />
-      <Label Text="Vertices Drawn:" Grid.Row="2" />
-      <Label Text="Primitives Drawn:" Grid.Row="3" />
-      <Label Text="Meshes Drawn:" Grid.Row="4" />
-      <Label Text="10" Id="_labelEffectsSwitches" Grid.Column="1" />
-      <Label Text="10" Id="_labelDrawCalls" Grid.Column="1" Grid.Row="1" />
-      <Label Text="10" Id="_labelVerticesDrawn" Grid.Column="1" Grid.Row="2" />
-      <Label Text="10" Id="_labelPrimitivesDrawn" Grid.Column="1" Grid.Row="3" />
-      <Label Text="10" Id="_labelMeshesDrawn" Grid.Column="1" Grid.Row="4" />
-    </Grid>
   </Panel>
 </Project>

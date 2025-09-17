@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
-	public struct VertexElementContent
+	internal struct VertexElementContent
 	{
 		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public VertexElementUsage Usage { get; set; }

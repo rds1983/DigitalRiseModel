@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
-	public class SubmeshContent
+	internal class SubmeshContent
 	{
 		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public PrimitiveType PrimitiveType { get; set; }

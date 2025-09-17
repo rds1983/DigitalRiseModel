@@ -1,4 +1,5 @@
-﻿using DigitalRiseModel.Animation;
+﻿using AssetManagementBase;
+using DigitalRiseModel.Animation;
 using DigitalRiseModel.Samples.ModelViewer.UI;
 using DigitalRiseModel.Samples.ModelViewer.Utils;
 using Microsoft.Xna.Framework;
@@ -6,7 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Events;
+using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.UI;
+using Myra.Graphics2D.UI.ColorPicker;
 using Myra.Graphics2D.UI.File;
 using System;
 using System.IO;
@@ -25,6 +28,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private bool _isAnimating;
 		private SkinnedEffect _skinnedEffect;
 		private string _path;
+		private Texture2D _white;
 
 		public ViewerGame(string path)
 		{
@@ -82,8 +86,6 @@ namespace DigitalRiseModel.Samples.ModelViewer
 					}
 				}
 
-				_mainPanel._textPath.Text = file;
-
 				// Reset camera
 				var camera = _controller.Camera;
 				if (_model.Model != null)
@@ -139,7 +141,8 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			};
 
 
-			_mainPanel._buttonChange.Click += _buttonChange_Click;
+			_mainPanel._buttonChangeTexture.Click += _buttonChangeTexture;
+			_mainPanel._buttonChangeColor.Click += _buttonChangeColor_Click;
 
 			_mainPanel._sliderTime.ValueChangedByUser += _sliderTime_ValueChanged;
 			_mainPanel._sliderTime.ValueChanged += (s, a) =>
@@ -148,8 +151,6 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			};
 
 			_mainPanel._buttonPlayStop.Click += _buttonPlayStop_Click;
-			_mainPanel._buttonBoundingBoxes.PressedChanged += _buttonBoundingBoxes_PressedChanged;
-			_mainPanel._buttonShadowMap.PressedChanged += _buttonShadowMap_PressedChanged;
 
 			_desktop = new Desktop
 			{
@@ -178,26 +179,23 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				DiffuseColor = Vector3.One
 			};
 
-			var white = new Texture2D(GraphicsDevice, 1, 1);
-			white.SetData([Color.White]);
-			_skinnedEffect.Texture = white;
+			_white = new Texture2D(GraphicsDevice, 1, 1);
+			_white.SetData([Color.White]);
+			_skinnedEffect.Texture = _white;
 			_skinnedEffect.PreferPerPixelLighting = true;
 
 			_skinnedEffect.DirectionalLight0.DiffuseColor = Vector3.One;
 			_skinnedEffect.DirectionalLight0.Direction = new Vector3(0, -1, -1);
 			_skinnedEffect.DirectionalLight0.Enabled = true;
 
+			_skinnedEffect.DirectionalLight1.DiffuseColor = new Vector3(0, 0.2f, 1.0f);
+			_skinnedEffect.DirectionalLight1.Direction = new Vector3(0, 0, 1);
+			_skinnedEffect.DirectionalLight1.Enabled = true;
+
+			_mainPanel._imageColor.Renderable = new TextureRegion(_white);
+			_mainPanel._imageColor.Color = Color.White;
+
 			LoadModel(_path);
-		}
-
-		private void _buttonShadowMap_PressedChanged(object sender, EventArgs e)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void _buttonBoundingBoxes_PressedChanged(object sender, EventArgs e)
-		{
-			//			DebugSettings.DrawBoundingBoxes = _mainPanel._buttonBoundingBoxes.IsPressed;
 		}
 
 		private void _buttonPlayStop_Click(object sender, EventArgs e)
@@ -220,11 +218,11 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_player.Time = passed;
 		}
 
-		private void _buttonChange_Click(object sender, EventArgs e)
+		private void _buttonChangeTexture(object sender, EventArgs e)
 		{
 			FileDialog dialog = new FileDialog(FileDialogMode.OpenFile)
 			{
-				Filter = "*.jdrm|*.drm"
+				Filter = "*.png|*.jpg|*.bmp|*.dds"
 			};
 
 			if (!string.IsNullOrEmpty(_mainPanel._textPath.Text))
@@ -241,7 +239,35 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				}
 
 				// "Ok" or Enter
-				LoadModel(dialog.FilePath);
+				var folder = Path.GetDirectoryName(dialog.FilePath);
+				var assetManager = AssetManager.CreateFileAssetManager(folder);
+				var texture = assetManager.LoadTexture2D(GraphicsDevice, Path.GetFileName(dialog.FilePath));
+
+				_skinnedEffect.Texture = texture;
+				_mainPanel._textPath.Text = dialog.FilePath;
+			};
+
+			dialog.ShowModal(_desktop);
+		}
+
+		private void _buttonChangeColor_Click(object sender, EventArgs e)
+		{
+			var dialog = new ColorPickerDialog
+			{
+				Color = _mainPanel._imageColor.Color
+			};
+
+			dialog.Closed += (s, a) =>
+			{
+				if (!dialog.Result)
+				{
+					// "Cancel" or Escape
+					return;
+				}
+
+				// "Ok" or Enter
+				_mainPanel._imageColor.Color = dialog.Color;
+				_skinnedEffect.DiffuseColor = dialog.Color.ToVector3();
 			};
 
 			dialog.ShowModal(_desktop);

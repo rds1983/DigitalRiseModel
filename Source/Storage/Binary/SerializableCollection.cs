@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage.Binary
 {
-	public abstract class SerializableCollection<T>
+	internal abstract class SerializableCollection<T>
 	{
 		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int BufferId { get; set; }

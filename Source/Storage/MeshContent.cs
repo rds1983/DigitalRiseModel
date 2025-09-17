@@ -2,7 +2,7 @@
 
 namespace DigitalRiseModel.Storage
 {
-	public class MeshContent
+	internal class MeshContent
 	{
 		public List<SubmeshContent> Submeshes { get; set; } = new List<SubmeshContent>();
 	}
