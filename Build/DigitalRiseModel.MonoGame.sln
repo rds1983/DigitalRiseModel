@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.MonoGame", "..\Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.MonoGame.csproj", "{F4FD209A-164C-11FF-E4D8-1FD576675E7B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Converter", "..\Tools\DigitalRiseModel.Converter\DigitalRiseModel.Converter.csproj", "{93F49417-218D-637C-24E9-CECC537E32DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93F49417-218D-637C-24E9-CECC537E32DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93F49417-218D-637C-24E9-CECC537E32DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93F49417-218D-637C-24E9-CECC537E32DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93F49417-218D-637C-24E9-CECC537E32DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

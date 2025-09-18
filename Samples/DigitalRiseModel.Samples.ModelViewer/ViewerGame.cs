@@ -27,6 +27,8 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private Desktop _desktop;
 		private bool _isAnimating;
 		private SkinnedEffect _skinnedEffect;
+		private BasicEffect _basicEffect;
+		private Effect[] _effects = new Effect[2];
 		private string _path;
 		private Texture2D _white;
 
@@ -77,10 +79,16 @@ namespace DigitalRiseModel.Samples.ModelViewer
 					_mainPanel._comboAnimations.Widgets.Add(new Label());
 					foreach (var pair in model.Animations)
 					{
+						var str = pair.Key;
+						if (string.IsNullOrEmpty(str))
+						{
+							str = "(default)";
+						}
+
 						_mainPanel._comboAnimations.Widgets.Add(
 							new Label
 							{
-								Text = pair.Key,
+								Text = str,
 								Tag = pair.Value
 							});
 					}
@@ -174,23 +182,36 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			var camera = new Camera();
 			_controller = new CameraInputController(camera);
 
-			_skinnedEffect = new SkinnedEffect(GraphicsDevice)
-			{
-				DiffuseColor = Vector3.One
-			};
-
 			_white = new Texture2D(GraphicsDevice, 1, 1);
 			_white.SetData([Color.White]);
-			_skinnedEffect.Texture = _white;
-			_skinnedEffect.PreferPerPixelLighting = true;
 
-			_skinnedEffect.DirectionalLight0.DiffuseColor = Vector3.One;
-			_skinnedEffect.DirectionalLight0.Direction = new Vector3(0, -1, -1);
-			_skinnedEffect.DirectionalLight0.Enabled = true;
+			_skinnedEffect = new SkinnedEffect(GraphicsDevice)
+			{
+				DiffuseColor = Vector3.One,
+				Texture = _white,
+				PreferPerPixelLighting = true
+			};
+			_effects[0] = _skinnedEffect;
 
-			_skinnedEffect.DirectionalLight1.DiffuseColor = new Vector3(0, 0.2f, 1.0f);
-			_skinnedEffect.DirectionalLight1.Direction = new Vector3(0, 0, 1);
-			_skinnedEffect.DirectionalLight1.Enabled = true;
+			_basicEffect = new BasicEffect(GraphicsDevice)
+			{
+				DiffuseColor = Vector3.One,
+				Texture = _white,
+				TextureEnabled = true,
+				PreferPerPixelLighting = true
+			};
+			_effects[1] = _basicEffect;
+
+			foreach (IEffectLights effect in _effects)
+			{
+				effect.DirectionalLight0.DiffuseColor = Vector3.One;
+				effect.DirectionalLight0.Direction = new Vector3(0, -1, -1);
+				effect.DirectionalLight0.Enabled = true;
+
+				effect.DirectionalLight1.DiffuseColor = new Vector3(0, 0.2f, 1.0f);
+				effect.DirectionalLight1.Direction = new Vector3(0, 0, 1);
+				effect.DirectionalLight1.Enabled = true;
+			}
 
 			_mainPanel._imageColor.Renderable = new TextureRegion(_white);
 			_mainPanel._imageColor.Color = Color.White;
@@ -244,6 +265,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				var texture = assetManager.LoadTexture2D(GraphicsDevice, Path.GetFileName(dialog.FilePath));
 
 				_skinnedEffect.Texture = texture;
+				_basicEffect.Texture = texture;
 				_mainPanel._textPath.Text = dialog.FilePath;
 			};
 
@@ -281,14 +303,14 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			}
 			else
 			{
-				var clipName = ((Label)_mainPanel._comboAnimations.SelectedItem).Text;
+				var clip = (AnimationClip)((Label)_mainPanel._comboAnimations.SelectedItem).Tag;
 				if (_mainPanel._checkCrossfade.IsChecked)
 				{
-					_player.CrossFade(clipName, TimeSpan.FromSeconds(0.5f));
+					_player.CrossFade(clip.Name, TimeSpan.FromSeconds(0.5f));
 				}
 				else
 				{
-					_player.StartClip(clipName);
+					_player.StartClip(clip.Name);
 				}
 			}
 
@@ -342,8 +364,13 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			GraphicsDevice.BlendState = BlendState.Opaque;
 
 			var camera = _controller.Camera;
-			_skinnedEffect.View = camera.View;
-			_skinnedEffect.Projection = camera.CalculateProjection(GraphicsDevice.Viewport.AspectRatio);
+
+			var proj = camera.CalculateProjection(GraphicsDevice.Viewport.AspectRatio);
+			foreach (IEffectMatrices effect in _effects)
+			{
+				effect.View = camera.View;
+				effect.Projection = proj;
+			}
 
 			foreach (var bone in _model.Model.Bones)
 			{
@@ -352,16 +379,25 @@ namespace DigitalRiseModel.Samples.ModelViewer
 					continue;
 				}
 
-				foreach (var pass in _skinnedEffect.CurrentTechnique.Passes)
+				foreach (var submesh in bone.Mesh.Submeshes)
 				{
-					pass.Apply();
-					foreach (var submesh in bone.Mesh.Submeshes)
+					Effect effect;
+					if (submesh.Skin != null)
 					{
-						if (submesh.Skin != null)
-						{
-							var skinTransforms = _model.GetSkinTransforms(submesh.Skin.SkinIndex);
-							_skinnedEffect.SetBoneTransforms(skinTransforms);
-						}
+						var skinTransforms = _model.GetSkinTransforms(submesh.Skin.SkinIndex);
+						_skinnedEffect.SetBoneTransforms(skinTransforms);
+						effect = _skinnedEffect;
+					}
+					else
+					{
+						var boneTransform = _model.GetBoneGlobalTransform(bone.Index);
+						_basicEffect.World = boneTransform;
+						effect = _basicEffect;
+					}
+
+					foreach (var pass in effect.CurrentTechnique.Passes)
+					{
+						pass.Apply();
 
 						submesh.Draw();
 					}

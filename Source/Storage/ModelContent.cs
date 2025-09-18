@@ -17,6 +17,7 @@ namespace DigitalRiseModel.Storage
 		public BoneContent RootBone { get; set; }
 
 		public Dictionary<string, AnimationClipContent> Animations { get; set; } = new Dictionary<string, AnimationClipContent>();
+		public DrMaterial[] Materials { get; set; }
 
 		private void SaveBinaryData(WriteContext context)
 		{

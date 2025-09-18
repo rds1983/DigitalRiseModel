@@ -1,10 +1,7 @@
 ﻿using DigitalRiseModel.Storage;
-using DigitalRiseModel.Vertices;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DigitalRiseModel
 {
@@ -40,6 +37,20 @@ namespace DigitalRiseModel
 			return result;
 		}
 
+		public static int CalculateStride(this IEnumerable<VertexElement> elements)
+		{
+			var result = 0;
+
+			foreach (var channel in elements)
+			{
+				result += channel.VertexElementFormat.GetSize();
+			}
+
+			return result;
+		}
+
+		public static int CalculateStride(this VertexDeclaration declaration) => declaration.GetVertexElements().CalculateStride();
+
 		public static int GetSize(this VertexElementFormat elementFormat)
 		{
 			switch (elementFormat)
@@ -68,6 +79,71 @@ namespace DigitalRiseModel
 					return 4;
 				case VertexElementFormat.HalfVector4:
 					return 8;
+			}
+
+			throw new Exception($"Unknown vertex element format {elementFormat}");
+		}
+
+		public static int CalculateElementsCount(this IEnumerable<VertexElement> elements)
+		{
+			var result = 0;
+
+			foreach (var channel in elements)
+			{
+				result += channel.VertexElementFormat.GetElementsCount();
+			}
+
+			return result;
+		}
+
+		public static int CalculateElementsCount(this VertexDeclaration declaration) =>
+			declaration.GetVertexElements().CalculateElementsCount();
+
+		public static int GetElementsCount(this VertexElementFormat elementFormat)
+		{
+			switch (elementFormat)
+			{
+				case VertexElementFormat.Single:
+					return 1;
+				case VertexElementFormat.Vector2:
+					return 2;
+				case VertexElementFormat.Vector3:
+					return 3;
+				case VertexElementFormat.Vector4:
+					return 4;
+				case VertexElementFormat.Color:
+					return 4;
+				case VertexElementFormat.Byte4:
+					return 4;
+				case VertexElementFormat.Short2:
+					return 2;
+				case VertexElementFormat.Short4:
+					return 4;
+			}
+
+			throw new Exception($"Unknown vertex element format {elementFormat}");
+		}
+
+		public static int GetComponentSize(this VertexElementFormat elementFormat)
+		{
+			switch (elementFormat)
+			{
+				case VertexElementFormat.Single:
+					return 4;
+				case VertexElementFormat.Vector2:
+					return 4;
+				case VertexElementFormat.Vector3:
+					return 4;
+				case VertexElementFormat.Vector4:
+					return 4;
+				case VertexElementFormat.Color:
+					return 1;
+				case VertexElementFormat.Byte4:
+					return 1;
+				case VertexElementFormat.Short2:
+					return 2;
+				case VertexElementFormat.Short4:
+					return 4;
 			}
 
 			throw new Exception($"Unknown vertex element format {elementFormat}");
@@ -109,58 +185,75 @@ namespace DigitalRiseModel
 			throw new Exception($"Unknown index buffer type {indexType}");
 		}
 
-		public static VertexBuffer CreateVertexBuffer<T>(this T[] vertices, GraphicsDevice device) where T : struct, IVertexType
+		/// <summary>
+		/// Used for debugging purposes
+		/// </summary>
+		/// <param name="buffer"></param>
+		/// <returns></returns>
+		public static object[][] To2DArray(this VertexBuffer buffer)
 		{
-			var result = new VertexBuffer(device, new T().VertexDeclaration, vertices.Length, BufferUsage.None);
-			result.SetData(vertices);
+			var elements = buffer.VertexDeclaration.GetVertexElements();
+			var elementsCount = elements.CalculateElementsCount();
 
-			return result;
-		}
+			var result = new object[buffer.VertexCount][];
+			for (var i = 0; i < result.Length; ++i)
+			{
+				result[i] = new object[elementsCount];
+			}
 
-		public static VertexBuffer CreateVertexBuffer(this Vector3[] vertices, GraphicsDevice device)
-		{
-			var result = new VertexBuffer(device, VertexPosition.VertexDeclaration, vertices.Length, BufferUsage.None);
-			result.SetData(vertices);
+			var stride = elements.CalculateStride();
+			var data = new byte[buffer.VertexCount * stride];
 
-			return result;
-		}
+			buffer.GetData(data);
 
-		public static IndexBuffer CreateIndexBuffer(this ushort[] indices, GraphicsDevice device)
-		{
-			var result = new IndexBuffer(device, IndexElementSize.SixteenBits, indices.Length, BufferUsage.None);
-			result.SetData(indices);
+			unsafe
+			{
+				fixed (byte* sptr = data)
+				{
+					var ptr = sptr;
 
-			return result;
-		}
+					for (var i = 0; i < buffer.VertexCount; ++i)
+					{
+						var idx = 0;
+						for (var j = 0; j < elements.Length; ++j)
+						{
+							var element = elements[j];
+							var format = element.VertexElementFormat;
 
-		public static IndexBuffer CreateIndexBuffer(this int[] indices, GraphicsDevice device)
-		{
-			var result = new IndexBuffer(device, IndexElementSize.ThirtyTwoBits, indices.Length, BufferUsage.None);
-			result.SetData(indices);
+							for (var k = 0; k < format.GetElementsCount(); ++k)
+							{
+								if (format == VertexElementFormat.Byte4 || format == VertexElementFormat.Color)
+								{
+									var b = *ptr;
+									result[i][idx] = b;
 
-			return result;
-		}
+									++ptr;
+								}
+								else if (format == VertexElementFormat.Short2 || format == VertexElementFormat.Short4)
+								{
+									short s;
+									Buffer.MemoryCopy(ptr, &s, 2, 2);
+									result[i][idx] = s;
 
-		public static IEnumerable<Vector3> GetPositions(this VertexPositionNormalTexture[] vertices) => (from v in vertices select v.Position);
-		public static IEnumerable<Vector3> GetPositions(this VertexPositionTexture[] vertices) => (from v in vertices select v.Position);
-		public static IEnumerable<Vector3> GetPositions(this VertexPositionNormal[] vertices) => (from v in vertices select v.Position);
-		public static IEnumerable<Vector3> GetPositions(this VertexPosition[] vertices) => (from v in vertices select v.Position);
+									ptr += 2;
+								}
+								else
+								{
+									float f;
+									Buffer.MemoryCopy(ptr, &f, 4, 4);
+									result[i][idx] = f;
 
-		public static BoundingBox BuildBoundingBox(this VertexPositionNormalTexture[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
-		public static BoundingBox BuildBoundingBox(this VertexPositionTexture[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
-		public static BoundingBox BuildBoundingBox(this VertexPositionNormal[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
-		public static BoundingBox BuildBoundingBox(this VertexPosition[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
-		public static BoundingBox BuildBoundingBox(this Vector3[] vertices) => BoundingBox.CreateFromPoints(vertices);
+									ptr += 4;
+								}
 
-		public static BoundingBox Transform(this BoundingBox source, ref Matrix matrix)
-		{
-			Vector3.Transform(ref source.Min, ref matrix, out Vector3 v1);
-			Vector3.Transform(ref source.Max, ref matrix, out Vector3 v2);
+								++idx;
+							}
+						}
+					}
+				}
 
-			var min = new Vector3(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y), Math.Min(v1.Z, v2.Z));
-			var max = new Vector3(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y), Math.Max(v1.Z, v2.Z));
-
-			return new BoundingBox(min, max);
+				return result;
+			}
 		}
 	}
 }

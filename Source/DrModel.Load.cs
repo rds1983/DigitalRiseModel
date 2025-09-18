@@ -1,5 +1,6 @@
 ﻿using DigitalRiseModel.Animation;
 using DigitalRiseModel.Storage;
+using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -50,6 +51,9 @@ namespace DigitalRiseModel
 
 				var vertexBuffer = new VertexBuffer(context.Device, vertexDeclaration, vertexBufferContent.VertexCount, BufferUsage.None);
 				vertexBuffer.SetData(vertexBufferContent.Data);
+
+				var data = vertexBuffer.To2DArray();
+				JsonSerialization.SerializeToFile(@"D:\Temp\data1.json", data);
 
 				context.VertexBuffers.Add(vertexBuffer);
 			}
@@ -230,6 +234,7 @@ namespace DigitalRiseModel
 			var rootBoneDesc = LoadBone(context, content.RootBone);
 			var result = new DrModel(rootBoneDesc);
 
+			result.Materials = content.Materials;
 			LoadAnimations(content, result);
 
 			return result;

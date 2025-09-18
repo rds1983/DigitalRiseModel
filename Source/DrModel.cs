@@ -11,7 +11,8 @@ namespace DigitalRiseModel
 		public DrModelBone[] Bones { get; }
 		public DrModelBone[] MeshBones { get; }
 
-		public Dictionary<string, AnimationClip> Animations { get; set; }
+		public Dictionary<string, AnimationClip> Animations { get; internal set; }
+		public DrMaterial[] Materials { get; internal set; }
 
 		internal DrModel(DrModelBone root)
 		{
