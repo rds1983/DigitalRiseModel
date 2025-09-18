@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Converter", "..\Tools\DigitalRiseModel.Converter\DigitalRiseModel.Converter.csproj", "{93F49417-218D-637C-24E9-CECC537E32DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.BasicEngine.MonoGame", "..\Samples\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj", "{9876750C-9A62-09EA-3954-309DF950F1AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,12 +31,17 @@ Global
 		{93F49417-218D-637C-24E9-CECC537E32DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93F49417-218D-637C-24E9-CECC537E32DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93F49417-218D-637C-24E9-CECC537E32DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9876750C-9A62-09EA-3954-309DF950F1AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9876750C-9A62-09EA-3954-309DF950F1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9876750C-9A62-09EA-3954-309DF950F1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9876750C-9A62-09EA-3954-309DF950F1AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9876750C-9A62-09EA-3954-309DF950F1AD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}

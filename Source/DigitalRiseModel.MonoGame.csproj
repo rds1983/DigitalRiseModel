@@ -10,5 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" PrivateAssets="All" Version="$(MonoGameVersion)" />
+    <PackageReference Include="XNAssets.MonoGame" Version="0.7.5" />
   </ItemGroup>
 </Project>

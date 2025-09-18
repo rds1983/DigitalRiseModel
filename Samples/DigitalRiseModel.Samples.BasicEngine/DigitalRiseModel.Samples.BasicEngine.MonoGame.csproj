@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="$(AppMonoGameVersion)" />
-    <PackageReference Include="Myra" Version="1.5.9" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj" />
+    <ProjectReference Include="..\..\Source\DigitalRiseModel.MonoGame.csproj" />
   </ItemGroup>
 </Project>

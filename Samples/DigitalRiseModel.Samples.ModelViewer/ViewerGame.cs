@@ -1,7 +1,7 @@
 ﻿using AssetManagementBase;
 using DigitalRiseModel.Animation;
+using DigitalRiseModel.Samples.BasicEngine;
 using DigitalRiseModel.Samples.ModelViewer.UI;
-using DigitalRiseModel.Samples.ModelViewer.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,7 +12,6 @@ using Myra.Graphics2D.UI;
 using Myra.Graphics2D.UI.ColorPicker;
 using Myra.Graphics2D.UI.File;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace DigitalRiseModel.Samples.ModelViewer
@@ -20,22 +19,15 @@ namespace DigitalRiseModel.Samples.ModelViewer
 	public class ViewerGame : Game
 	{
 		private readonly GraphicsDeviceManager _graphics;
-		private readonly DrModelInstance _model = new DrModelInstance();
 		private AnimationController _player = null;
 		private CameraInputController _controller;
 		private MainPanel _mainPanel;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
 		private Desktop _desktop;
 		private bool _isAnimating;
-		private SkinnedEffect _skinnedEffect;
-		private BasicEffect _basicEffect;
-		private Effect[] _effects = new Effect[2];
 		private string _path;
-		private Texture2D _white;
-		private readonly Dictionary<string, Texture2D> _textureCache = new Dictionary<string, Texture2D>();
-		private string _folder;
-		private Texture2D _customTexture;
-		private Color? _customColor;
+		private Engine _engine;
+		private DrModelInstance _model;
 
 		public ViewerGame(string path)
 		{
@@ -56,53 +48,17 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_mainPanel._sliderTime.Value = _mainPanel._sliderTime.Minimum;
 		}
 
-		private Texture2D LoadTexture(GraphicsDevice device, string name)
-		{
-			Texture2D result;
-
-			if (!_textureCache.TryGetValue(name, out result))
-			{
-				if (!Path.IsPathRooted(name))
-				{
-					name = Path.Combine(_folder, name);
-				}
-
-				using (var stream = File.OpenRead(name))
-				{
-					result = Texture2D.FromStream(device, stream);
-				}
-
-				_textureCache[name] = result;
-			}
-
-			return result;
-		}
-
 		private void LoadModel(string file)
 		{
 			try
 			{
 				if (!string.IsNullOrEmpty(file))
 				{
-					_folder = Path.GetDirectoryName(file);
+					var folder = Path.GetDirectoryName(file);
+					var f = Path.GetFileName(file);
 
-					DrModel model;
-					if (file.EndsWith(".jdrm"))
-					{
-						var folder = Path.GetDirectoryName(file);
-						model = DrModel.CreateFromJson(GraphicsDevice,
-							File.ReadAllText(file),
-							s => File.OpenRead(Path.Combine(folder, s)),
-							LoadTexture);
-					}
-					else
-					{
-						using (var stream = File.OpenRead(file))
-						{
-							model = DrModel.CreateFromBinary(GraphicsDevice, stream, LoadTexture);
-						}
-					}
-
+					var assetManager = AssetManager.CreateFileAssetManager(folder);
+					var model = assetManager.LoadDrModel(GraphicsDevice, f);
 					_model.Model = model;
 
 					_mainPanel._comboAnimations.Widgets.Clear();
@@ -204,6 +160,11 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				Root = _mainPanel
 			};
 
+			_engine = new Engine(GraphicsDevice);
+			_model = new DrModelInstance();
+			_engine.Models.Add(_model);
+			_controller = new CameraInputController(_engine.Camera);
+
 			_player = new AnimationController(_model);
 			_player.TimeChanged += (s, a) =>
 			{
@@ -218,39 +179,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				slider.Value = slider.Minimum + k * (slider.Maximum - slider.Minimum);
 			};
 
-			var camera = new Camera();
-			_controller = new CameraInputController(camera);
-
-			_white = new Texture2D(GraphicsDevice, 1, 1);
-			_white.SetData(new Color[] { Color.White });
-
-			_skinnedEffect = new SkinnedEffect(GraphicsDevice)
-			{
-				DiffuseColor = Vector3.One,
-				PreferPerPixelLighting = true
-			};
-			_effects[0] = _skinnedEffect;
-
-			_basicEffect = new BasicEffect(GraphicsDevice)
-			{
-				DiffuseColor = Vector3.One,
-				TextureEnabled = true,
-				PreferPerPixelLighting = true
-			};
-			_effects[1] = _basicEffect;
-
-			foreach (IEffectLights effect in _effects)
-			{
-				effect.DirectionalLight0.DiffuseColor = Vector3.One;
-				effect.DirectionalLight0.Direction = new Vector3(0, -1, -1);
-				effect.DirectionalLight0.Enabled = true;
-
-				effect.DirectionalLight1.DiffuseColor = new Vector3(0, 0.2f, 1.0f);
-				effect.DirectionalLight1.Direction = new Vector3(0, 0, 1);
-				effect.DirectionalLight1.Enabled = true;
-			}
-
-			_mainPanel._imageColor.Renderable = new TextureRegion(_white);
+			_mainPanel._imageColor.Renderable = new TextureRegion(_engine.WhiteTexture);
 			_mainPanel._imageColor.Color = Color.Transparent;
 
 			LoadModel(_path);
@@ -301,7 +230,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				var assetManager = AssetManager.CreateFileAssetManager(folder);
 				var texture = assetManager.LoadTexture2D(GraphicsDevice, Path.GetFileName(dialog.FilePath));
 
-				_customTexture = texture;
+				_engine.CustomTexture = texture;
 				_mainPanel._textPath.Text = dialog.FilePath;
 			};
 
@@ -310,7 +239,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 		private void _buttonClearTexture_Click(object sender, EventArgs e)
 		{
-			_customTexture = null;
+			_engine.CustomTexture = null;
 			_mainPanel._textPath.Text = string.Empty;
 		}
 
@@ -331,7 +260,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 				// "Ok" or Enter
 				_mainPanel._imageColor.Color = dialog.Color;
-				_customColor = dialog.Color;
+				_engine.CustomColor = dialog.Color;
 			};
 
 			dialog.ShowModal(_desktop);
@@ -340,7 +269,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private void _buttonClearColor_Click(object sender, EventArgs e)
 		{
 			_mainPanel._imageColor.Color = Color.Transparent;
-			_customColor = null;
+			_engine.CustomColor = null;
 		}
 
 		private void _comboAnimations_SelectedIndexChanged(object sender, EventArgs e)
@@ -389,108 +318,11 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			}
 
 			_controller.Update();
-		}
 
-		private Texture2D GetCurrentTexture(DrSubmesh submesh)
-		{
-			if (_customTexture != null)
-			{
-				return _customTexture;
-			}
-
-			if (submesh.Material == null || submesh.Material.DiffuseTexture == null)
-			{
-				return _white;
-			}
-
-			return submesh.Material.DiffuseTexture;
-		}
-
-		private Color GetCurrentColor(DrSubmesh submesh)
-		{
-			if (_customColor != null)
-			{
-				return _customColor.Value;
-			}
-
-			if (submesh.Material == null || submesh.Material.DiffuseColor == null)
-			{
-				return Color.White;
-			}
-
-			return submesh.Material.DiffuseColor.Value;
-		}
-
-		private void DrawModel(GameTime gameTime)
-		{
-			if (_model.Model == null)
-			{
-				return;
-			}
-
-			if (_isAnimating)
+			if (_model.Model != null && _isAnimating)
 			{
 				_player.Update(gameTime.ElapsedGameTime);
 			}
-
-			var oldRasterizer = GraphicsDevice.RasterizerState;
-			var oldDepthStencilState = GraphicsDevice.DepthStencilState;
-			var oldBlendState = GraphicsDevice.BlendState;
-
-			GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-			GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-			GraphicsDevice.BlendState = BlendState.Opaque;
-
-			var camera = _controller.Camera;
-
-			var proj = camera.CalculateProjection(GraphicsDevice.Viewport.AspectRatio);
-			foreach (IEffectMatrices effect in _effects)
-			{
-				effect.View = camera.View;
-				effect.Projection = proj;
-			}
-
-			foreach (var bone in _model.Model.Bones)
-			{
-				if (bone.Mesh == null)
-				{
-					continue;
-				}
-
-				foreach (var submesh in bone.Mesh.Submeshes)
-				{
-					Effect effect;
-					if (submesh.Skin != null)
-					{
-						_skinnedEffect.Texture = GetCurrentTexture(submesh);
-						_skinnedEffect.DiffuseColor = GetCurrentColor(submesh).ToVector3();
-
-						var skinTransforms = _model.GetSkinTransforms(submesh.Skin.SkinIndex);
-						_skinnedEffect.SetBoneTransforms(skinTransforms);
-						effect = _skinnedEffect;
-					}
-					else
-					{
-						_basicEffect.Texture = GetCurrentTexture(submesh);
-						_basicEffect.DiffuseColor = GetCurrentColor(submesh).ToVector3();
-
-						var boneTransform = _model.GetBoneGlobalTransform(bone.Index);
-						_basicEffect.World = boneTransform;
-						effect = _basicEffect;
-					}
-
-					foreach (var pass in effect.CurrentTechnique.Passes)
-					{
-						pass.Apply();
-
-						submesh.Draw();
-					}
-				}
-			}
-
-			GraphicsDevice.RasterizerState = oldRasterizer;
-			GraphicsDevice.DepthStencilState = oldDepthStencilState;
-			GraphicsDevice.BlendState = oldBlendState;
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -499,7 +331,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 			GraphicsDevice.Clear(Color.Black);
 
-			DrawModel(gameTime);
+			_engine.Render();
 
 			_desktop.Render();
 

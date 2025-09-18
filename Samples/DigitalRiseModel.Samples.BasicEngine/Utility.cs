@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace DigitalRiseModel.Samples.ModelViewer.Utils
+namespace DigitalRiseModel.Samples.BasicEngine
 {
 	internal static class Utility
 	{

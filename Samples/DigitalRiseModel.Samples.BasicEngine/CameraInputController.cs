@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace DigitalRiseModel.Samples.ModelViewer.Utils
+namespace DigitalRiseModel.Samples.BasicEngine
 {
 	public class CameraInputController
 	{
