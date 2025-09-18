@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel
 {
@@ -8,8 +10,17 @@ namespace DigitalRiseModel
 		public Color? DiffuseColor { get; set; }
 		public Color? SpecularColor { get; set; }
 		public float? SpecularPower { get; set; }
-		public string DiffuseTexture { get; set; }
-		public string NormalTexture { get; set; }
-		public string SpecularTexture { get; set; }
+		public string DiffuseTexturePath { get; set; }
+		public string NormalTexturePath { get; set; }
+		public string SpecularTexturePath { get; set; }
+
+		[JsonIgnore]
+		public Texture2D DiffuseTexture { get; set; }
+
+		[JsonIgnore]
+		public Texture2D NormalTexture { get; set; }
+
+		[JsonIgnore]
+		public Texture2D SpecularTexture { get; set; }
 	}
 }

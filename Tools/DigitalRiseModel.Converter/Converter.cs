@@ -1,9 +1,8 @@
-﻿using Assimp;
-using Assimp.Configs;
-using DigitalRiseModel.Storage;
+﻿using DigitalRiseModel.Storage;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using SharpAssimp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -182,25 +181,25 @@ namespace DigitalRiseModel.Converter
 						var bz = (byte)bi.Z;
 						var bw = (byte)bi.W;
 
-						if (!bs.X || weight > w.X)
+						if (!bs.X)
 						{
 							bs.X = true;
 							bx = boneIndex;
 							w.X = weight;
 						}
-						else if (!bs.Y || weight > w.Y)
+						else if (!bs.Y)
 						{
 							bs.Y = true;
 							by = boneIndex;
 							w.Y = weight;
 						}
-						else if (!bs.Z || weight > w.Z)
+						else if (!bs.Z)
 						{
 							bs.Z = true;
 							bz = boneIndex;
 							w.Z = weight;
 						}
-						else if (!bs.W || weight > w.W)
+						else if (!bs.W)
 						{
 							bs.W = true;
 							bw = boneIndex;
@@ -213,19 +212,25 @@ namespace DigitalRiseModel.Converter
 
 						boneSets[vertexId] = bs;
 						boneIndices[vertexId] = new Byte4(bx, by, bz, bw);
-
-						// Normalize weight
-						var totalWeight = w.X + w.Y + w.Z + w.W;
-						if (!totalWeight.IsZero())
-						{
-							w.X /= totalWeight;
-							w.Y /= totalWeight;
-							w.Z /= totalWeight;
-							w.W /= totalWeight;
-						}
-
 						boneWeights[vertexId] = w;
 					}
+				}
+
+				// Normalize weights
+				for (var i = 0; i < boneWeights.Length; ++i)
+				{
+					var w = boneWeights[i];
+
+					var totalWeight = w.X + w.Y + w.Z + w.W;
+					if (!totalWeight.IsZero())
+					{
+						w.X /= totalWeight;
+						w.Y /= totalWeight;
+						w.Z /= totalWeight;
+						w.W /= totalWeight;
+					}
+
+					boneWeights[i] = w;
 				}
 			}
 
@@ -280,7 +285,7 @@ namespace DigitalRiseModel.Converter
 		{
 			foreach (var mesh in scene.Meshes)
 			{
-				if (mesh.PrimitiveType != Assimp.PrimitiveType.Triangle)
+				if (mesh.PrimitiveType != SharpAssimp.PrimitiveType.Triangle)
 				{
 					throw new Exception("Only triangle primitive type is supported");
 				}
@@ -306,7 +311,7 @@ namespace DigitalRiseModel.Converter
 					StartVertex = startVertex,
 					VertexCount = mesh.Vertices.Count,
 					StartIndex = startIndex,
-					PrimitiveCount = indices.Length / 3,
+					PrimitiveCount = indices.Count() / 3,
 					MaterialIndex = mesh.MaterialIndex,
 					BoundingBox = Microsoft.Xna.Framework.BoundingBox.CreateFromPoints((from v in mesh.Vertices select v.ToXna()).ToArray())
 				};
@@ -356,20 +361,8 @@ namespace DigitalRiseModel.Converter
 			return result;
 		}
 
-		private static string UpdateMaterialPath(string texturePath, string modelFolder)
+		private void ProcessMaterials(Scene scene)
 		{
-			if (!string.IsNullOrEmpty(texturePath) && !Path.IsPathRooted(texturePath))
-			{
-				texturePath = Path.Combine(modelFolder, texturePath);
-			}
-
-			return texturePath;
-		}
-
-		private void ProcessMaterials(Scene scene, string inputPath)
-		{
-			var modelFolder = Path.GetDirectoryName(inputPath);
-
 			for (var i = 0; i < scene.MaterialCount; ++i)
 			{
 				var sourceMaterial = scene.Materials[i];
@@ -381,130 +374,130 @@ namespace DigitalRiseModel.Converter
 									materialContent.Properties["BlendMode"] = material.BlendMode;
 								}*/
 
-/*				if (material.HasBumpScaling)
-				{
-					materialContent.BumpScaling = material.BumpScaling;
-				}
+				/*				if (material.HasBumpScaling)
+								{
+									materialContent.BumpScaling = material.BumpScaling;
+								}
 
-				if (material.HasColorAmbient)
-				{
-					materialContent.AmbientColor = material.ColorAmbient.ToXna();
-				}*/
+								if (material.HasColorAmbient)
+								{
+									materialContent.AmbientColor = material.ColorAmbient.ToXna();
+								}*/
 
 				if (sourceMaterial.HasColorDiffuse)
 				{
-					material.DiffuseColor = sourceMaterial.ColorDiffuse.ToXna();
+					material.DiffuseColor = sourceMaterial.ColorDiffuse.ToXnaColor();
 				}
 
-/*				if (material.HasColorEmissive)
-				{
-					materialContent.EmissiveColor = material.ColorEmissive.ToXna();
-				}
+				/*				if (material.HasColorEmissive)
+								{
+									materialContent.EmissiveColor = material.ColorEmissive.ToXna();
+								}
 
-				if (material.HasColorReflective)
-				{
-					materialContent.ReflectiveColor = material.ColorReflective.ToXna();
-				}*/
+								if (material.HasColorReflective)
+								{
+									materialContent.ReflectiveColor = material.ColorReflective.ToXna();
+								}*/
 
 				if (sourceMaterial.HasColorSpecular)
 				{
-					material.SpecularColor = sourceMaterial.ColorSpecular.ToXna();
+					material.SpecularColor = sourceMaterial.ColorSpecular.ToXnaColor();
 				}
 
-/*				if (material.HasColorTransparent)
-				{
-					materialContent.TransparentColor = material.ColorTransparent.ToXna();
-				}
-
-				if (material.HasOpacity)
-				{
-					materialContent.Opacity = material.Opacity;
-				}
-
-				if (material.HasReflectivity)
-				{
-					materialContent.Reflectivity = material.Reflectivity;
-				}
-
-								if (material.HasShadingMode)
+				/*				if (material.HasColorTransparent)
 								{
-									materialContent.Properties["ShadingMode"] = material.ShadingMode;
-								}*/
+									materialContent.TransparentColor = material.ColorTransparent.ToXna();
+								}
+
+								if (material.HasOpacity)
+								{
+									materialContent.Opacity = material.Opacity;
+								}
+
+								if (material.HasReflectivity)
+								{
+									materialContent.Reflectivity = material.Reflectivity;
+								}
+
+												if (material.HasShadingMode)
+												{
+													materialContent.Properties["ShadingMode"] = material.ShadingMode;
+												}*/
 
 				if (sourceMaterial.HasShininess)
 				{
 					material.SpecularPower = sourceMaterial.Shininess;
 				}
 
-/*				if (material.HasShininessStrength)
-				{
-					materialContent.ShininessStrength = material.ShininessStrength;
-				}
+				/*				if (material.HasShininessStrength)
+								{
+									materialContent.ShininessStrength = material.ShininessStrength;
+								}
 
-				if (material.HasTextureAmbient)
-				{
-					materialContent.AmbientTexture = material.TextureAmbient.ToTextureSlotContent();
-				}
+								if (material.HasTextureAmbient)
+								{
+									materialContent.AmbientTexture = material.TextureAmbient.ToTextureSlotContent();
+								}
 
-				if (material.HasTextureAmbientOcclusion)
-				{
-					materialContent.AmbientOcclusionTexture = material.TextureAmbientOcclusion.ToTextureSlotContent();
-				}*/
+								if (material.HasTextureAmbientOcclusion)
+								{
+									materialContent.AmbientOcclusionTexture = material.TextureAmbientOcclusion.ToTextureSlotContent();
+								}*/
 
 				if (sourceMaterial.HasTextureDiffuse)
 				{
-					material.DiffuseTexture = UpdateMaterialPath(sourceMaterial.TextureDiffuse.FilePath, modelFolder);
+					material.DiffuseTexturePath = sourceMaterial.TextureDiffuse.FilePath;
 				}
 
-/*				if (material.HasTextureEmissive)
-				{
-					materialContent.EmissiveTexture = material.TextureEmissive.ToTextureSlotContent();
-				}
+				/*				if (material.HasTextureEmissive)
+								{
+									materialContent.EmissiveTexture = material.TextureEmissive.ToTextureSlotContent();
+								}
 
-				if (material.HasTextureHeight)
-				{
-					materialContent.HeightTexture = material.TextureHeight.ToTextureSlotContent();
-				}
+								if (material.HasTextureHeight)
+								{
+									materialContent.HeightTexture = material.TextureHeight.ToTextureSlotContent();
+								}
 
-				if (material.HasTextureLightMap)
-				{
-					materialContent.LightMapTexture = material.TextureLightMap.ToTextureSlotContent();
-				}*/
+								if (material.HasTextureLightMap)
+								{
+									materialContent.LightMapTexture = material.TextureLightMap.ToTextureSlotContent();
+								}*/
 
 				if (sourceMaterial.HasTextureNormal)
 				{
-					material.NormalTexture = UpdateMaterialPath(sourceMaterial.TextureNormal.FilePath, modelFolder);
+					material.NormalTexturePath = sourceMaterial.TextureNormal.FilePath;
 				}
 
-/*				if (material.HasTextureOpacity)
-				{
-					materialContent.OpacityTexture = material.TextureOpacity.ToTextureSlotContent();
-				}
+				/*				if (material.HasTextureOpacity)
+								{
+									materialContent.OpacityTexture = material.TextureOpacity.ToTextureSlotContent();
+								}
 
-				if (material.HasTextureReflection)
-				{
-					materialContent.ReflectionTexture = material.TextureReflection.ToTextureSlotContent();
-				}*/
+								if (material.HasTextureReflection)
+								{
+									materialContent.ReflectionTexture = material.TextureReflection.ToTextureSlotContent();
+								}*/
 
 				if (sourceMaterial.HasTextureSpecular)
 				{
-					material.SpecularTexture = UpdateMaterialPath(sourceMaterial.TextureSpecular.FilePath, modelFolder);
+					material.SpecularTexturePath = sourceMaterial.TextureSpecular.FilePath;
 				}
 
-/*				if (material.HasTransparencyFactor)
-				{
-					materialContent.TransparencyFactor = material.TransparencyFactor;
-				}
+				/*				if (material.HasTransparencyFactor)
+								{
+									materialContent.TransparencyFactor = material.TransparencyFactor;
+								}
 
-				if (material.HasTwoSided)
-				{
-					materialContent.IsTwoSided = material.IsTwoSided;
-				}
+								if (material.HasTwoSided)
+								{
+									materialContent.IsTwoSided = material.IsTwoSided;
+								}
 
-				if (material.HasWireFrame)
-				{
-					materialContent.IsWireFrame = material.IsWireFrameEnabled;
-				}*/
+								if (material.HasWireFrame)
+								{
+									materialContent.IsWireFrame = material.IsWireFrameEnabled;
+								}*/
 
 				_materials.Add(material);
 			}
@@ -615,23 +608,15 @@ namespace DigitalRiseModel.Converter
 
 			using (AssimpContext importer = new AssimpContext())
 			{
-				importer.SetConfig(new VertexBoneWeightLimitConfig(4));
-
-				/*				var steps = PostProcessSteps.FindDegenerates |
-									PostProcessSteps.FindInvalidData |
-									PostProcessSteps.FlipUVs |              // Required for Direct3D
-									PostProcessSteps.FlipWindingOrder |     // Required for Direct3D
-									PostProcessSteps.JoinIdenticalVertices |
-									PostProcessSteps.ImproveCacheLocality |
-									PostProcessSteps.OptimizeMeshes |
-									PostProcessSteps.Triangulate;*/
+				// importer.SetConfig(new VertexBoneWeightLimitConfig(4));
 
 				var steps = PostProcessSteps.FindDegenerates |
-					PostProcessSteps.FindInvalidData |
-					PostProcessSteps.FlipUVs |              // Required for Direct3D
-					PostProcessSteps.ImproveCacheLocality |
-					PostProcessSteps.OptimizeMeshes |
-					PostProcessSteps.Triangulate;
+							PostProcessSteps.FindInvalidData |
+							PostProcessSteps.FlipUVs |
+							PostProcessSteps.JoinIdenticalVertices |
+							PostProcessSteps.ImproveCacheLocality |
+							PostProcessSteps.OptimizeMeshes |
+							PostProcessSteps.Triangulate;
 
 				if (!options.FlipWindingOrder)
 				{
@@ -651,7 +636,7 @@ namespace DigitalRiseModel.Converter
 
 				_model.RootBone = Convert(scene.RootNode);
 
-				ProcessMaterials(scene, options.InputFile);
+				ProcessMaterials(scene);
 				ProcessSkins(scene);
 				ProcessAnimations(scene);
 			}

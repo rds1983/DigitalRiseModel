@@ -117,7 +117,7 @@ namespace DigitalRiseModel
 
 
 		[Category("Material")]
-		public int MaterialId { get; set; }
+		public DrMaterial Material { get; set; }
 
 		public Skin Skin { get; set; }
 
@@ -326,7 +326,7 @@ namespace DigitalRiseModel
 				IndexBuffer = IndexBuffer,
 				StartIndex = StartIndex,
 				PrimitiveCount = PrimitiveCount,
-				MaterialId = MaterialId,
+				Material = Material,
 				MorphTargets = MorphTargets,
 				UserData = UserData,
 			};

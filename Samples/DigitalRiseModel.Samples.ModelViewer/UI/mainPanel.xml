@@ -23,6 +23,9 @@
         <Button Id="_buttonChangeColor" Grid.Column="2" Grid.Row="1">
           <Label Text="Change..." />
         </Button>
+        <Button Id="_buttonClearColor" Grid.Column="3" Grid.Row="1">
+          <Label Text="Clear" />
+        </Button>
         <Label Text="Animation:" Grid.Row="2" />
         <ComboView HorizontalAlignment="Stretch" Id="_comboAnimations" Grid.Column="1" Grid.Row="2">
           <Label />

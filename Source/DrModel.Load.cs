@@ -1,6 +1,5 @@
 ﻿using DigitalRiseModel.Animation;
 using DigitalRiseModel.Storage;
-using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -23,6 +22,7 @@ namespace DigitalRiseModel
 			public GraphicsDevice Device { get; }
 			public List<VertexBuffer> VertexBuffers { get; } = new List<VertexBuffer>();
 			public IndexBuffer IndexBuffer;
+			public DrMaterial[] Materials;
 			public int SkinIndex = 0;
 
 			public LoadContext(GraphicsDevice device)
@@ -52,9 +52,6 @@ namespace DigitalRiseModel
 				var vertexBuffer = new VertexBuffer(context.Device, vertexDeclaration, vertexBufferContent.VertexCount, BufferUsage.None);
 				vertexBuffer.SetData(vertexBufferContent.Data);
 
-				var data = vertexBuffer.To2DArray();
-				JsonSerialization.SerializeToFile(@"D:\Temp\data1.json", data);
-
 				context.VertexBuffers.Add(vertexBuffer);
 			}
 
@@ -62,6 +59,34 @@ namespace DigitalRiseModel
 			{
 				context.IndexBuffer = new IndexBuffer(context.Device, content.IndexBuffer.IndexType, content.IndexBuffer.IndexCount, BufferUsage.None);
 				context.IndexBuffer.SetData(content.IndexBuffer.Data);
+			}
+		}
+
+		private static void LoadMaterials(LoadContext context, ModelContent content,
+			Func<GraphicsDevice, string, Texture2D> textureLoader)
+		{
+			if (content.Materials == null || textureLoader == null)
+			{
+				return;
+			}
+
+			context.Materials = content.Materials;
+			foreach (var material in context.Materials)
+			{
+				if (!string.IsNullOrEmpty(material.DiffuseTexturePath))
+				{
+					material.DiffuseTexture = textureLoader(context.Device, material.DiffuseTexturePath);
+				}
+
+				if (!string.IsNullOrEmpty(material.NormalTexturePath))
+				{
+					material.NormalTexture = textureLoader(context.Device, material.NormalTexturePath);
+				}
+
+				if (!string.IsNullOrEmpty(material.SpecularTexturePath))
+				{
+					material.SpecularTexture = textureLoader(context.Device, material.SpecularTexturePath);
+				}
 			}
 		}
 
@@ -82,9 +107,13 @@ namespace DigitalRiseModel
 						submeshContent.PrimitiveType, submeshContent.VertexCount, submeshContent.PrimitiveCount)
 					{
 						StartVertex = submeshContent.StartVertex,
-						StartIndex = submeshContent.StartIndex,
-						MaterialId = submeshContent.MaterialIndex,
+						StartIndex = submeshContent.StartIndex
 					};
+
+					if (context.Materials != null)
+					{
+						submesh.Material = context.Materials[submeshContent.MaterialIndex];
+					}
 
 					if (submeshContent.Skin != null)
 					{
@@ -225,29 +254,35 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private static DrModel Load(GraphicsDevice device, ModelContent content)
+		private static DrModel Load(GraphicsDevice device, ModelContent content, Func<GraphicsDevice, string, Texture2D> textureLoader)
 		{
 			var context = new LoadContext(device);
 
 			LoadBuffers(context, content);
+			LoadMaterials(context, content, textureLoader);
 
 			var rootBoneDesc = LoadBone(context, content.RootBone);
-			var result = new DrModel(rootBoneDesc);
 
-			result.Materials = content.Materials;
+			var result = new DrModel(rootBoneDesc)
+			{
+				Materials = content.Materials
+			};
+
 			LoadAnimations(content, result);
 
 			return result;
 		}
 
-		public static DrModel CreateFromJson(GraphicsDevice device, string json, Func<string, Stream> binaryOpener)
+		public static DrModel CreateFromJson(GraphicsDevice device, string json,
+			Func<string, Stream> binaryOpener, Func<GraphicsDevice, string, Texture2D> textureLoader)
 		{
 			var content = ModelContent.LoadJsonFromString(json, binaryOpener);
 
-			return Load(device, content);
+			return Load(device, content, textureLoader);
 		}
 
-		public static DrModel CreateFromBinary(GraphicsDevice device, Stream stream)
+		public static DrModel CreateFromBinary(GraphicsDevice device, Stream stream,
+			Func<GraphicsDevice, string, Texture2D> textureLoader)
 		{
 			ModelContent content;
 			using (var reader = new BinaryReader(stream))
@@ -255,7 +290,7 @@ namespace DigitalRiseModel
 				content = ModelContent.LoadBinary(reader);
 			}
 
-			return Load(device, content);
+			return Load(device, content, textureLoader);
 		}
 	}
 }
