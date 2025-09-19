@@ -101,5 +101,23 @@ namespace DigitalRiseModel.Samples.BasicEngine
 
 			return result;
 		}
+
+		public static BoundingBox Transform(this BoundingBox source, ref Matrix matrix)
+		{
+			Vector3.Transform(ref source.Min, ref matrix, out Vector3 v1);
+			Vector3.Transform(ref source.Max, ref matrix, out Vector3 v2);
+
+			var min = new Vector3(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y), Math.Min(v1.Z, v2.Z));
+			var max = new Vector3(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y), Math.Max(v1.Z, v2.Z));
+
+			return new BoundingBox(min, max);
+		}
+
+		public static Vector3 ToScale(this BoundingBox box)
+		{
+			return new Vector3(box.Max.X - box.Min.X,
+				box.Max.Y - box.Min.Y,
+				box.Max.Z - box.Min.Z);
+		}
 	}
 }

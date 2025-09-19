@@ -21,9 +21,9 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private readonly GraphicsDeviceManager _graphics;
 		private AnimationController _player = null;
 		private CameraInputController _controller;
+		private Desktop _desktop;
 		private MainPanel _mainPanel;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
-		private Desktop _desktop;
 		private bool _isAnimating;
 		private string _path;
 		private ForwardRenderer _renderer;
@@ -96,7 +96,8 @@ namespace DigitalRiseModel.Samples.ModelViewer
 						_mainPanel._comboAnimations.SelectedIndex = 1;
 						_mainPanel._comboAnimations.Enabled = true;
 						_mainPanel._buttonPlayStop.Enabled = true;
-					} else
+					}
+					else
 					{
 						_mainPanel._comboAnimations.Enabled = false;
 						_mainPanel._buttonPlayStop.Enabled = false;
@@ -171,6 +172,11 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			};
 
 			_mainPanel._buttonPlayStop.Click += _buttonPlayStop_Click;
+
+			_mainPanel._checkDrawBoundingBoxes.IsCheckedChanged += (s, a) =>
+			{
+				_renderer.DrawBoundingBoxes = _mainPanel._checkDrawBoundingBoxes.IsChecked;
+			};
 
 			_desktop = new Desktop
 			{
@@ -353,9 +359,18 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 			_renderer.Render(_controller.Camera, _modelNode);
 
-			_desktop.Render();
-
 			_fpsCounter.Draw(gameTime);
+
+			_mainPanel._labelFPS.Text = $"FPS: {_fpsCounter.FramesPerSecond}";
+
+			var stats = _renderer.Statistics;
+			_mainPanel._labelDrawCalls.Text = stats.DrawCalls.ToString();
+			_mainPanel._labelEffectsSwitches.Text = stats.EffectsSwitches.ToString();
+			_mainPanel._labelMeshesDrawn.Text = stats.MeshesDrawn.ToString();
+			_mainPanel._labelPrimitivesDrawn.Text = stats.PrimitivesDrawn.ToString();
+			_mainPanel._labelVerticesDrawn.Text = stats.VerticesDrawn.ToString();
+
+			_desktop.Render();
 		}
 	}
 }

@@ -13,6 +13,14 @@ namespace DigitalRiseModel.Samples.BasicEngine
 		public DirectionalLightWrapper DirectionalLight1 => RenderContext.DirectionalLight1;
 		public DirectionalLightWrapper DirectionalLight2 => RenderContext.DirectionalLight2;
 
+		public RenderStatistics Statistics => RenderContext.Statistics;
+		public bool DrawBoundingBoxes
+		{
+			get => RenderContext.DrawBoundingBoxes;
+			
+			set => RenderContext.DrawBoundingBoxes = value;
+		}
+
 		public ForwardRenderer(GraphicsDevice graphicsDevice)
 		{
 			RenderContext = new RenderContext(graphicsDevice);

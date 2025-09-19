@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace Nursia
+namespace DigitalRiseModel.Samples.ThirdPerson
 {
 	public class InputEventArgs<T> : EventArgs
 	{

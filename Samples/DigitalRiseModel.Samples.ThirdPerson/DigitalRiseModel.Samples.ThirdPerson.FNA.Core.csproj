@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.FNA.Core.csproj" />
     <ProjectReference Include="..\..\Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.FNA.Core.csproj" />
     <ProjectReference Include="..\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.FNA.Core.csproj" />
   </ItemGroup>
@@ -16,6 +17,6 @@
     <None Update="Assets\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-﻿namespace DigitalRiseModel
+﻿using DigitalRiseModel.Samples.BasicEngine;
+
+namespace DigitalRiseModel
 {
 	public class MeshNode : VisualNode
 	{
@@ -18,7 +20,9 @@
 				var texture = GetTextureForSubmesh(submesh, context.WhiteTexture);
 				var color = GetColorForSubmesh(submesh);
 
-				context.Render(submesh, EffectType.Basic, GlobalTransform, texture, color, null);
+				var transform = GlobalTransform;
+				var boundingBox = submesh.BoundingBox.Transform(ref transform);
+				context.Render(submesh, boundingBox, EffectType.Basic, GlobalTransform, texture, color, null);
 			}
 		}
 	}

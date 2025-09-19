@@ -10,23 +10,24 @@ namespace DigitalRiseModel.Primitives
 		/// (The box is centered at the origin. The side length is 1.)
 		/// </summary>
 		/// <param name="graphicsDevice"></param>
+		/// <param name="box"></param>
 		/// <returns>A new <see cref="DrSubmesh"/> that represents a box line list.</returns>
 		/// <remarks>
 		/// If the returned <see cref="DrSubmesh"/> is not going to be modified, then it is better
 		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="DrSubmesh"/> instance.
 		/// </remarks>
-		public static DrSubmesh CreateBoxLinesSubmesh(GraphicsDevice graphicsDevice)
+		public static DrSubmesh CreateBoxLinesSubmesh(GraphicsDevice graphicsDevice, BoundingBox box)
 		{
 			var vertices = new[]
 			{
-				new Vector3(-0.5f, -0.5f, +0.5f),
-				new Vector3(+0.5f, -0.5f, +0.5f),
-				new Vector3(+0.5f, +0.5f, +0.5f),
-				new Vector3(-0.5f, +0.5f, +0.5f),
-				new Vector3(-0.5f, -0.5f, -0.5f),
-				new Vector3(+0.5f, -0.5f, -0.5f),
-				new Vector3(+0.5f, +0.5f, -0.5f),
-				new Vector3(-0.5f, +0.5f, -0.5f)
+				new Vector3(box.Min.X, box.Min.Y, box.Max.Z),
+				new Vector3(box.Max.X, box.Min.Y, box.Max.Z),
+				new Vector3(box.Max.X, box.Max.Y, box.Max.Z),
+				new Vector3(box.Min.X, box.Max.Y, box.Max.Z),
+				new Vector3(box.Min.X, box.Min.Y, box.Min.Z),
+				new Vector3(box.Max.X, box.Min.Y, box.Min.Z),
+				new Vector3(box.Max.X, box.Max.Y, box.Min.Z),
+				new Vector3(box.Min.X, box.Max.Y, box.Min.Z)
 			};
 
 			var indices = new ushort[]

@@ -3,15 +3,17 @@ using DigitalRiseModel;
 using DigitalRiseModel.Animation;
 using DigitalRiseModel.Primitives;
 using DigitalRiseModel.Samples.BasicEngine;
+using DigitalRiseModel.Samples.ThirdPerson.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Nursia;
+using Myra;
+using Myra.Graphics2D.UI;
 using System;
 using System.IO;
 using System.Reflection;
 
-namespace SimpleScene
+namespace DigitalRiseModel.Samples.ThirdPerson
 {
 	public class ViewerGame : Game
 	{
@@ -21,7 +23,6 @@ namespace SimpleScene
 		private readonly GraphicsDeviceManager _graphics;
 		private AnimationController _player;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
-		private SpriteBatch _spriteBatch;
 		private InputService _inputService;
 		private readonly SceneNode _rootNode = new SceneNode();
 		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
@@ -31,6 +32,8 @@ namespace SimpleScene
 		private readonly SceneNode _cameraMount = new SceneNode();
 		private readonly CameraNode _mainCamera = new CameraNode();
 		private ForwardRenderer _renderer;
+		private Desktop _desktop;
+		private MainPanel _mainPanel;
 
 		public static string ExecutingAssemblyDirectory
 		{
@@ -107,15 +110,22 @@ namespace SimpleScene
 			_player = new AnimationController(_modelNode.ModelInstance);
 			_player.StartClip("idle");
 
+			// Init input service
 			_inputService = new InputService();
 			_inputService.MouseMoved += _inputService_MouseMoved;
 
+			// Init forward renderer
 			_renderer = new ForwardRenderer(GraphicsDevice);
 			_renderer.DirectionalLight0.Enabled = true;
 			_renderer.DirectionalLight0.Direction = new Vector3(1, -1, 0);
 			_renderer.DirectionalLight0.DiffuseColor = Color.White;
 
-			_spriteBatch = new SpriteBatch(GraphicsDevice);
+			// Init ui
+			MyraEnvironment.Game = this;
+
+			_desktop = new Desktop();
+			_mainPanel = new MainPanel();
+			_desktop.Root = _mainPanel;
 		}
 
 		private void _inputService_MouseMoved(object sender, InputEventArgs<Point> e)
@@ -194,13 +204,17 @@ namespace SimpleScene
 			_renderer.Render(_mainCamera, _rootNode);
 
 			_fpsCounter.Draw(gameTime);
-			_spriteBatch.Begin();
 
-			/*			_spriteBatch.Draw(_light.ShadowMap, 
-							new Rectangle(0, 0, 256, 256), 
-							Color.White);*/
+			_mainPanel._labelFPS.Text = $"FPS: {_fpsCounter.FramesPerSecond}";
 
-			_spriteBatch.End();
+			var stats = _renderer.Statistics;
+			_mainPanel._labelDrawCalls.Text = stats.DrawCalls.ToString();
+			_mainPanel._labelEffectsSwitches.Text = stats.EffectsSwitches.ToString();
+			_mainPanel._labelMeshesDrawn.Text = stats.MeshesDrawn.ToString();
+			_mainPanel._labelPrimitivesDrawn.Text = stats.PrimitivesDrawn.ToString();
+			_mainPanel._labelVerticesDrawn.Text = stats.VerticesDrawn.ToString();
+
+			_desktop.Render();
 		}
 	}
 }

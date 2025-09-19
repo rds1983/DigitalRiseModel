@@ -1,4 +1,4 @@
-﻿namespace SimpleScene
+﻿namespace DigitalRiseModel.Samples.ThirdPerson
 {
 	static class Configuration
 	{

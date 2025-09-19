@@ -438,7 +438,8 @@ namespace DigitalRiseModel
 						DiffuseColor = Color.White,
 					};
 
-					var modelMesh = new DrSubmesh(vertexBuffer, indexBuffer, BoundingBox.CreateFromPoints(positions))
+					var box = BoundingBox.CreateFromPoints(positions);
+					var submesh = new DrSubmesh(vertexBuffer, indexBuffer, box)
 					{
 						Material = material
 					};
@@ -478,7 +479,7 @@ namespace DigitalRiseModel
 						}
 					}
 
-					mesh.Submeshes.Add(modelMesh);
+					mesh.Submeshes.Add(submesh);
 				}
 
 				_meshes.Add(mesh);
