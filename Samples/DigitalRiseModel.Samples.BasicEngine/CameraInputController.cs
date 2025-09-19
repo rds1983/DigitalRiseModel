@@ -26,12 +26,12 @@ namespace DigitalRiseModel.Samples.BasicEngine
 		private bool _leftKeyPressed, _rightKeyPressed, _forwardKeyPressed, _backwardKeyPressed, _upKeyPressed, _downKeyPressed;
 		private DateTime? _keyboardLastTime;
 
-		public Camera Camera { get; }
+		public CameraNode Camera { get; }
 		public float RotateDelta { get; set; }
 		public float MoveDelta { get; set; }
 		public float KeyboardMovementSpeed { get; set; }
 
-		public CameraInputController(Camera camera)
+		public CameraInputController(CameraNode camera)
 		{
 			if (camera == null)
 			{

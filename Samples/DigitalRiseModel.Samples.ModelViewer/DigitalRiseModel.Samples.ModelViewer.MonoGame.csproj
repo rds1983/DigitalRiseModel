@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AssemblyName>DrmViewer</AssemblyName>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
   </PropertyGroup>
@@ -9,6 +10,7 @@
     <PackageReference Include="Myra" Version="1.5.9" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.MonoGame.csproj" />
     <ProjectReference Include="..\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj" />
   </ItemGroup>
 </Project>

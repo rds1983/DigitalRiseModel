@@ -26,8 +26,13 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private Desktop _desktop;
 		private bool _isAnimating;
 		private string _path;
-		private Engine _engine;
-		private DrModelInstance _model;
+		private ForwardRenderer _renderer;
+		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
+		{
+			ModelInstance = new DrModelInstance()
+		};
+
+		private DrModelInstance ModelInstance => _modelNode.ModelInstance;
 
 		public ViewerGame(string path)
 		{
@@ -52,45 +57,57 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		{
 			try
 			{
+
 				if (!string.IsNullOrEmpty(file))
 				{
 					var folder = Path.GetDirectoryName(file);
 					var f = Path.GetFileName(file);
 
 					var assetManager = AssetManager.CreateFileAssetManager(folder);
-					var model = assetManager.LoadDrModel(GraphicsDevice, f);
-					_model.Model = model;
+					var model = assetManager.LoadGltf(GraphicsDevice, f);
+					ModelInstance.Model = model;
 
 					_mainPanel._comboAnimations.Widgets.Clear();
-					_mainPanel._comboAnimations.Widgets.Add(new Label());
-					foreach (var pair in model.Animations)
-					{
-						var str = pair.Key;
-						if (string.IsNullOrEmpty(str))
-						{
-							str = "(default)";
-						}
 
-						_mainPanel._comboAnimations.Widgets.Add(
-							new Label
+					if (model.Animations != null)
+					{
+						// Default pose
+						_mainPanel._comboAnimations.Widgets.Add(new Label());
+						foreach (var pair in model.Animations)
+						{
+							var str = pair.Key;
+							if (string.IsNullOrEmpty(str))
 							{
-								Text = str,
-								Tag = pair.Value
-							});
+								str = "(default)";
+							}
+
+							_mainPanel._comboAnimations.Widgets.Add(
+								new Label
+								{
+									Text = str,
+									Tag = pair.Value
+								});
+						}
 					}
 
 					if (_mainPanel._comboAnimations.Widgets.Count > 1)
 					{
 						// First animation
 						_mainPanel._comboAnimations.SelectedIndex = 1;
+						_mainPanel._comboAnimations.Enabled = true;
+						_mainPanel._buttonPlayStop.Enabled = true;
+					} else
+					{
+						_mainPanel._comboAnimations.Enabled = false;
+						_mainPanel._buttonPlayStop.Enabled = false;
 					}
 				}
 
 				// Reset camera
 				var camera = _controller.Camera;
-				if (_model.Model != null)
+				if (ModelInstance.Model != null)
 				{
-					var bb = _model.BoundingBox.Value;
+					var bb = _modelNode.ModelInstance.BoundingBox.Value;
 					var min = bb.Min;
 					var max = bb.Max;
 					var center = (min + max) / 2;
@@ -160,12 +177,12 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				Root = _mainPanel
 			};
 
-			_engine = new Engine(GraphicsDevice);
-			_model = new DrModelInstance();
-			_engine.Models.Add(_model);
-			_controller = new CameraInputController(_engine.Camera);
+			_renderer = new ForwardRenderer(GraphicsDevice);
 
-			_player = new AnimationController(_model);
+			var camera = new CameraNode();
+			_controller = new CameraInputController(camera);
+
+			_player = new AnimationController(ModelInstance);
 			_player.TimeChanged += (s, a) =>
 			{
 				if (_player.AnimationClip == null)
@@ -179,7 +196,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				slider.Value = slider.Minimum + k * (slider.Maximum - slider.Minimum);
 			};
 
-			_mainPanel._imageColor.Renderable = new TextureRegion(_engine.WhiteTexture);
+			_mainPanel._imageColor.Renderable = new TextureRegion(_renderer.WhiteTexture);
 			_mainPanel._imageColor.Color = Color.Transparent;
 
 			LoadModel(_path);
@@ -230,7 +247,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				var assetManager = AssetManager.CreateFileAssetManager(folder);
 				var texture = assetManager.LoadTexture2D(GraphicsDevice, Path.GetFileName(dialog.FilePath));
 
-				_engine.CustomTexture = texture;
+				_modelNode.CustomTexture = texture;
 				_mainPanel._textPath.Text = dialog.FilePath;
 			};
 
@@ -239,7 +256,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 		private void _buttonClearTexture_Click(object sender, EventArgs e)
 		{
-			_engine.CustomTexture = null;
+			_modelNode.CustomTexture = null;
 			_mainPanel._textPath.Text = string.Empty;
 		}
 
@@ -260,7 +277,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 				// "Ok" or Enter
 				_mainPanel._imageColor.Color = dialog.Color;
-				_engine.CustomColor = dialog.Color;
+				_modelNode.CustomColor = dialog.Color;
 			};
 
 			dialog.ShowModal(_desktop);
@@ -269,7 +286,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private void _buttonClearColor_Click(object sender, EventArgs e)
 		{
 			_mainPanel._imageColor.Color = Color.Transparent;
-			_engine.CustomColor = null;
+			_modelNode.CustomColor = null;
 		}
 
 		private void _comboAnimations_SelectedIndexChanged(object sender, EventArgs e)
@@ -319,7 +336,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 			_controller.Update();
 
-			if (_model.Model != null && _isAnimating)
+			if (ModelInstance.Model != null && _isAnimating)
 			{
 				_player.Update(gameTime.ElapsedGameTime);
 			}
@@ -331,7 +348,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 			GraphicsDevice.Clear(Color.Black);
 
-			_engine.Render();
+			_renderer.Render(_controller.Camera, _modelNode);
 
 			_desktop.Render();
 

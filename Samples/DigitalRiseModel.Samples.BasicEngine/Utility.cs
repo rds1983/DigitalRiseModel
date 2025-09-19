@@ -22,6 +22,55 @@ namespace DigitalRiseModel.Samples.BasicEngine
 			return Math.Abs(left - right) <= epsilon;
 		}
 
+		public static bool EpsilonEquals(this Vector2 a, Vector2 b, float epsilon = ZeroTolerance)
+		{
+			return a.X.EpsilonEquals(b.X, epsilon) &&
+				a.Y.EpsilonEquals(b.Y, epsilon);
+		}
+
+		public static bool EpsilonEquals(this Vector3 a, Vector3 b, float epsilon = ZeroTolerance)
+		{
+			return a.X.EpsilonEquals(b.X, epsilon) &&
+				a.Y.EpsilonEquals(b.Y, epsilon) &&
+				a.Z.EpsilonEquals(b.Z, epsilon);
+		}
+
+		public static bool EpsilonEquals(this Vector4 a, Vector4 b, float epsilon = ZeroTolerance)
+		{
+			return a.X.EpsilonEquals(b.X, epsilon) &&
+				a.Y.EpsilonEquals(b.Y, epsilon) &&
+				a.Z.EpsilonEquals(b.Z, epsilon) &&
+				a.W.EpsilonEquals(b.W, epsilon);
+		}
+
+		public static bool EpsilonEquals(this Quaternion a, Quaternion b, float epsilon = ZeroTolerance)
+		{
+			return a.X.EpsilonEquals(b.X, epsilon) &&
+				a.Y.EpsilonEquals(b.Y, epsilon) &&
+				a.Z.EpsilonEquals(b.Z, epsilon) &&
+				a.W.EpsilonEquals(b.W, epsilon);
+		}
+
+		public static bool IsZero(this float a)
+		{
+			return a.EpsilonEquals(0.0f);
+		}
+
+		public static bool IsZero(this Vector2 a)
+		{
+			return a.EpsilonEquals(Vector2.Zero);
+		}
+
+		public static bool IsZero(this Vector3 a)
+		{
+			return a.EpsilonEquals(Vector3.Zero);
+		}
+
+		public static bool IsZero(this Vector4 a)
+		{
+			return a.EpsilonEquals(Vector4.Zero);
+		}
+
 		public static float ClampDegree(this float deg)
 		{
 			var isNegative = deg < 0;
