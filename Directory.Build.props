@@ -6,7 +6,7 @@
     <PackageProjectUrl>https://github.com/DigitalRiseEngine/DigitalRiseModel</PackageProjectUrl>
     <Description>MonoGame/FNA library that provides simple 3D model class</Description>
     <RootNamespace>DigitalRiseModel</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
+    <FNATargetFramework>net8.0</FNATargetFramework>
     <Version>0.5.0</Version>
     <MonoGameVersion>3.8.0.1641</MonoGameVersion>
     <AppMonoGameVersion>3.8.1.303</AppMonoGameVersion>

@@ -1,0 +1,97 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{D3447DFD-A975-4EAC-BCB6-EB5E9454351C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.FNA.Core", "Source\DigitalRiseModel\DigitalRiseModel.FNA.Core.csproj", "{0881A579-0339-93D3-D4F6-EFC2EF06EE41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{FB955119-43B2-4F31-888B-E2DBCEBE68A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "..\FNA\FNA.Core.csproj", "{B955E668-3D04-C971-D3D3-26D12AA164FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Gltf.FNA.Core", "Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.FNA.Core.csproj", "{17B99D67-18FD-26CD-2560-B4744BDCD1A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DdsKtxXna.FNA.Core", "..\DdsKtxXna\DdsKtxXna\DdsKtxXna.FNA.Core.csproj", "{6750E335-1883-9BC3-D90F-16C66F6F8978}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XNAssets.FNA.Core", "..\XNAssets\src\XNAssets.FNA.Core.csproj", "{389B43E3-C451-5086-E881-6E0354038C34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.BasicEngine.FNA.Core", "Samples\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.FNA.Core.csproj", "{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ThirdPerson.FNA.Core", "Samples\DigitalRiseModel.Samples.ThirdPerson\DigitalRiseModel.Samples.ThirdPerson.FNA.Core.csproj", "{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.FNA.Core", "..\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{2535A45B-38CA-0551-63AC-19F2D00C17EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myra.FNA.Core", "..\Myra\src\Myra\Myra.FNA.Core.csproj", "{96FF26B3-E037-18F1-75AF-DAED23B417DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.FNA.Core", "Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.FNA.Core.csproj", "{CAF7148E-3508-7E03-B36D-61843F162038}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0881A579-0339-93D3-D4F6-EFC2EF06EE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0881A579-0339-93D3-D4F6-EFC2EF06EE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0881A579-0339-93D3-D4F6-EFC2EF06EE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0881A579-0339-93D3-D4F6-EFC2EF06EE41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B955E668-3D04-C971-D3D3-26D12AA164FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B955E668-3D04-C971-D3D3-26D12AA164FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B955E668-3D04-C971-D3D3-26D12AA164FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B955E668-3D04-C971-D3D3-26D12AA164FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17B99D67-18FD-26CD-2560-B4744BDCD1A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17B99D67-18FD-26CD-2560-B4744BDCD1A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17B99D67-18FD-26CD-2560-B4744BDCD1A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17B99D67-18FD-26CD-2560-B4744BDCD1A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6750E335-1883-9BC3-D90F-16C66F6F8978}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6750E335-1883-9BC3-D90F-16C66F6F8978}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6750E335-1883-9BC3-D90F-16C66F6F8978}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6750E335-1883-9BC3-D90F-16C66F6F8978}.Release|Any CPU.Build.0 = Release|Any CPU
+		{389B43E3-C451-5086-E881-6E0354038C34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{389B43E3-C451-5086-E881-6E0354038C34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{389B43E3-C451-5086-E881-6E0354038C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{389B43E3-C451-5086-E881-6E0354038C34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96FF26B3-E037-18F1-75AF-DAED23B417DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96FF26B3-E037-18F1-75AF-DAED23B417DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96FF26B3-E037-18F1-75AF-DAED23B417DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96FF26B3-E037-18F1-75AF-DAED23B417DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF7148E-3508-7E03-B36D-61843F162038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF7148E-3508-7E03-B36D-61843F162038}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF7148E-3508-7E03-B36D-61843F162038}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF7148E-3508-7E03-B36D-61843F162038}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0881A579-0339-93D3-D4F6-EFC2EF06EE41} = {D3447DFD-A975-4EAC-BCB6-EB5E9454351C}
+		{B955E668-3D04-C971-D3D3-26D12AA164FE} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{17B99D67-18FD-26CD-2560-B4744BDCD1A4} = {D3447DFD-A975-4EAC-BCB6-EB5E9454351C}
+		{6750E335-1883-9BC3-D90F-16C66F6F8978} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{389B43E3-C451-5086-E881-6E0354038C34} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{977E4BA9-CB98-6C2E-D672-E7C4E27EEA49} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{9E5F40BA-CB5C-6A80-ADD4-F50DBFDE75F0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{2535A45B-38CA-0551-63AC-19F2D00C17EB} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{96FF26B3-E037-18F1-75AF-DAED23B417DD} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{CAF7148E-3508-7E03-B36D-61843F162038} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
+	EndGlobalSection
+EndGlobal

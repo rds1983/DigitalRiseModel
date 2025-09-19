@@ -5,17 +5,17 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.MonoGame", "..\Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.MonoGame.csproj", "{F4FD209A-164C-11FF-E4D8-1FD576675E7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.MonoGame", "Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.MonoGame.csproj", "{F4FD209A-164C-11FF-E4D8-1FD576675E7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.BasicEngine.MonoGame", "..\Samples\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj", "{9876750C-9A62-09EA-3954-309DF950F1AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.BasicEngine.MonoGame", "Samples\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj", "{9876750C-9A62-09EA-3954-309DF950F1AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ThirdPerson.MonoGame", "..\Samples\DigitalRiseModel.Samples.ThirdPerson\DigitalRiseModel.Samples.ThirdPerson.MonoGame.csproj", "{DB0A213A-DAB3-FEFF-EF06-E17FB08D6987}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ThirdPerson.MonoGame", "Samples\DigitalRiseModel.Samples.ThirdPerson\DigitalRiseModel.Samples.ThirdPerson.MonoGame.csproj", "{DB0A213A-DAB3-FEFF-EF06-E17FB08D6987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame", "..\Source\DigitalRiseModel\DigitalRiseModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame", "Source\DigitalRiseModel\DigitalRiseModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{D3447DFD-A975-4EAC-BCB6-EB5E9454351C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Gltf.MonoGame", "..\Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.MonoGame.csproj", "{2CFAE6CB-8921-C7C3-B8E4-BD2BB9789167}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Gltf.MonoGame", "Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.MonoGame.csproj", "{2CFAE6CB-8921-C7C3-B8E4-BD2BB9789167}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

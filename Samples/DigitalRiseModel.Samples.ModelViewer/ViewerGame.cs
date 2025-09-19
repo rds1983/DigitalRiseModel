@@ -178,6 +178,9 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			};
 
 			_renderer = new ForwardRenderer(GraphicsDevice);
+			_renderer.DirectionalLight0.Direction = new Vector3(0, -1, -1);
+			_renderer.DirectionalLight0.DiffuseColor = Color.White;
+			_renderer.DirectionalLight0.Enabled = true;
 
 			var camera = new CameraNode();
 			_controller = new CameraInputController(camera);

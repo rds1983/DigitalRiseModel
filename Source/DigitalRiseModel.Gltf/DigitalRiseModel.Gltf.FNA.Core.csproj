@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(FNATargetFramework)</TargetFramework>
+    <AssemblyName>DigitalRiseModel.Gltf</AssemblyName>
+    <RootNamespace>DigitalRiseModel</RootNamespace>
+    <PackageId>DigitalRiseModel.Gltf.FNA.Core</PackageId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\XNAssets\src\XNAssets.FNA.Core.csproj" />
+    <ProjectReference Include="..\DigitalRiseModel\DigitalRiseModel.FNA.Core.csproj" />
+  </ItemGroup>
+</Project>

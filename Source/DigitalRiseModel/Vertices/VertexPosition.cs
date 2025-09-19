@@ -1,4 +1,6 @@
-﻿// DigitalRune Engine - Copyright (C) DigitalRune GmbH
+﻿#if FNA
+
+// DigitalRune Engine - Copyright (C) DigitalRune GmbH
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.TXT', which is part of this source code package.
 
@@ -11,10 +13,11 @@ using Microsoft.Xna.Framework.Graphics;
 namespace DigitalRiseModel.Vertices
 {
 	/// <summary>
-	/// Describes a custom vertex format structure that contains position and normal vector.
+	/// Describes a custom vertex format structure that contains only the vertex position (no normals,
+	/// texture coordinates or other vertex data).
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
-	public struct VertexPositionNormal : IVertexType
+	public struct VertexPosition : IVertexType
 	{
 		//--------------------------------------------------------------
 		#region Fields
@@ -23,28 +26,18 @@ namespace DigitalRiseModel.Vertices
 		/// <summary>
 		/// The vertex declaration.
 		/// </summary>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
 		public static readonly VertexDeclaration VertexDeclaration =
 		  new VertexDeclaration(
-			new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
-			new VertexElement(12, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0))
+			new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0))
 		  {
-			  Name = "VertexPositionNormal.VertexDeclaration"
+			  Name = "VertexPosition.VertexDeclaration"
 		  };
 
 
 		/// <summary>
 		/// The vertex position.
 		/// </summary>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		public Vector3 Position;
-
-
-		/// <summary>
-		/// The vertex normal vector.
-		/// </summary>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
-		public Vector3 Normal;
 		#endregion
 
 
@@ -53,12 +46,12 @@ namespace DigitalRiseModel.Vertices
 		//--------------------------------------------------------------
 
 		/// <summary>
-		/// Gets the size of the <see cref="VertexPositionNormal"/> structure in bytes.
+		/// Gets the size of the <see cref="VertexPosition"/> structure in bytes.
 		/// </summary>
 		/// <value>The size of the vertex in bytes.</value>
 		public static int SizeInBytes
 		{
-			get { return 12 + 12; }
+			get { return 12; }
 		}
 		#endregion
 
@@ -68,14 +61,16 @@ namespace DigitalRiseModel.Vertices
 		//--------------------------------------------------------------
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="VertexPositionNormal"/> struct.
+		/// Initializes a new instance of the <see cref="VertexPosition"/> struct.
 		/// </summary>
 		/// <param name="position">The position of the vertex.</param>
-		/// <param name="normal">The normal of the vertex.</param>
-		public VertexPositionNormal(Vector3 position, Vector3 normal)
+		public VertexPosition(Vector3 position)
 		{
 			Position = position;
-			Normal = normal;
+		}
+
+		public VertexPosition(float x, float y, float z): this(new Vector3(x, y, z))
+		{
 		}
 		#endregion
 
@@ -94,7 +89,7 @@ namespace DigitalRiseModel.Vertices
 		/// </returns>
 		public override bool Equals(object obj)
 		{
-			return obj is VertexPositionNormal && this == (VertexPositionNormal)obj;
+			return obj is VertexPosition && this == (VertexPosition)obj;
 		}
 
 
@@ -105,12 +100,7 @@ namespace DigitalRiseModel.Vertices
 		public override int GetHashCode()
 		{
 			// ReSharper disable NonReadonlyFieldInGetHashCode
-			unchecked
-			{
-				int hashCode = Position.GetHashCode();
-				hashCode = hashCode * 397 ^ Normal.GetHashCode();
-				return hashCode;
-			}
+			return Position.GetHashCode();
 			// ReSharper restore NonReadonlyFieldInGetHashCode
 		}
 
@@ -133,10 +123,9 @@ namespace DigitalRiseModel.Vertices
 		/// <returns>
 		/// <see langword="true"/> if the objects are the same; <see langword="false"/> otherwise. 
 		/// </returns>
-		public static bool operator ==(VertexPositionNormal left, VertexPositionNormal right)
+		public static bool operator ==(VertexPosition left, VertexPosition right)
 		{
-			return left.Position == right.Position
-				   && left.Normal == right.Normal;
+			return left.Position == right.Position;
 		}
 
 
@@ -148,10 +137,9 @@ namespace DigitalRiseModel.Vertices
 		/// <returns>
 		/// <see langword="true"/> if the objects are different; <see langword="false"/> otherwise. 
 		/// </returns>
-		public static bool operator !=(VertexPositionNormal left, VertexPositionNormal right)
+		public static bool operator !=(VertexPosition left, VertexPosition right)
 		{
-			return left.Position != right.Position
-				   || left.Normal != right.Normal;
+			return left.Position != right.Position;
 		}
 
 
@@ -161,12 +149,10 @@ namespace DigitalRiseModel.Vertices
 		/// <returns>String representation of this object.</returns>
 		public override string ToString()
 		{
-			return string.Format(
-			  CultureInfo.CurrentCulture,
-			  "{{Position:{0} Normal:{1}}}",
-			  Position,
-			  Normal);
+			return string.Format(CultureInfo.CurrentCulture, "{{Position:{0}}}", Position);
 		}
 		#endregion
 	}
 }
+
+#endif
