@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>$(MonoGameTargetFramework)</TargetFramework>
     <AssemblyName>DigitalRiseModel.Gltf</AssemblyName>
 	<RootNamespace>DigitalRiseModel</RootNamespace>
     <PackageId>DigitalRiseModel.Gltf.MonoGame</PackageId>
