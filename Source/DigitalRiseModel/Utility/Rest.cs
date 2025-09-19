@@ -21,5 +21,18 @@ namespace DigitalRiseModel.Utility
 				disposable.Dispose();
 			}
 		}
+
+		/// <summary>
+		/// Swaps the content of two variables.
+		/// </summary>
+		/// <typeparam name="T">The type of the objects.</typeparam>
+		/// <param name="obj1">First variable.</param>
+		/// <param name="obj2">Second variable.</param>
+		public static void Swap<T>(ref T obj1, ref T obj2)
+		{
+			T temp = obj1;
+			obj1 = obj2;
+			obj2 = temp;
+		}
 	}
 }

@@ -4,6 +4,7 @@
     <AssemblyName>DigitalRiseModel</AssemblyName>
     <RootNamespace>DigitalRiseModel</RootNamespace>
     <PackageId>DigitalRiseModel.MonoGame</PackageId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
   </PropertyGroup>

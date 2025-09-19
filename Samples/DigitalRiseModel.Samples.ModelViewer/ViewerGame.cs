@@ -247,7 +247,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				var assetManager = AssetManager.CreateFileAssetManager(folder);
 				var texture = assetManager.LoadTexture2D(GraphicsDevice, Path.GetFileName(dialog.FilePath));
 
-				_modelNode.CustomTexture = texture;
+				_modelNode.Texture = texture;
 				_mainPanel._textPath.Text = dialog.FilePath;
 			};
 
@@ -256,7 +256,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 		private void _buttonClearTexture_Click(object sender, EventArgs e)
 		{
-			_modelNode.CustomTexture = null;
+			_modelNode.Texture = null;
 			_mainPanel._textPath.Text = string.Empty;
 		}
 
@@ -277,7 +277,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 				// "Ok" or Enter
 				_mainPanel._imageColor.Color = dialog.Color;
-				_modelNode.CustomColor = dialog.Color;
+				_modelNode.Color = dialog.Color;
 			};
 
 			dialog.ShowModal(_desktop);
@@ -286,7 +286,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private void _buttonClearColor_Click(object sender, EventArgs e)
 		{
 			_mainPanel._imageColor.Color = Color.Transparent;
-			_modelNode.CustomColor = null;
+			_modelNode.Color = null;
 		}
 
 		private void _comboAnimations_SelectedIndexChanged(object sender, EventArgs e)
