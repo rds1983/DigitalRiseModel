@@ -1,4 +1,4 @@
-[![NuGet](https://img.shields.io/nuget/v/DigitalRiseModel.svg)](https://www.nuget.org/packages/DigitalRiseModel/)
+[![NuGet](https://img.shields.io/nuget/v/DigitalRiseModel.MonoGame.svg)](https://www.nuget.org/packages/DigitalRiseModel.MonoGame/)
 [![Build & Publish Beta](https://github.com/DigitalRiseEngine/DigitalRiseModel/actions/workflows/build-and-publish-beta.yml/badge.svg)](https://github.com/DigitalRiseEngine/DigitalRiseModel/actions/workflows/build-and-publish-beta.yml)
 [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 
