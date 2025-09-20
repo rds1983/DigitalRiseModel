@@ -187,25 +187,6 @@ namespace DigitalRiseModel
 			throw new NotSupportedException($"Accessor of type {accessor.Type} and component type {accessor.ComponentType} isn't supported");
 		}
 
-		private static Matrix CreateTransform(Vector3 translation, Vector3 scale, Quaternion rotation)
-		{
-			return Matrix.CreateFromQuaternion(rotation) *
-				Matrix.CreateScale(scale) *
-				Matrix.CreateTranslation(translation);
-		}
-
-		private static Matrix LoadTransform(JObject data)
-		{
-			var scale = data.OptionalVector3("scale", Vector3.One);
-			var translation = data.OptionalVector3("translation", Vector3.Zero);
-			var rotation = data.OptionalVector4("rotation", Vector4.Zero);
-
-			var quaternion = new Quaternion(rotation.X,
-				rotation.Y, rotation.Z, rotation.W);
-
-			return CreateTransform(translation, scale, quaternion);
-		}
-
 		private void LoadAnimationTransforms<T>(SrtTransform defaultPose, SortedDictionary<float, SrtTransform> poses, PoseSetter<T> poseSetter, float[] times, AnimationSampler sampler)
 		{
 			var data = GetAccessorAs<T>(sampler.Output);

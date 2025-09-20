@@ -77,7 +77,7 @@ namespace DigitalRiseModel.Samples.BasicEngine
 											MathHelper.ToRadians(_rotation.Y),
 											MathHelper.ToRadians(_rotation.X),
 											MathHelper.ToRadians(_rotation.Z));
-					_localTransform = Utility.CreateTransform(Translation, Scale, quaternion);
+					_localTransform = SrtTransform.CreateMatrix(Translation, Scale, quaternion);
 				}
 
 				return _localTransform.Value;

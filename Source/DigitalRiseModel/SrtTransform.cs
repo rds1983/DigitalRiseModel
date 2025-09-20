@@ -66,7 +66,7 @@ namespace DigitalRiseModel
 			Scale = scale;
 		}
 
-		public Matrix ToMatrix() => Mathematics.CreateTransform(Translation, Scale, Rotation);
+		public Matrix ToMatrix() => CreateMatrix(Translation, Scale, Rotation);
 
 		///<summary>	
 		/// Interpolates between 2 poses using the specified algorithm
@@ -149,6 +149,11 @@ namespace DigitalRiseModel
 			}
 
 			return resultPose;
+		}
+
+		public static Matrix CreateMatrix(Vector3 translation, Vector3 scale, Quaternion rotation)
+		{
+			return Matrix.CreateScale(scale) * Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(translation);
 		}
 
 		#region IEquatable<Pose> Members
