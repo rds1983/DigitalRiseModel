@@ -84,6 +84,8 @@ namespace DigitalRiseModel
 		#region Properties & Events
 		//--------------------------------------------------------------
 
+		public string Name { get; set; }
+
 		public BoundingBox BoundingBox
 		{
 			get

@@ -311,7 +311,11 @@ namespace DigitalRiseModel
 		{
 			foreach (var gltfMesh in _gltf.Meshes)
 			{
-				var mesh = new DrMesh();
+				var mesh = new DrMesh
+				{
+					Name = gltfMesh.Name
+				};
+
 				foreach (var primitive in gltfMesh.Primitives)
 				{
 					if (primitive.Mode != MeshPrimitive.ModeEnum.TRIANGLES)
@@ -447,6 +451,7 @@ namespace DigitalRiseModel
 					if (primitive.Material != null)
 					{
 						var gltfMaterial = _gltf.Materials[primitive.Material.Value];
+						material.Name = gltfMaterial.Name;
 						if (gltfMaterial.PbrMetallicRoughness != null)
 						{
 							material.DiffuseColor = new Color(gltfMaterial.PbrMetallicRoughness.BaseColorFactor.ToVector4());
@@ -468,7 +473,6 @@ namespace DigitalRiseModel
 									else
 									{
 										// Create default material
-										material.Id = image.Uri;
 										material.SpecularFactor = 0.0f;
 										material.SpecularPower = 250.0f;
 										material.DiffuseTexture = _assetManager.LoadTexture2D(_device, image.Uri);
