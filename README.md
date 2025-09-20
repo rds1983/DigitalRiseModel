@@ -49,3 +49,10 @@ https://github.com/rds1983/Myra|UI library(required for samples)
 this repo|
 
 Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
+
+### Credits
+* [MonoGame](http://www.monogame.net/)
+* [FNA](https://github.com/FNA-XNA/FNA)
+* [DigitalRune](https://github.com/DigitalRune/DigitalRune)
+* [SharpDX](https://github.com/sharpdx/SharpDX)
+* 
