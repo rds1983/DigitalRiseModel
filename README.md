@@ -33,3 +33,19 @@ Name|Description
 BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
 ModelViewer|Application to load and view 3D models in GLTF/GLB format. Skeletal animation is supported
 ThirdPerson|Application that demonstrates how simple third person controller could be done
+
+### Building From Source For MonoGame
+Open DigitalRiseModel.MonoGame.sln in the IDE and run.
+
+### Building From Source For FNA
+Clone following projects in one folder:
+Link|Description
+----|-----------
+https://github.com/FNA-XNA/FNA|FNA
+https://github.com/rds1983/DdsKtxSharp|Loading textures in DDS format
+https://github.com/rds1983/XNAssets|Asset management library
+https://github.com/FontStashSharp/FontStashSharp|Text rendering library(required for samples)
+https://github.com/rds1983/Myra|UI library(required for samples)
+this repo|
+
+Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
