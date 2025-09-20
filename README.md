@@ -17,11 +17,11 @@ It's important to note that DigitalRiseModel lacks functionality to render model
 However [Samples](Samples) section demonstrates how it could be done. It implements simple rendering engine that is based on XNA stock effects such as BasicEffect and SkinnedEffect.
 
 ### Adding Reference
-DigitalRiseModel consists of following assemblies:
-Name|MonoGame NuGet Link|Description
-----|-------------------|-----------
-DigitalRiseModel|https://www.nuget.org/packages/DigitalRiseModel.MonoGame|Base 3D modelling API and 3D primitives
-DigitalRiseModel.Gltf|https://www.nuget.org/packages/DigitalRiseModel.Gltf.MonoGame|Loading 3D models from GLTF/GLB
+DigitalRiseModel consists of following assemblies(click on the name for MonoGame nuget link):
+Name|Description
+----|-----------
+[DigitalRiseModel](https://www.nuget.org/packages/DigitalRiseModel.MonoGame)|Base 3D modelling API and 3D primitives
+[DigitalRiseModel.Gltf](https://www.nuget.org/packages/DigitalRiseModel.Gltf.MonoGame)|Loading 3D models from GLTF/GLB
 
 ### Samples
 Right now, [Samples](Samples) is the best way to learn how to work with the library.
