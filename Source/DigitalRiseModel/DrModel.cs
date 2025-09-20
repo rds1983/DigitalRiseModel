@@ -1,4 +1,6 @@
 ﻿using DigitalRiseModel.Animation;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,6 +64,52 @@ namespace DigitalRiseModel
 		private void TraverseBones(Action<DrModelBone> action)
 		{
 			TraverseBones(Root, action);
+		}
+
+		public void CopyBoneTransformsTo(Matrix[] boneTransforms)
+		{
+			if (boneTransforms == null)
+			{
+				throw new ArgumentNullException(nameof(boneTransforms));
+			}
+
+			if (boneTransforms.Length < Bones.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(boneTransforms));
+			}
+
+			for (var i = 0; i < Bones.Length; i++)
+			{
+				var bone = Bones[i];
+				boneTransforms[bone.Index] = bone.CalculateDefaultLocalTransform();
+			}
+		}
+
+		public void CopyAbsoluteBoneTransformsTo(Matrix[] boneTransforms)
+		{
+			if (boneTransforms == null)
+			{
+				throw new ArgumentNullException(nameof(boneTransforms));
+			}
+
+			if (boneTransforms.Length < Bones.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(boneTransforms));
+			}
+
+			for (var i = 0; i < Bones.Length; i++)
+			{
+				var bone = Bones[i];
+
+				if (bone.Parent == null)
+				{
+					boneTransforms[bone.Index] = bone.CalculateDefaultLocalTransform();
+				}
+				else
+				{
+					boneTransforms[bone.Index] = bone.CalculateDefaultLocalTransform() * boneTransforms[bone.Parent.Index];
+				}
+			}
 		}
 	}
 }

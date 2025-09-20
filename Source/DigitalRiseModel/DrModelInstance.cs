@@ -74,6 +74,15 @@ namespace DigitalRiseModel
 			}
 		}
 
+		public DrModelInstance()
+		{
+		}
+
+		public DrModelInstance(DrModel model)
+		{
+			Model = model;
+		}
+
 		public void ResetTransforms()
 		{
 			if (Model == null)
@@ -81,12 +90,7 @@ namespace DigitalRiseModel
 				return;
 			}
 
-			for (var i = 0; i < Model.Bones.Length; i++)
-			{
-				var bone = Model.Bones[i];
-				_localTransforms[bone.Index] = bone.CalculateDefaultLocalTransform();
-			}
-
+			Model.CopyBoneTransformsTo(_localTransforms);
 			_transformsDirty = true;
 		}
 
