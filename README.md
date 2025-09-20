@@ -7,11 +7,27 @@
 ### Overview
 DigitalRiseModel is MonoGame/FNA library that provides alternative API to XNA's 3D modelling.
 DigitalRiseModel has following features(that XNA lacks):
-* Construct 3d models in code
-* Load 3d models from GLTF/GLB in the run-time
+* Construct 3D models in code
+* Load 3D models from GLTF/GLB in the run-time
 * Skeletal animation
-* Create primitives(boxes, spheres, toruses, etc) in the run-time
+* Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
 
-It's important to note that DigitalRiseModel lacks functionality to render models. That responsibility of the developer. However [Samples] section demonstrates how it could be done. It implements very simple rendering engine that is based on XNA stock effects such as BasicEffect and SkinnedEffect.
+It's important to note that DigitalRiseModel lacks functionality to render models. That is the responsibility of the developer. 
 
+However [Samples](Samples) section demonstrates how it could be done. It implements simple rendering engine that is based on XNA stock effects such as BasicEffect and SkinnedEffect.
 
+### Adding Reference
+DigitalRiseModel consists of following assemblies:
+Name|MonoGame NuGet Link|Description
+----|-------------------|-----------
+DigitalRiseModel|https://www.nuget.org/packages/DigitalRiseModel.MonoGame|Base 3D modelling API and 3D primitives
+DigitalRiseModel.Gltf|https://www.nuget.org/packages/DigitalRiseModel.Gltf.MonoGame|Loading 3D models from GLTF/GLB
+
+### Samples
+Right now, [Samples](Samples) is the best way to learn how to work with the library.
+
+Name|Description
+----|-----------
+BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
+ModelViewer|Application to load and view 3D models in GLTF/GLB format. Skeletal animation is supported
+ThirdPerson|Application that demonstrates how simple third person controller could be done
