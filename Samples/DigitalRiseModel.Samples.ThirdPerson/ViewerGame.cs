@@ -145,22 +145,34 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 
 			_inputService.Update();
 
-			var movement = 0;
+			var forward = true;
+			var speed = 0;
 			if (_inputService.IsKeyDown(Keys.W))
 			{
-				movement = -1;
-			} else if (_inputService.IsKeyDown(Keys.S))
+				speed = -1;
+			}
+			else if (_inputService.IsKeyDown(Keys.S))
 			{
-				movement = 1;
+				speed = 1;
+			}
+			else if (_inputService.IsKeyDown(Keys.A))
+			{
+				speed = 1;
+				forward = false;
+			}
+			else if (_inputService.IsKeyDown(Keys.D))
+			{
+				speed = -1;
+				forward = false;
 			}
 
 			if (_inputService.IsKeyDown(Keys.LeftShift) || _inputService.IsKeyDown(Keys.RightShift))
 			{
-				movement *= 2;
+				speed *= 2;
 			}
 
 			// Set animation
-			switch(movement)
+			switch(speed)
 			{
 				case 0:
 					if (_player.AnimationClip.Name != "idle")
@@ -186,9 +198,22 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 					break;
 			}
 
-			// Perform the movement
-			var velocity = _modelNode.GlobalTransform.Forward * movement * MovementSpeed;
-			_modelNode.Translation += velocity;
+			if (speed != 0)
+			{
+				// Perform the movement
+				Vector3 velocity;
+
+				if (forward)
+				{
+					velocity = _modelNode.GlobalTransform.Forward * speed * MovementSpeed;
+				}
+				else
+				{
+					velocity = _modelNode.GlobalTransform.Right * speed * MovementSpeed;
+				}
+
+				_modelNode.Translation += velocity;
+			}
 
 
 			_fpsCounter.Update(gameTime);
