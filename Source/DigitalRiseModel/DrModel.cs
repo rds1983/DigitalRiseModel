@@ -8,11 +8,12 @@ namespace DigitalRiseModel
 	public partial class DrModel
 	{
 		public DrModelBone Root { get; }
+
 		public DrModelBone[] Bones { get; }
+
 		public DrModelBone[] MeshBones { get; }
 
 		public Dictionary<string, AnimationClip> Animations { get; set; }
-		public DrMaterial[] Materials { get; internal set; }
 
 		/// <summary>
 		/// Creates a new DrModel
