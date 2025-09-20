@@ -192,7 +192,14 @@ namespace DigitalRiseModel
 			_lineEffect.View = camera.View;
 			_lineEffect.Projection = proj;
 
-			BoundingFrustum = new BoundingFrustum(camera.View * proj);
+			if (BoundingFrustum == null)
+			{
+				BoundingFrustum = new BoundingFrustum(camera.View * proj);
+			}
+			else
+			{
+				BoundingFrustum.Matrix = camera.View * proj;
+			}
 
 			_statistics.Reset();
 			_lastEffect = null;

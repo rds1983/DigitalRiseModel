@@ -3,9 +3,8 @@ name: Build & Publish Beta
 on:
     push:
         paths:
-            - 'src/**'
-            - 'build/**'
-            - 'samples/**'
+            - 'Source/**'
+            - 'Samples/**'
     workflow_dispatch:
 
 jobs:
