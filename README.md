@@ -23,6 +23,8 @@ Name|Description
 [DigitalRiseModel](https://www.nuget.org/packages/DigitalRiseModel.MonoGame)|Base 3D modelling API and 3D primitives
 [DigitalRiseModel.Gltf](https://www.nuget.org/packages/DigitalRiseModel.Gltf.MonoGame)|Loading 3D models from GLTF/GLB
 
+See [this](https://github.com/DigitalRiseEngine/DigitalRiseModel/wiki/Adding-Reference-For-FNA-Project) on how to reference the library in the FNA project.
+
 ### Samples
 Right now, [Samples](Samples) is the best way to learn how to work with the library.
 
