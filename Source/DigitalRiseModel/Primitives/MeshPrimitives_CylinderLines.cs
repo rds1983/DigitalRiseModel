@@ -13,21 +13,21 @@ namespace DigitalRiseModel.Primitives
 	partial class MeshPrimitives
 	{
 		/// <summary>
-		/// Creates a new submesh that represents a cylinder using lines.
+		/// Creates a new meshpart that represents a cylinder using lines.
 		/// (The cylinder is centered at the origin. Radius = 1. Height = 2 (along the y axis).) 
 		/// </summary>
 		/// <param name="graphicsDevice"></param>
 		/// <param name="numberOfSegments">
 		/// The number of segments. This parameter controls the detail of the mesh.</param>
-		/// <returns>A new <see cref="DrSubmesh"/> that represents a cylinder line list.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a cylinder line list.</returns>
 		/// <remarks>
-		/// If the returned <see cref="DrSubmesh"/> is not going to be modified, then it is better
-		/// to call <see cref="GetCylinderLines"/> to retrieve a shared <see cref="DrSubmesh"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetCylinderLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.
 		/// </exception>
-		public static DrSubmesh CreateCylinderLinesSubmesh(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
+		public static DrMeshPart CreateCylinderLinesMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
 		{
 			if (numberOfSegments < 3)
 				throw new ArgumentOutOfRangeException("numberOfSegments", "numberOfSegments must be greater than 2");
@@ -79,7 +79,7 @@ namespace DigitalRiseModel.Primitives
 				indices.Add((ushort)(numberOfSegments + i * numberOfSegments / 4));
 			}
 
-			return new DrSubmesh(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
 		}
 	}
 }

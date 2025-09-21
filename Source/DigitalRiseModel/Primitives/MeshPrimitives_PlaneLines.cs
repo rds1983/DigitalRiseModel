@@ -7,7 +7,7 @@ namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{
-		public static DrSubmesh CreatePlaneLinesSubmesh(GraphicsDevice graphicsDevice, int size)
+		public static DrMeshPart CreatePlaneLinesMeshPart(GraphicsDevice graphicsDevice, int size)
 		{
 			var vertices = new List<VertexPosition>();
 			var indices = new List<ushort>();
@@ -49,7 +49,7 @@ namespace DigitalRiseModel.Primitives
 				++idx;
 			}
 
-			return new DrSubmesh(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
 		}
 	}
 }

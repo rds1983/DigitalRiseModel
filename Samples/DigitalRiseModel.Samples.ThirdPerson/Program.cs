@@ -1,4 +1,7 @@
-﻿namespace DigitalRiseModel.Samples.ThirdPerson
+﻿using AssetManagementBase;
+using System;
+
+namespace DigitalRiseModel.Samples.ThirdPerson
 {
 	class Program
 	{
@@ -12,6 +15,7 @@
 				}
 			}
 
+			AMBConfiguration.Logger = Console.WriteLine;
 			using (var game = new ViewerGame())
 			{
 				game.Run();

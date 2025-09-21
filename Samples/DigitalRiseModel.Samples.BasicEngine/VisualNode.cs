@@ -9,34 +9,34 @@ namespace DigitalRiseModel
 		public Texture2D Texture { get; set; }
 		public Color? Color { get; set; }
 
-		protected Texture2D GetTextureForSubmesh(DrSubmesh submesh, Texture2D defaultTexture)
+		protected Texture2D GetTextureForMeshPart(DrMeshPart meshpart, Texture2D defaultTexture)
 		{
 			if (Texture != null)
 			{
 				return Texture;
 			}
 
-			if (submesh.Material == null || submesh.Material.DiffuseTexture == null)
+			if (meshpart.Material == null || meshpart.Material.DiffuseTexture == null)
 			{
 				return defaultTexture;
 			}
 
-			return submesh.Material.DiffuseTexture;
+			return meshpart.Material.DiffuseTexture;
 		}
 
-		protected Color GetColorForSubmesh(DrSubmesh submesh)
+		protected Color GetColorForMeshPart(DrMeshPart meshpart)
 		{
 			if (Color != null)
 			{
 				return Color.Value;
 			}
 
-			if (submesh.Material == null)
+			if (meshpart.Material == null)
 			{
 				return Microsoft.Xna.Framework.Color.White;
 			}
 
-			return submesh.Material.DiffuseColor;
+			return meshpart.Material.DiffuseColor;
 		}
 	}
 }

@@ -424,7 +424,7 @@ namespace DigitalRiseModel
 					};
 
 					var box = BoundingBox.CreateFromPoints(positions);
-					var submesh = new DrSubmesh(vertexBuffer, indexBuffer, box)
+					var meshpart = new DrMeshPart(vertexBuffer, indexBuffer, box)
 					{
 						Material = material
 					};
@@ -464,7 +464,7 @@ namespace DigitalRiseModel
 						}
 					}
 
-					mesh.Submeshes.Add(submesh);
+					mesh.MeshParts.Add(meshpart);
 				}
 
 				_meshes.Add(mesh);

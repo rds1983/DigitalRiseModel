@@ -15,14 +15,14 @@ namespace DigitalRiseModel
 				return;
 			}
 
-			foreach (var submesh in Mesh.Submeshes)
+			foreach (var meshpart in Mesh.MeshParts)
 			{
-				var texture = GetTextureForSubmesh(submesh, context.WhiteTexture);
-				var color = GetColorForSubmesh(submesh);
+				var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);
+				var color = GetColorForMeshPart(meshpart);
 
 				var transform = GlobalTransform;
-				var boundingBox = submesh.BoundingBox.Transform(ref transform);
-				context.Render(submesh, boundingBox, EffectType.Basic, GlobalTransform, texture, color, null);
+				var boundingBox = meshpart.BoundingBox.Transform(ref transform);
+				context.Render(meshpart, boundingBox, EffectType.Basic, GlobalTransform, texture, color, null);
 			}
 		}
 	}

@@ -44,7 +44,7 @@ namespace DigitalRiseModel.Primitives
 			_uses32BitIndices = false;
 		}
 
-		public DrSubmesh CreateSubmesh(GraphicsDevice graphicsDevice, bool toLeftHanded)
+		public DrMeshPart CreateMeshPart(GraphicsDevice graphicsDevice, bool toLeftHanded)
 		{
 			if (toLeftHanded)
 			{
@@ -83,15 +83,15 @@ namespace DigitalRiseModel.Primitives
 			var vertexBuffer = Vertices.ToArray().CreateVertexBuffer(graphicsDevice);
 
 
-			return new DrSubmesh(vertexBuffer, indexBuffer, BoundingBox.CreateFromPoints(from v in Vertices select v.Position));
+			return new DrMeshPart(vertexBuffer, indexBuffer, BoundingBox.CreateFromPoints(from v in Vertices select v.Position));
 		}
 
 
 		public DrMesh CreateMesh(GraphicsDevice graphicsDevice, bool toLeftHanded)
 		{
-			var submesh = CreateSubmesh(graphicsDevice, toLeftHanded);
+			var meshpart = CreateMeshPart(graphicsDevice, toLeftHanded);
 
-			return new DrMesh(submesh);
+			return new DrMesh(meshpart);
 		}
 	}
 }

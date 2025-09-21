@@ -6,17 +6,17 @@ namespace DigitalRiseModel.Primitives
 	partial class MeshPrimitives
 	{
 		/// <summary>
-		/// Creates a new submesh that represents a box using lines.
+		/// Creates a new meshpart that represents a box using lines.
 		/// (The box is centered at the origin. The side length is 1.)
 		/// </summary>
 		/// <param name="graphicsDevice"></param>
 		/// <param name="box"></param>
-		/// <returns>A new <see cref="DrSubmesh"/> that represents a box line list.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a box line list.</returns>
 		/// <remarks>
-		/// If the returned <see cref="DrSubmesh"/> is not going to be modified, then it is better
-		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="DrSubmesh"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
-		public static DrSubmesh CreateBoxLinesSubmesh(GraphicsDevice graphicsDevice, BoundingBox box)
+		public static DrMeshPart CreateBoxLinesMeshPart(GraphicsDevice graphicsDevice, BoundingBox box)
 		{
 			var vertices = new[]
 			{
@@ -48,7 +48,7 @@ namespace DigitalRiseModel.Primitives
 				3, 7
 			};
 
-			return new DrSubmesh(graphicsDevice, vertices, indices, PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices, indices, PrimitiveType.LineList);
 		}
 	}
 }

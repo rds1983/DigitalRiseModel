@@ -178,11 +178,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A sphere primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
-		public static DrSubmesh CreateSphereSubmesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = CreateSphereMeshBuilder(radius, tessellation, uScale, vScale);
 
-			return builder.CreateSubmesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
 		/// <summary>

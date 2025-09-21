@@ -44,6 +44,8 @@ namespace DigitalRiseModel
 
 		public DrSkin Skin { get; set; }
 
+		public object Tag { get; set; }
+
 		public DrModelBone(string name)
 		{
 			Name = name;

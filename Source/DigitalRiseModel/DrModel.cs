@@ -1,13 +1,12 @@
 ﻿using DigitalRiseModel.Animation;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DigitalRiseModel
 {
-	public partial class DrModel
+	public class DrModel: DrDisposable
 	{
 		public DrModelBone Root { get; }
 
@@ -16,6 +15,8 @@ namespace DigitalRiseModel
 		public DrModelBone[] MeshBones { get; }
 
 		public Dictionary<string, AnimationClip> Animations { get; set; }
+
+		public object Tag { get; set; }
 
 		/// <summary>
 		/// Creates a new DrModel
@@ -44,6 +45,17 @@ namespace DigitalRiseModel
 
 			Bones = traverseOrder.ToArray();
 			MeshBones = (from bone in Bones where bone.Mesh != null select bone).ToArray();
+		}
+
+		public override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				foreach (var bone in MeshBones)
+				{
+					bone.Mesh.Dispose();
+				}
+			}
 		}
 
 		private void TraverseBones(DrModelBone root, Action<DrModelBone> action)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AssetManagementBase;
+using System;
 
 namespace DigitalRiseModel.Samples.ModelViewer
 {
@@ -14,6 +15,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 					return;
 				}
 
+				AMBConfiguration.Logger = Console.WriteLine;
 				using (var game = new ViewerGame(args[0]))
 				{
 					game.Run();

@@ -13,22 +13,22 @@ namespace DigitalRiseModel.Primitives
 	partial class MeshPrimitives
 	{
 		/// <summary>
-		/// Creates a new submesh that represents a spherical cap using lines.
-		/// (The sphere is centered at the origin. Radius = 1. The submesh contains only the 
+		/// Creates a new meshpart that represents a spherical cap using lines.
+		/// (The sphere is centered at the origin. Radius = 1. The meshpart contains only the 
 		/// top half (+y) of the sphere.) 
 		/// </summary>
 		/// <param name="graphicsDevice"></param>
 		/// <param name="numberOfSegments">
 		/// The number of segments. This parameter controls the detail of the mesh.</param>
-		/// <returns>A new <see cref="DrSubmesh"/> that represents a hemisphere line list.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a hemisphere line list.</returns>
 		/// <remarks>
-		/// If the returned <see cref="DrSubmesh"/> is not going to be modified, then it is better
-		/// to call <see cref="GetHemisphereLines"/> to retrieve a shared <see cref="DrSubmesh"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetHemisphereLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.
 		/// </exception>
-		public static DrSubmesh CreateHemisphereLinesSubmesh(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
+		public static DrMeshPart CreateHemisphereLinesMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
 		{
 			if (numberOfSegments < 3)
 				throw new ArgumentOutOfRangeException("numberOfSegments", "numberOfSegments must be greater than 2");
@@ -125,7 +125,7 @@ namespace DigitalRiseModel.Primitives
 			}
 			indices.Add((ushort)topVertexIndex);
 
-			return new DrSubmesh(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
 		}
 	}
 }

@@ -16,5 +16,7 @@ namespace DigitalRiseModel
 		public Texture2D NormalTexture { get; set; }
 
 		public Texture2D SpecularTexture { get; set; }
+		
+		public object Tag { get; set; }
 	}
 }

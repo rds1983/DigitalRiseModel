@@ -154,10 +154,10 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cube.</returns>
-		public static DrSubmesh CreateBoxSubmesh(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateBoxMeshPart(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = CreateBoxBuilder(size, uScale, vScale);
-			return builder.CreateSubmesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
 		/// <summary>

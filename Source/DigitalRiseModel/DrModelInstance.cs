@@ -74,6 +74,8 @@ namespace DigitalRiseModel
 			}
 		}
 
+		public object Tag { get; set; }
+
 		public DrModelInstance()
 		{
 		}

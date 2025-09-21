@@ -22,22 +22,22 @@ namespace DigitalRiseModel
 					continue;
 				}
 
-				foreach (var submesh in bone.Mesh.Submeshes)
+				foreach (var meshpart in bone.Mesh.MeshParts)
 				{
-					var texture = GetTextureForSubmesh(submesh, context.WhiteTexture);
-					var color = GetColorForSubmesh(submesh);
+					var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);
+					var color = GetColorForMeshPart(meshpart);
 
 					var boneTransform = ModelInstance.GetBoneGlobalTransform(bone.Index) * GlobalTransform;
-					var boundingBox = submesh.BoundingBox.Transform(ref boneTransform);
+					var boundingBox = meshpart.BoundingBox.Transform(ref boneTransform);
 
 					if (bone.Skin != null)
 					{
 						var skinTransforms = ModelInstance.GetSkinTransforms(bone.Skin.SkinIndex);
-						context.Render(submesh, boundingBox, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
+						context.Render(meshpart, boundingBox, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
 					}
 					else
 					{
-						context.Render(submesh, boundingBox, EffectType.Basic, boneTransform, texture, color, null);
+						context.Render(meshpart, boundingBox, EffectType.Basic, boneTransform, texture, color, null);
 					}
 				}
 			}

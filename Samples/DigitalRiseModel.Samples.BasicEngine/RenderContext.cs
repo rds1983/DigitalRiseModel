@@ -113,7 +113,7 @@ namespace DigitalRiseModel
 
 		public BoundingFrustum BoundingFrustum { get; private set; }
 		public bool DrawBoundingBoxes { get; set; } = false;
-		private DrSubmesh BoundingBoxMesh { get; }
+		private DrMeshPart BoundingBoxMesh { get; }
 
 		internal RenderContext(GraphicsDevice graphicsDevice)
 		{
@@ -143,7 +143,7 @@ namespace DigitalRiseModel
 				DiffuseColor = Color.GreenYellow.ToVector3()
 			};
 
-			BoundingBoxMesh = MeshPrimitives.CreateBoxLinesSubmesh(GraphicsDevice, new BoundingBox(Vector3.Zero, Vector3.One));
+			BoundingBoxMesh = MeshPrimitives.CreateBoxLinesMeshPart(GraphicsDevice, new BoundingBox(Vector3.Zero, Vector3.One));
 
 			DirectionalLight0 = new DirectionalLightWrapper(this);
 			DirectionalLight1 = new DirectionalLightWrapper(this);
@@ -205,7 +205,7 @@ namespace DigitalRiseModel
 			_lastEffect = null;
 		}
 
-		public void Render(DrSubmesh submesh, BoundingBox boundingBox, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
+		public void Render(DrMeshPart meshpart, BoundingBox boundingBox, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
 		{
 			if (DrawBoundingBoxes)
 			{
@@ -251,11 +251,11 @@ namespace DigitalRiseModel
 			{
 				pass.Apply();
 
-				submesh.Draw(GraphicsDevice);
+				meshpart.Draw(GraphicsDevice);
 
 				++_statistics.DrawCalls;
-				_statistics.VerticesDrawn += submesh.VertexCount;
-				_statistics.PrimitivesDrawn += submesh.PrimitiveCount;
+				_statistics.VerticesDrawn += meshpart.NumVertices;
+				_statistics.PrimitivesDrawn += meshpart.PrimitiveCount;
 			}
 
 			++_statistics.MeshesDrawn;

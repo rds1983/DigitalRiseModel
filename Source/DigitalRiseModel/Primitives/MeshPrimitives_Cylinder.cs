@@ -188,11 +188,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cylinder primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
-		public static DrSubmesh CreateCylinderSubmesh(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
+		public static DrMeshPart CreateCylinderMeshPart(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
 		{
 			var builder = CreateCylinderMeshBuilder(height, radius, tessellation, uScale, vScale, capped);
 
-			return builder.CreateSubmesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
 		/// <summary>
