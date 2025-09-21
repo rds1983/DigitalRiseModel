@@ -11,8 +11,8 @@
     <FNATargetFramework>net8.0</FNATargetFramework>
     <Version>0.5.1</Version>
     <MonoGameVersion>3.8.0.1641</MonoGameVersion>
-    <AppMonoGameVersion>3.8.1.303</AppMonoGameVersion>
-    <XNAssetsVersion>0.7.5</XNAssetsVersion>
+    <AppMonoGameVersion>3.8.4</AppMonoGameVersion>
+    <XNAssetsVersion>0.7.6</XNAssetsVersion>
     <MyraVersion>1.5.9</MyraVersion>
   </PropertyGroup>
 </Project>
