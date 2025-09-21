@@ -125,7 +125,7 @@ namespace DigitalRiseModel
 				graphicsDevice.Indices = IndexBuffer;
 
 #if MONOGAME
-				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, 0, NumVertices, StartIndex, PrimitiveCount);
+				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, StartIndex, PrimitiveCount);
 #else
 				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, 0, NumVertices, StartIndex, PrimitiveCount);
 #endif
