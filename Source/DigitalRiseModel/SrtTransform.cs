@@ -66,6 +66,14 @@ namespace DigitalRiseModel
 			Scale = scale;
 		}
 
+		public SrtTransform(Matrix m)
+		{
+			m.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+			Translation = translation;
+			Rotation = rotation;
+			Scale = scale;
+		}
+
 		public Matrix ToMatrix() => CreateMatrix(Translation, Scale, Rotation);
 
 		///<summary>	

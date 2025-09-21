@@ -78,7 +78,7 @@ namespace DigitalRiseModel
 			TraverseBones(Root, action);
 		}
 
-		public void CopyBoneTransformsTo(Matrix[] boneTransforms)
+		private void ValidateTransforms(Matrix[] boneTransforms)
 		{
 			if (boneTransforms == null)
 			{
@@ -89,11 +89,27 @@ namespace DigitalRiseModel
 			{
 				throw new ArgumentOutOfRangeException(nameof(boneTransforms));
 			}
+		}
+
+		public void CopyBoneTransformsTo(Matrix[] boneTransforms)
+		{
+			ValidateTransforms(boneTransforms);
 
 			for (var i = 0; i < Bones.Length; i++)
 			{
 				var bone = Bones[i];
 				boneTransforms[bone.Index] = bone.CalculateDefaultLocalTransform();
+			}
+		}
+
+		public void CopyBoneTransformsFrom(Matrix[] boneTransforms)
+		{
+			ValidateTransforms(boneTransforms);
+
+			for (var i = 0; i < Bones.Length; i++)
+			{
+				var bone = Bones[i];
+				bone.DefaultPose = new SrtTransform(boneTransforms[i]);
 			}
 		}
 
@@ -123,5 +139,12 @@ namespace DigitalRiseModel
 				}
 			}
 		}
+
+		/// <summary>
+		/// Returns null if bone could not be found
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public DrModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
 	}
 }
