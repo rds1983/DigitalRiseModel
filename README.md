@@ -55,4 +55,4 @@ Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
 * [FNA](https://github.com/FNA-XNA/FNA)
 * [DigitalRune](https://github.com/DigitalRune/DigitalRune)
 * [SharpDX](https://github.com/sharpdx/SharpDX)
-* 
+* [XNAnimationMG](https://github.com/infinitespace-studios/XNAnimationMG)
