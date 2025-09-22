@@ -5,6 +5,7 @@ namespace DigitalRiseModel
 	public class DrModelBone
 	{
 		private DrModelBone[] _children;
+		private DrMesh _mesh;
 
 		public string Name { get; }
 
@@ -40,7 +41,28 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrMesh Mesh { get; set; }
+		public DrMesh Mesh
+		{
+			get => _mesh;
+		
+			set
+			{
+				if (_mesh != null)
+				{
+					_mesh.Bone = null;
+				}
+
+				_mesh = value;
+				Model?.InvalidateMeshes();
+
+				if (_mesh != null)
+				{
+					_mesh.Bone = this;
+				}
+			}
+		}
+
+		public DrModel Model { get; internal set; }
 
 		public DrSkin Skin { get; set; }
 
