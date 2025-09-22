@@ -64,6 +64,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 					var f = Path.GetFileName(file);
 
 					var assetManager = AssetManager.CreateFileAssetManager(folder);
+
 					var model = assetManager.LoadGltf(GraphicsDevice, f);
 					ModelInstance.Model = model;
 

@@ -500,8 +500,6 @@ namespace DigitalRiseModel
 			{
 				var gltfNode = _gltf.Nodes[i];
 
-				var bone = new DrModelBone(gltfNode.Name);
-
 				var pose = new SrtTransform
 				{
 					Translation = gltfNode.Translation != null ? gltfNode.Translation.ToVector3() : Vector3.Zero,
@@ -523,13 +521,14 @@ namespace DigitalRiseModel
 					}
 				}
 
-				bone.DefaultPose = pose;
-
+				DrMesh mesh = null;
 				if (gltfNode.Mesh != null)
 				{
-					bone.Mesh = _meshes[gltfNode.Mesh.Value];
+					mesh = _meshes[gltfNode.Mesh.Value];
 				}
 
+				var bone = new DrModelBone(gltfNode.Name, mesh);
+				bone.DefaultPose = pose;
 				_allBones.Add(bone);
 			}
 

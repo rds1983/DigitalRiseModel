@@ -8,31 +8,11 @@ namespace DigitalRiseModel
 {
 	public class DrModel: DrDisposable
 	{
-		private bool _meshesDirty = true;
-		private DrMesh[] _meshes;
-
 		public DrModelBone Root { get; }
 
 		public DrModelBone[] Bones { get; }
 
-		public DrMesh[] Meshes
-		{
-			get
-			{
-				if (_meshesDirty)
-				{
-					var meshes = (from bone in Bones where bone.Mesh != null select bone.Mesh).ToArray();
-					if (meshes.Length > 0)
-					{
-						_meshes = meshes;
-					}
-
-					_meshesDirty = false;
-				}
-
-				return _meshes;
-			}
-		}
+		public DrMesh[] Meshes { get; }
 
 		public Dictionary<string, AnimationClip> Animations { get; set; }
 
@@ -59,12 +39,12 @@ namespace DigitalRiseModel
 			TraverseBones(bone =>
 			{
 				bone.Index = boneIndex;
-				bone.Model = this;
 				traverseOrder.Add(bone);
 				++boneIndex;
 			});
 
 			Bones = traverseOrder.ToArray();
+			Meshes = (from b in Bones where b.Mesh != null select b.Mesh).ToArray();
 		}
 
 		public override void Dispose(bool disposing)
@@ -169,10 +149,5 @@ namespace DigitalRiseModel
 		/// <param name="name"></param>
 		/// <returns></returns>
 		public DrModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
-
-		internal void InvalidateMeshes()
-		{
-			_meshesDirty = true;
-		}
 	}
 }

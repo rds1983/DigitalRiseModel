@@ -5,7 +5,6 @@ namespace DigitalRiseModel
 	public class DrModelBone
 	{
 		private DrModelBone[] _children;
-		private DrMesh _mesh;
 
 		public string Name { get; }
 
@@ -41,36 +40,20 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrMesh Mesh
-		{
-			get => _mesh;
-		
-			set
-			{
-				if (_mesh != null)
-				{
-					_mesh.Bone = null;
-				}
-
-				_mesh = value;
-				Model?.InvalidateMeshes();
-
-				if (_mesh != null)
-				{
-					_mesh.Bone = this;
-				}
-			}
-		}
-
-		public DrModel Model { get; internal set; }
+		public DrMesh Mesh { get; }
 
 		public DrSkin Skin { get; set; }
 
 		public object Tag { get; set; }
 
-		public DrModelBone(string name)
+		public DrModelBone(string name, DrMesh mesh = null)
 		{
 			Name = name;
+			if (mesh != null)
+			{
+				Mesh = mesh;
+				Mesh.Bone = this;
+			}
 		}
 
 		public Matrix CalculateDefaultLocalTransform() => DefaultPose.ToMatrix();
