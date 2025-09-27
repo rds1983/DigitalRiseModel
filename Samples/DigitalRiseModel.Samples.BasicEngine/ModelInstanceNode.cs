@@ -17,7 +17,7 @@ namespace DigitalRiseModel
 
 			foreach (var mesh in ModelInstance.Model.Meshes)
 			{
-				var bone = mesh.Bone;
+				var bone = mesh.ParentBone;
 				foreach (var meshpart in bone.Mesh.MeshParts)
 				{
 					var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);

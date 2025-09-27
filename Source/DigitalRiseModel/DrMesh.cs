@@ -10,7 +10,7 @@ namespace DigitalRiseModel
 		private BoundingBox? _boundingBox;
 
 		public string Name { get; set; }
-		public DrModelBone Bone { get; internal set; }
+		public DrModelBone ParentBone { get; internal set; }
 
 		public BoundingBox BoundingBox
 		{

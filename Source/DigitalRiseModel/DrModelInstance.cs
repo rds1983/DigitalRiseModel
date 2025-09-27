@@ -142,7 +142,7 @@ namespace DigitalRiseModel
 			var boundingBox = new BoundingBox();
 			foreach (var mesh in _model.Meshes)
 			{
-				var bone = mesh.Bone;
+				var bone = mesh.ParentBone;
 				var m = bone.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
 				var bb = bone.Mesh.BoundingBox.Transform(ref m);
 				boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);

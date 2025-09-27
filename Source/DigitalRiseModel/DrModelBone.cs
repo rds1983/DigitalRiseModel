@@ -52,7 +52,7 @@ namespace DigitalRiseModel
 			if (mesh != null)
 			{
 				Mesh = mesh;
-				Mesh.Bone = this;
+				Mesh.ParentBone = this;
 			}
 		}
 
