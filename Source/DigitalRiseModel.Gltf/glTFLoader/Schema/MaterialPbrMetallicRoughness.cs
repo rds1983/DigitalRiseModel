@@ -107,12 +107,6 @@ namespace glTFLoader.Schema {
                 return this.m_metallicFactor;
             }
             set {
-                if ((value < 0D)) {
-                    throw new System.ArgumentOutOfRangeException("MetallicFactor", value, "Expected value to be greater than or equal to 0");
-                }
-                if ((value > 1D)) {
-                    throw new System.ArgumentOutOfRangeException("MetallicFactor", value, "Expected value to be less than or equal to 1");
-                }
                 this.m_metallicFactor = value;
             }
         }
@@ -126,12 +120,6 @@ namespace glTFLoader.Schema {
                 return this.m_roughnessFactor;
             }
             set {
-                if ((value < 0D)) {
-                    throw new System.ArgumentOutOfRangeException("RoughnessFactor", value, "Expected value to be greater than or equal to 0");
-                }
-                if ((value > 1D)) {
-                    throw new System.ArgumentOutOfRangeException("RoughnessFactor", value, "Expected value to be less than or equal to 1");
-                }
                 this.m_roughnessFactor = value;
             }
         }

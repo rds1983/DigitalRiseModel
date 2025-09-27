@@ -14,7 +14,7 @@ namespace DigitalRiseModel
 		public int PrimitiveCount { get; }
 
 		public VertexBuffer VertexBuffer { get; }
-		public int StartVertex { get; }
+		public int VertexOffset { get; }
 		public int NumVertices { get; }
 
 		public IndexBuffer IndexBuffer { get; }
@@ -28,7 +28,7 @@ namespace DigitalRiseModel
 
 		public object Tag { get; set; }
 
-		public DrMeshPart(VertexBuffer vertexBuffer, IndexBuffer indexBuffer, BoundingBox boundingBox, PrimitiveType primitiveType = PrimitiveType.TriangleList, int? numVertices = null, int? primitiveCount = null, int startVertex = 0, int startIndex = 0)
+		public DrMeshPart(VertexBuffer vertexBuffer, IndexBuffer indexBuffer, BoundingBox boundingBox, PrimitiveType primitiveType = PrimitiveType.TriangleList, int? numVertices = null, int? primitiveCount = null, int vertexOffset = 0, int startIndex = 0)
 		{
 			if (indexBuffer == null && primitiveCount == null)
 			{
@@ -39,7 +39,7 @@ namespace DigitalRiseModel
 			PrimitiveCount = primitiveCount ?? primitiveType.GetPrimitiveCount(indexBuffer.IndexCount - startIndex);
 
 			VertexBuffer = vertexBuffer;
-			StartVertex = startVertex;
+			VertexOffset = vertexOffset;
 			NumVertices = numVertices ?? VertexBuffer.VertexCount;
 
 			IndexBuffer = indexBuffer;
@@ -118,14 +118,14 @@ namespace DigitalRiseModel
 			graphicsDevice.SetVertexBuffer(VertexBuffer);
 			if (IndexBuffer == null)
 			{
-				graphicsDevice.DrawPrimitives(PrimitiveType, StartVertex, PrimitiveCount);
+				graphicsDevice.DrawPrimitives(PrimitiveType, VertexOffset, PrimitiveCount);
 			}
 			else
 			{
 				graphicsDevice.Indices = IndexBuffer;
 
 #if MONOGAME
-				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, StartIndex, PrimitiveCount);
+				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, StartIndex, PrimitiveCount);
 #else
 				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, 0, NumVertices, StartIndex, PrimitiveCount);
 #endif
