@@ -65,15 +65,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 
 					var assetManager = AssetManager.CreateFileAssetManager(folder);
 
-					DrModel model;
-					if (f.EndsWith("jdrm") || f.EndsWith("drm"))
-					{
-						model = assetManager.LoadDrm(GraphicsDevice, f);
-					}
-					else
-					{
-						model = assetManager.LoadGltf(GraphicsDevice, f);
-					}
+					var model = assetManager.LoadGltf(GraphicsDevice, f);
 					ModelInstance.Model = model;
 
 					_mainPanel._comboAnimations.Widgets.Clear();
