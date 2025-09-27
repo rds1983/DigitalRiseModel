@@ -1,25 +1,20 @@
 ﻿using DigitalRiseModel.Storage.Binary;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
 	internal class IndexBufferContent
 	{
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int BufferId { get; set; }
 
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public IndexElementSize IndexType { get; set; }
 
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int IndexCount { get; set; }
 
-		[Browsable(false)]
 		[JsonIgnore]
 		public byte[] Data { get; set; }
 

@@ -23,26 +23,13 @@ namespace DigitalRiseModel.Converter
 
 		private ModelContent _model;
 		private readonly List<uint> _indices = new List<uint>();
-		private readonly List<SubmeshContent> _submeshes = new List<SubmeshContent>();
+		private readonly List<MeshPartContent> _meshParts = new List<MeshPartContent>();
+		private readonly Dictionary<int, BoneContent> _meshPartsToBones = new Dictionary<int, BoneContent>();
 		private readonly List<BoneContent> _bones = new List<BoneContent>();
 		private readonly Dictionary<string, byte> _bonesIndices = new Dictionary<string, byte>();
-		private readonly List<DrMaterial> _materials = new List<DrMaterial>();
+		private readonly List<MaterialContent> _materials = new List<MaterialContent>();
 
 		static void Log(string message) => Console.WriteLine(message);
-
-		private void BuildBonesIndices(Node root, ref byte index)
-		{
-			_bonesIndices[root.Name] = index;
-			++index;
-
-			if (root.HasChildren)
-			{
-				for (var i = 0; i < root.ChildCount; ++i)
-				{
-					BuildBonesIndices(root.Children[i], ref index);
-				}
-			}
-		}
 
 		private byte GetBoneIndex(string name)
 		{
@@ -60,8 +47,7 @@ namespace DigitalRiseModel.Converter
 			for (var i = 0; i < _model.VertexBuffers.Count; ++i)
 			{
 				var vertexBuffer = _model.VertexBuffers[i];
-				if (vertexBuffer.Elements.Count != vertexElements.Count ||
-					vertexBuffer.VertexStride != vertexElements.CalculateStride())
+				if (vertexBuffer.Elements.Count != vertexElements.Count || vertexBuffer.VertexStride != vertexElements.CalculateStride())
 				{
 					continue;
 				}
@@ -305,7 +291,7 @@ namespace DigitalRiseModel.Converter
 
 				_indices.AddRange(indices);
 
-				var submesh = new SubmeshContent
+				var submesh = new MeshPartContent
 				{
 					VertexBufferIndex = vertexBufferIndex,
 					StartVertex = startVertex,
@@ -316,46 +302,81 @@ namespace DigitalRiseModel.Converter
 					BoundingBox = Microsoft.Xna.Framework.BoundingBox.CreateFromPoints((from v in mesh.Vertices select v.ToXna()).ToArray())
 				};
 
-				_submeshes.Add(submesh);
+				_meshParts.Add(submesh);
 			}
 
 			_model.IndexBuffer = new IndexBufferContent(_indices);
 		}
 
-		BoneContent Convert(Node node)
+		private class IndexedQueue<T>
 		{
-			var transform = node.Transform.ToXna();
-			Vector3 scale, translation;
-			Quaternion rotation;
+			private readonly Queue<T> _data = new Queue<T>();
+			private int _lastIndex = 0;
 
-			transform.Decompose(out scale, out rotation, out translation);
+			public int Count => _data.Count;
 
-			var result = new BoneContent
+			public int Enqueue(T item)
 			{
-				Name = node.Name,
-				Scale = scale,
-				Rotation = rotation,
-				Translation = translation
-			};
+				var result = _lastIndex;
+				_data.Enqueue(item);
 
-			_bones.Add(result);
+				++_lastIndex;
 
-			if (node.HasMeshes)
-			{
-				result.Mesh = new MeshContent();
-
-				foreach (var meshIndex in node.MeshIndices)
-				{
-					result.Mesh.Submeshes.Add(_submeshes[meshIndex]);
-				}
+				return result;
 			}
 
-			if (node.Children != null)
+			public T Dequeue() => _data.Dequeue();
+		}
+
+		List<BoneContent> ProcessNodes(Node rootNode)
+		{
+			var queue = new IndexedQueue<Node>();
+			queue.Enqueue(rootNode);
+
+			var result = new List<BoneContent>();
+			while (queue.Count > 0)
 			{
-				foreach (var child in node.Children)
+				var node = queue.Dequeue();
+
+				var transform = node.Transform.ToXna();
+				Vector3 scale, translation;
+				Quaternion rotation;
+
+				transform.Decompose(out scale, out rotation, out translation);
+
+				var bone = new BoneContent
 				{
-					result.Children.Add(Convert(child));
+					Name = node.Name,
+					Scale = scale,
+					Rotation = rotation,
+					Translation = translation
+				};
+
+				_bones.Add(bone);
+
+				if (node.HasMeshes)
+				{
+					bone.Mesh = new MeshContent();
+
+					foreach (var meshIndex in node.MeshIndices)
+					{
+						bone.Mesh.MeshParts.Add(_meshParts[meshIndex]);
+						_meshPartsToBones[meshIndex] = bone;
+					}
 				}
+
+				if (node.Children != null)
+				{
+					bone.Children = new List<int>();
+					foreach (var child in node.Children)
+					{
+						var index = queue.Enqueue(child);
+						bone.Children.Add(index);
+					}
+				}
+
+				_bonesIndices[bone.Name] = (byte)result.Count;
+				result.Add(bone);
 			}
 
 			return result;
@@ -367,7 +388,7 @@ namespace DigitalRiseModel.Converter
 			{
 				var sourceMaterial = scene.Materials[i];
 
-				var material = new DrMaterial();
+				var material = new MaterialContent();
 
 				/*				if (material.HasBlendMode)
 								{
@@ -504,7 +525,7 @@ namespace DigitalRiseModel.Converter
 
 			if (_materials.Count > 0)
 			{
-				_model.Materials = _materials.ToArray();
+				_model.Materials = _materials;
 			}
 		}
 
@@ -533,12 +554,18 @@ namespace DigitalRiseModel.Converter
 					skinContent.Data.Add(skinJointContent);
 				}
 
-				_submeshes[i].Skin = skinContent;
+				var boneContent = _meshPartsToBones[i];
+				boneContent.Skin = skinContent;
 			}
 		}
 
 		private void ProcessAnimations(Scene scene)
 		{
+			if (scene.Animations.Count > 0)
+			{
+				_model.Animations = new Dictionary<string, AnimationClipContent>();
+			}
+
 			foreach (var animation in scene.Animations)
 			{
 				if (animation.HasMeshAnimations)
@@ -550,6 +577,7 @@ namespace DigitalRiseModel.Converter
 				{
 					Name = animation.Name
 				};
+
 				foreach (var sourceChannel in animation.NodeAnimationChannels)
 				{
 					var boneIndex = GetBoneIndex(sourceChannel.NodeName);
@@ -603,7 +631,7 @@ namespace DigitalRiseModel.Converter
 			_bones.Clear();
 			_bonesIndices.Clear();
 			_indices.Clear();
-			_submeshes.Clear();
+			_meshParts.Clear();
 			_materials.Clear();
 
 			using (AssimpContext importer = new AssimpContext())
@@ -630,12 +658,8 @@ namespace DigitalRiseModel.Converter
 
 				var scene = importer.ImportFile(options.InputFile, steps);
 
-				byte index = 0;
-				BuildBonesIndices(scene.RootNode, ref index);
 				ProcessMeshes(scene);
-
-				_model.RootBone = Convert(scene.RootNode);
-
+				_model.Bones = ProcessNodes(scene.RootNode);
 				ProcessMaterials(scene);
 				ProcessSkins(scene);
 				ProcessAnimations(scene);

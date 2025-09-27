@@ -5,7 +5,6 @@ using glTFLoader;
 using glTFLoader.Schema;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,6 +55,7 @@ namespace DigitalRiseModel
 		private readonly List<DrMesh> _meshes = new List<DrMesh>();
 		private readonly List<DrModelBone> _allBones = new List<DrModelBone>();
 		private readonly List<DrSkin> _skins = new List<DrSkin>();
+		private int _lastSkinIndex = 0;
 
 		private byte[] FileResolver(string path)
 		{
@@ -487,8 +487,10 @@ namespace DigitalRiseModel
 				joints.Add(new DrSkinJoint(_allBones[jointIndex], transforms[i]));
 			}
 
-			var result = new DrSkin(joints.ToArray());
+			var result = new DrSkin(_lastSkinIndex, joints.ToArray());
 			Debug.WriteLine($"Skin {gltfSkin.Name} has {gltfSkin.Joints.Length} joints");
+
+			++_lastSkinIndex;
 
 			return result;
 		}
@@ -527,8 +529,10 @@ namespace DigitalRiseModel
 					mesh = _meshes[gltfNode.Mesh.Value];
 				}
 
-				var bone = new DrModelBone(gltfNode.Name, mesh);
-				bone.DefaultPose = pose;
+				var bone = new DrModelBone(gltfNode.Name, mesh)
+				{
+					DefaultPose = pose
+				};
 				_allBones.Add(bone);
 			}
 

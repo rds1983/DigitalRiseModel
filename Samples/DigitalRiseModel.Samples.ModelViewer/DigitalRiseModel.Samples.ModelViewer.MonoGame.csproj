@@ -11,6 +11,7 @@
     <PackageReference Include="Myra" Version="$(MyraVersion)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\DigitalRiseModel.Drm\DigitalRiseModel.Drm.MonoGame.csproj" />
     <ProjectReference Include="..\..\Source\DigitalRiseModel.Gltf\DigitalRiseModel.Gltf.MonoGame.csproj" />
     <ProjectReference Include="..\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj" />
   </ItemGroup>

@@ -14,10 +14,11 @@ namespace DigitalRiseModel.Storage
 
 		public IndexBufferContent IndexBuffer { get; set; }
 
-		public BoneContent RootBone { get; set; }
+		public List<BoneContent> Bones { get; set; } = new List<BoneContent>();
+		public int RootBoneIndex { get; set; }
 
-		public Dictionary<string, AnimationClipContent> Animations { get; set; } = new Dictionary<string, AnimationClipContent>();
-		public DrMaterial[] Materials { get; set; }
+		public Dictionary<string, AnimationClipContent> Animations { get; set; }
+		public List<MaterialContent> Materials { get; set; }
 
 		private void SaveBinaryData(WriteContext context)
 		{
@@ -33,34 +34,26 @@ namespace DigitalRiseModel.Storage
 				IndexBuffer.SaveBinaryData(context);
 			}
 
-			// Bones
-			if (RootBone != null)
+			// Skins
+			foreach (var bone in Bones)
 			{
-				RootBone.RecursiveProcess(bone =>
+				if (bone.Skin == null)
 				{
-					if (bone.Mesh == null)
-					{
-						return;
-					}
+					continue;
+				}
 
-					foreach (var submesh in bone.Mesh.Submeshes)
-					{
-						if (submesh.Skin == null)
-						{
-							continue;
-						}
-
-						submesh.Skin.SaveBinaryData(context);
-					}
-				});
+				bone.Skin.SaveBinaryData(context);
 			}
 
 			// Animations
-			foreach (var pair in Animations)
+			if (Animations != null)
 			{
-				foreach (var channel in pair.Value.Channels)
+				foreach (var pair in Animations)
 				{
-					channel.SaveBinaryData(context);
+					foreach (var channel in pair.Value.Channels)
+					{
+						channel.SaveBinaryData(context);
+					}
 				}
 			}
 		}
@@ -150,33 +143,25 @@ namespace DigitalRiseModel.Storage
 			}
 
 			// Bones
-			if (RootBone != null)
+			foreach (var bone in Bones)
 			{
-				RootBone.RecursiveProcess(bone =>
+				if (bone.Skin == null)
 				{
-					if (bone.Mesh == null)
-					{
-						return;
-					}
+					continue;
+				}
 
-					foreach (var submesh in bone.Mesh.Submeshes)
-					{
-						if (submesh.Skin == null)
-						{
-							continue;
-						}
-
-						submesh.Skin.LoadBinaryData(context);
-					}
-				});
+				bone.Skin.LoadBinaryData(context);
 			}
 
 			// Animations
-			foreach (var pair in Animations)
+			if (Animations != null)
 			{
-				foreach (var channel in pair.Value.Channels)
+				foreach (var pair in Animations)
 				{
-					channel.LoadBinaryData(context);
+					foreach (var channel in pair.Value.Channels)
+					{
+						channel.LoadBinaryData(context);
+					}
 				}
 			}
 		}

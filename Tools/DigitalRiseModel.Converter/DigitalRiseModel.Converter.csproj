@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>$(AppMonoGameTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <PackAsTool>true</PackAsTool>
     <PackageId>drmodconv</PackageId>
@@ -13,15 +14,15 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="$(AppMonoGameVersion)" />
     <PackageReference Include="SharpAssimp" Version="6.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\Source\Storage\**\*.cs" LinkBase="Storage" />
+    <Compile Include="..\..\Source\DigitalRiseModel.Drm\Storage\**\*.cs" LinkBase="Storage" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\Source\DrMaterial.cs" Link="DrMaterial.cs" />
-    <Compile Include="..\..\Source\Utility.cs" Link="Utility.cs" />
+    <Compile Include="..\..\Source\DigitalRiseModel.Drm\Utility.cs" Link="Utility.cs" />
   </ItemGroup>
 
 </Project>

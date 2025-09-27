@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(MonoGameTargetFramework)</TargetFramework>
-    <AssemblyName>DigitalRiseModel.Gltf</AssemblyName>
-	<RootNamespace>DigitalRiseModel</RootNamespace>
-    <PackageId>DigitalRiseModel.Gltf.MonoGame</PackageId>
+    <AssemblyName>DigitalRiseModel.Drm</AssemblyName>
+    <RootNamespace>DigitalRiseModel</RootNamespace>
+    <PackageId>DigitalRiseModel.Drm.MonoGame</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" PrivateAssets="All" Version="$(MonoGameVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="XNAssets.MonoGame" Version="$(XNAssetsVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
   </ItemGroup>
 
   <ItemGroup>

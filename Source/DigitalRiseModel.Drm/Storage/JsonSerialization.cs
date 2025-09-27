@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Globalization;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 using System;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace DigitalRiseModel.Storage
 {
@@ -32,9 +32,9 @@ namespace DigitalRiseModel.Storage
 			{
 			}
 
-			public override Point Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+			public override Point ReadJson(JsonReader reader, Type objectType, Point existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
-				string s = reader.GetString();
+				string s = reader.Value.ToString();
 
 				var p = s.Split(',');
 				var result = new Point(ParseInt(p[0]), ParseInt(p[1]));
@@ -42,10 +42,10 @@ namespace DigitalRiseModel.Storage
 				return result;
 			}
 
-			public override void Write(Utf8JsonWriter writer, Point value, JsonSerializerOptions options)
+			public override void WriteJson(JsonWriter writer, Point value, JsonSerializer serializer)
 			{
 				var str = string.Format(CultureInfo.InvariantCulture, "{0}, {1}", value.X, value.Y);
-				writer.WriteStringValue(str);
+				writer.WriteValue(str);
 			}
 		}
 
@@ -57,9 +57,9 @@ namespace DigitalRiseModel.Storage
 			{
 			}
 
-			public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+			public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
-				var s = reader.GetString();
+				var s = reader.Value.ToString();
 
 				var p = s.Split(',');
 				var result = new Color(ParseByte(p[0]), ParseByte(p[1]), ParseByte(p[2]), ParseByte(p[3]));
@@ -67,10 +67,10 @@ namespace DigitalRiseModel.Storage
 				return result;
 			}
 
-			public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
+			public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
 			{
 				var str = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}, {3}", (int)value.R, (int)value.G, (int)value.B, (int)value.A);
-				writer.WriteStringValue(str);
+				writer.WriteValue(str);
 			}
 		}
 
@@ -83,9 +83,9 @@ namespace DigitalRiseModel.Storage
 
 			}
 
-			public override Quaternion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+			public override Quaternion ReadJson(JsonReader reader, Type objectType, Quaternion existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
-				var s = reader.GetString();
+				var s = reader.Value.ToString();
 
 				var p = s.Split(',');
 				var result = new Quaternion(ParseFloat(p[0]), ParseFloat(p[1]), ParseFloat(p[2]), ParseFloat(p[3]));
@@ -93,10 +93,10 @@ namespace DigitalRiseModel.Storage
 				return result;
 			}
 
-			public override void Write(Utf8JsonWriter writer, Quaternion value, JsonSerializerOptions options)
+			public override void WriteJson(JsonWriter writer, Quaternion value, JsonSerializer options)
 			{
 				var str = string.Format(CultureInfo.InvariantCulture, "{0}, {1}, {2}, {3}", value.X, value.Y, value.Z, value.W);
-				writer.WriteStringValue(str);
+				writer.WriteValue(str);
 			}
 		}
 
@@ -108,9 +108,9 @@ namespace DigitalRiseModel.Storage
 			{
 			}
 
-			public override Matrix Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+			public override Matrix ReadJson(JsonReader reader, Type objectType, Matrix existingValue, bool hasExistingValue, JsonSerializer serializer)
 			{
-				var s = reader.GetString();
+				var s = reader.Value.ToString();
 
 				var p = s.Split(',');
 
@@ -123,7 +123,7 @@ namespace DigitalRiseModel.Storage
 				return result;
 			}
 
-			public override void Write(Utf8JsonWriter writer, Matrix value, JsonSerializerOptions options)
+			public override void WriteJson(JsonWriter writer, Matrix value, JsonSerializer serializer)
 			{
 				var str = string.Format(CultureInfo.InvariantCulture,
 					"{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}",
@@ -131,20 +131,19 @@ namespace DigitalRiseModel.Storage
 				value.M21, value.M22, value.M23, value.M24,
 				value.M31, value.M32, value.M33, value.M34,
 					value.M41, value.M42, value.M43, value.M44);
-				writer.WriteStringValue(str);
+				writer.WriteValue(str);
 			}
 		}
 
-		public static JsonSerializerOptions CreateOptions(bool indented = true)
+		public static JsonSerializerSettings CreateOptions(bool indented = true)
 		{
-			var result = new JsonSerializerOptions
+			var result = new JsonSerializerSettings
 			{
-				WriteIndented = indented,
-				IncludeFields = true,
-				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+				Formatting = Formatting.Indented,
+				DefaultValueHandling = DefaultValueHandling.Ignore
 			};
 
-			result.Converters.Add(new JsonStringEnumConverter());
+			result.Converters.Add(new StringEnumConverter());
 			result.Converters.Add(PointConverter.Instance);
 			result.Converters.Add(ColorConverter.Instance);
 			result.Converters.Add(QuaternionConverter.Instance);
@@ -156,7 +155,7 @@ namespace DigitalRiseModel.Storage
 		public static string SerializeToString<T>(T data, bool indented = true)
 		{
 			var options = CreateOptions(indented);
-			return JsonSerializer.Serialize(data, options);
+			return JsonConvert.SerializeObject(data, options);
 		}
 
 		public static void SerializeToFile<T>(string path, T data)
@@ -168,7 +167,7 @@ namespace DigitalRiseModel.Storage
 		public static T DeserializeFromString<T>(string data)
 		{
 			var options = CreateOptions();
-			return JsonSerializer.Deserialize<T>(data, options);
+			return JsonConvert.DeserializeObject<T>(data, options);
 		}
 	}
 }

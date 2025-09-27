@@ -1,12 +1,11 @@
 ﻿using DigitalRiseModel.Storage.Binary;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
@@ -16,10 +15,8 @@ namespace DigitalRiseModel.Storage
 		private byte[] _data;
 		private readonly MemoryStream _stream = new MemoryStream();
 
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int BufferId { get; set; }
 
-		[Browsable(false)]
 		[JsonIgnore]
 		public int VertexStride
 		{
@@ -30,17 +27,14 @@ namespace DigitalRiseModel.Storage
 			}
 		}
 
-		[Browsable(false)]
 		[JsonIgnore]
 		public int MemorySizeInBytes => (int)_stream.Length;
 
-		[Browsable(false)]
 		[JsonIgnore]
 		public int MemoryVertexCount => MemorySizeInBytes / VertexStride;
 
 		public int VertexCount { get; set; }
 
-		[Browsable(false)]
 		[JsonIgnore]
 		public byte[] Data
 		{
@@ -87,9 +81,9 @@ namespace DigitalRiseModel.Storage
 			_vertexStride = Elements.CalculateStride();
 		}
 
-		public void Write(ReadOnlySpan<byte> data)
+		public void Write(byte[] data)
 		{
-			_stream.Write(data);
+			_stream.Write(data, 0, data.Length);
 			_data = null;
 		}
 

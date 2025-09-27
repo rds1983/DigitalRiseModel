@@ -8,7 +8,7 @@ using System.IO;
 
 namespace DigitalRiseModel
 {
-	partial class DrModel
+	internal static class DrmLoader
 	{
 		private struct SrtTransformOptional
 		{
@@ -22,6 +22,7 @@ namespace DigitalRiseModel
 			public GraphicsDevice Device { get; }
 			public List<VertexBuffer> VertexBuffers { get; } = new List<VertexBuffer>();
 			public IndexBuffer IndexBuffer;
+			public DrModelBone[] Bones { get; set; }
 			public DrMaterial[] Materials;
 			public int SkinIndex = 0;
 
@@ -31,11 +32,11 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private static void LoadBuffers(LoadContext context, ModelContent content)
+		private static void LoadBuffers(LoadContext context, ModelContent modelContent)
 		{
-			for (var i = 0; i < content.VertexBuffers.Count; ++i)
+			for (var i = 0; i < modelContent.VertexBuffers.Count; ++i)
 			{
-				var vertexBufferContent = content.VertexBuffers[i];
+				var vertexBufferContent = modelContent.VertexBuffers[i];
 				var vertexElements = new List<VertexElement>();
 
 				var offset = 0;
@@ -55,110 +56,136 @@ namespace DigitalRiseModel
 				context.VertexBuffers.Add(vertexBuffer);
 			}
 
-			if (content.IndexBuffer != null)
+			if (modelContent.IndexBuffer != null)
 			{
-				context.IndexBuffer = new IndexBuffer(context.Device, content.IndexBuffer.IndexType, content.IndexBuffer.IndexCount, BufferUsage.None);
-				context.IndexBuffer.SetData(content.IndexBuffer.Data);
+				context.IndexBuffer = new IndexBuffer(context.Device, modelContent.IndexBuffer.IndexType, modelContent.IndexBuffer.IndexCount, BufferUsage.None);
+				context.IndexBuffer.SetData(modelContent.IndexBuffer.Data);
 			}
 		}
 
-		private static void LoadMaterials(LoadContext context, ModelContent content,
-			Func<GraphicsDevice, string, Texture2D> textureLoader)
+		private static void LoadMaterials(LoadContext context, ModelContent modelContent, Func<GraphicsDevice, string, Texture2D> textureLoader)
 		{
-			if (content.Materials == null || textureLoader == null)
+			if (modelContent.Materials == null || textureLoader == null)
 			{
 				return;
 			}
 
-			context.Materials = content.Materials;
-			foreach (var material in context.Materials)
+			var materials = new List<DrMaterial>();
+			foreach (var materialContent in modelContent.Materials)
 			{
-				if (!string.IsNullOrEmpty(material.DiffuseTexturePath))
+				var material = new DrMaterial
 				{
-					material.DiffuseTexture = textureLoader(context.Device, material.DiffuseTexturePath);
+					Name = materialContent.Name,
+					DiffuseColor = materialContent.DiffuseColor,
+					SpecularColor = materialContent.SpecularColor,
+					SpecularFactor = materialContent.SpecularFactor,
+					SpecularPower = materialContent.SpecularPower
+				};
+
+				if (!string.IsNullOrEmpty(materialContent.DiffuseTexturePath))
+				{
+					material.DiffuseTexture = textureLoader(context.Device, materialContent.DiffuseTexturePath);
 				}
 
-				if (!string.IsNullOrEmpty(material.NormalTexturePath))
+				if (!string.IsNullOrEmpty(materialContent.NormalTexturePath))
 				{
-					material.NormalTexture = textureLoader(context.Device, material.NormalTexturePath);
+					material.NormalTexture = textureLoader(context.Device, materialContent.NormalTexturePath);
 				}
 
-				if (!string.IsNullOrEmpty(material.SpecularTexturePath))
+				if (!string.IsNullOrEmpty(materialContent.SpecularTexturePath))
 				{
-					material.SpecularTexture = textureLoader(context.Device, material.SpecularTexturePath);
+					material.SpecularTexture = textureLoader(context.Device, materialContent.SpecularTexturePath);
 				}
+
+				materials.Add(material);
 			}
+
+			context.Materials = materials.ToArray();
 		}
 
-		private static DrModelBone LoadBone(LoadContext context, BoneContent bone)
+		private static void LoadBones(LoadContext context, ModelContent modelContent)
 		{
-			var result = new DrModelBone(bone.Name)
+			// First run: load all bones
+			var bones = new List<DrModelBone>();
+			for (var i = 0; i < modelContent.Bones.Count; ++i)
 			{
-				DefaultPose = new SrtTransform(bone.Translation, bone.Rotation, bone.Scale)
-			};
-
-			if (bone.Mesh != null)
-			{
-				result.Mesh = new DrMesh();
-
-				foreach (var submeshContent in bone.Mesh.Submeshes)
+				var boneContent = modelContent.Bones[i];
+				DrModelBone bone;
+				if (boneContent.Mesh != null)
 				{
-					var submesh = new DrSubmesh(context.VertexBuffers[submeshContent.VertexBufferIndex], context.IndexBuffer, submeshContent.BoundingBox,
-						submeshContent.PrimitiveType, submeshContent.VertexCount, submeshContent.PrimitiveCount)
+					var mesh = new DrMesh();
+					foreach (var meshPartContent in boneContent.Mesh.MeshParts)
 					{
-						StartVertex = submeshContent.StartVertex,
-						StartIndex = submeshContent.StartIndex
-					};
+						var part = new DrMeshPart(context.VertexBuffers[meshPartContent.VertexBufferIndex], context.IndexBuffer, meshPartContent.BoundingBox,
+							 meshPartContent.PrimitiveType, meshPartContent.VertexCount, meshPartContent.PrimitiveCount, meshPartContent.StartVertex, meshPartContent.StartIndex);
 
-					if (context.Materials != null)
-					{
-						submesh.Material = context.Materials[submeshContent.MaterialIndex];
-					}
-
-					if (submeshContent.Skin != null)
-					{
-						var joints = new List<SkinJoint>();
-						foreach (var skinJointContent in submeshContent.Skin.Data)
+						if (context.Materials != null)
 						{
-							joints.Add(new SkinJoint(skinJointContent.BoneIndex, skinJointContent.InverseBindTransform));
+							part.Material = context.Materials[meshPartContent.MaterialIndex];
 						}
 
-						submesh.Skin = new Skin(joints.ToArray())
+						if (boneContent.Skin != null)
 						{
-							SkinIndex = context.SkinIndex
-						};
+						}
 
-						++context.SkinIndex;
+						mesh.MeshParts.Add(part);
 					}
 
-					result.Mesh.Submeshes.Add(submesh);
+					bone = new DrModelBone(boneContent.Name, mesh);
 				}
-			}
-
-			if (bone.Children != null)
-			{
-				var bones = new List<DrModelBone>();
-				foreach (var child in bone.Children)
+				else
 				{
-					bones.Add(LoadBone(context, child));
+					bone = new DrModelBone(boneContent.Name);
 				}
 
-				result.Children = bones.ToArray();
+				bone.DefaultPose = new SrtTransform(boneContent.Translation, boneContent.Rotation, boneContent.Scale);
+
+				bones.Add(bone);
 			}
 
-			return result;
+			context.Bones = bones.ToArray();
+
+			// Second run: set children and skins
+			for (var i = 0; i < modelContent.Bones.Count; ++i)
+			{
+				var bone = context.Bones[i];
+				var boneContent = modelContent.Bones[i];
+
+				if (boneContent.Children != null)
+				{
+					var children = new List<DrModelBone>();
+					foreach (var child in boneContent.Children)
+					{
+						children.Add(context.Bones[child]);
+					}
+
+					bone.Children = children.ToArray();
+				}
+
+				if (boneContent.Skin != null)
+				{
+					var joints = new List<DrSkinJoint>();
+					foreach (var skinJointContent in boneContent.Skin.Data)
+					{
+						joints.Add(new DrSkinJoint(context.Bones[skinJointContent.BoneIndex], skinJointContent.InverseBindTransform));
+					}
+
+					bone.Skin = new DrSkin(context.SkinIndex, joints.ToArray());
+
+					++context.SkinIndex;
+				}
+			}
 		}
 
-
-		private static void LoadAnimations(ModelContent content, DrModel model)
+		private static Dictionary<string, AnimationClip> LoadAnimations(LoadContext context, ModelContent modelContent)
 		{
-			if (content.Animations == null)
+			if (modelContent.Animations == null)
 			{
-				return;
+				return null;
 			}
 
-			model.Animations = new Dictionary<string, AnimationClip>();
-			foreach (var animationContent in content.Animations)
+			var animations = new Dictionary<string, AnimationClip>();
+			foreach (var animationContent in modelContent.Animations)
 			{
 				var channels = new List<AnimationChannel>();
 				double time = 0;
@@ -166,7 +193,7 @@ namespace DigitalRiseModel
 				{
 					var animationData = new SortedDictionary<double, SrtTransformOptional>();
 
-					var bone = model.Bones[channelContent.BoneIndex];
+					var bone = context.Bones[channelContent.BoneIndex];
 
 					// First run: gather times and transforms
 					if (channelContent.Translations != null)
@@ -250,25 +277,23 @@ namespace DigitalRiseModel
 
 				var animation = new AnimationClip(animationContent.Key, TimeSpan.FromMilliseconds(time), channels.ToArray());
 				var id = animation.Name ?? "(default)";
-				model.Animations[id] = animation;
+				animations[id] = animation;
 			}
+
+			return animations;
 		}
 
-		private static DrModel Load(GraphicsDevice device, ModelContent content, Func<GraphicsDevice, string, Texture2D> textureLoader)
+		private static DrModel Load(GraphicsDevice device, ModelContent modelContent, Func<GraphicsDevice, string, Texture2D> textureLoader)
 		{
 			var context = new LoadContext(device);
 
-			LoadBuffers(context, content);
-			LoadMaterials(context, content, textureLoader);
+			LoadBuffers(context, modelContent);
+			LoadMaterials(context, modelContent, textureLoader);
+			LoadBones(context, modelContent);
 
-			var rootBoneDesc = LoadBone(context, content.RootBone);
+			var result = new DrModel(context.Bones[modelContent.RootBoneIndex]);
 
-			var result = new DrModel(rootBoneDesc)
-			{
-				Materials = content.Materials
-			};
-
-			LoadAnimations(content, result);
+			result.Animations = LoadAnimations(context, modelContent);
 
 			return result;
 		}

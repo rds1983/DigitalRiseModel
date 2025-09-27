@@ -61,7 +61,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private void TraverseBones(DrModelBone root, Action<DrModelBone> action)
+		private static void TraverseBones(DrModelBone root, Action<DrModelBone> action)
 		{
 			action(root);
 

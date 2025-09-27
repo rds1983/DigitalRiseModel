@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage.Binary
 {
 	internal abstract class SerializableCollection<T>
 	{
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public int BufferId { get; set; }
 
 		[Browsable(false)]

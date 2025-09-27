@@ -1,14 +1,11 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System.Text.Json.Serialization;
 
 namespace DigitalRiseModel.Storage
 {
 	internal struct VertexElementContent
 	{
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public VertexElementUsage Usage { get; set; }
 
-		[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 		public VertexElementFormat Format { get; set; }
 
 		public int UsageIndex { get; set; }

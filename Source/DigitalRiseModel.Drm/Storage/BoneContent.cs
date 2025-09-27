@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 
 namespace DigitalRiseModel.Storage
@@ -11,16 +10,8 @@ namespace DigitalRiseModel.Storage
 		public Vector3 Scale = Vector3.One;
 		public Quaternion Rotation = Quaternion.Identity;
 		public Vector3 Translation = Vector3.Zero;
-		public List<BoneContent> Children { get; set; } = new List<BoneContent>();
+		public SkinContent Skin { get; set; }
 
-		internal void RecursiveProcess(Action<BoneContent> processor)
-		{
-			processor(this);
-
-			foreach (var child in Children)
-			{
-				child.RecursiveProcess(processor);
-			}
-		}
+		public List<int> Children { get; set; }
 	}
 }
