@@ -6,6 +6,7 @@ using glTFLoader.Schema;
 using glTFLoader;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using System.Text.Json;
 
 namespace BatchConverter
 {
@@ -48,13 +49,16 @@ namespace BatchConverter
 
 			var totalVertices = 0;
 			byte[] buffer;
+
+			var materialInfo = new Dictionary<string, Dictionary<int, Dictionary<string, string>>>();
 			using (var ms = new MemoryStream())
 			{
 				foreach (var mesh in sourceMeshes)
 				{
 					var primitives = new List<MeshPrimitive>();
-					foreach (var part in mesh.MeshParts)
+					for(var partIndex = 0; partIndex < mesh.MeshParts.Count; ++partIndex)
 					{
+						var part = mesh.MeshParts[partIndex];
 						var primitive = new MeshPrimitive
 						{
 							Attributes = new Dictionary<string, int>()
@@ -172,6 +176,34 @@ namespace BatchConverter
 
 						primitive.Indices = ms.WriteData(bufferViews, accessors, indicesShort.ToArray());
 
+						if (part.Effect != null)
+						{
+							foreach (var par in part.Effect.Parameters)
+							{
+								if (par.ParameterType == EffectParameterType.Texture2D)
+								{
+									// Material
+									var val = par.GetValueTexture2D();
+
+									Dictionary<int, Dictionary<string, string>> meshMaterials;
+									if (!materialInfo.TryGetValue(mesh.Name, out meshMaterials))
+									{
+										meshMaterials = new Dictionary<int, Dictionary<string, string>>();
+										materialInfo[mesh.Name] = meshMaterials;
+									}
+
+									Dictionary<string, string> partMaterials;
+									if (!meshMaterials.TryGetValue(partIndex, out partMaterials))
+									{
+										partMaterials = new Dictionary<string, string>();
+										meshMaterials[partIndex] = partMaterials;
+									}
+
+									partMaterials[par.Name] = val.Name;
+								}
+							}
+						}
+
 						primitives.Add(primitive);
 					}
 
@@ -271,6 +303,12 @@ namespace BatchConverter
 			var output = Path.ChangeExtension(outputFile, "glb");
 			Logger.LogMessage($"Writing {output}");
 			Interface.SaveBinaryModel(gltf, buffer, output);
+
+			output = Path.ChangeExtension(outputFile, "material");
+			Logger.LogMessage($"Writing {output}");
+
+			var json = JsonSerializer.Serialize(materialInfo, new JsonSerializerOptions { WriteIndented = true });
+			File.WriteAllText(output, json);
 		}
 	}
 }

@@ -127,7 +127,7 @@ namespace DigitalRiseModel
 #if MONOGAME
 				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, StartIndex, PrimitiveCount);
 #else
-				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, StartVertex, 0, NumVertices, StartIndex, PrimitiveCount);
+				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, 0, NumVertices, StartIndex, PrimitiveCount);
 #endif
 			}
 		}
