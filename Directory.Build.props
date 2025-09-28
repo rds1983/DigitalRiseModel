@@ -12,7 +12,7 @@
     <Version>0.5.3</Version>
     <MonoGameVersion>3.8.0.1641</MonoGameVersion>
     <AppMonoGameVersion>3.8.4</AppMonoGameVersion>
-    <XNAssetsVersion>0.7.6</XNAssetsVersion>
+    <XNAssetsVersion>0.7.7</XNAssetsVersion>
     <NewtonsoftJsonVersion>13.0.4</NewtonsoftJsonVersion>
     <MyraVersion>1.5.9</MyraVersion>
   </PropertyGroup>
