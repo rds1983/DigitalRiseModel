@@ -263,60 +263,6 @@ namespace DigitalRiseModel.Primitives
 			new Vector3(-0.375f, -0.31125f, -0.21f),
 		};
 
-		/// <summary>
-		/// Creates a teapot primitive.
-		/// </summary>
-		/// <param name="graphicsDevice"></param>
-		/// <param name="size">The size.</param>
-		/// <param name="tessellation">The tessellation.</param>
-		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
-		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
-		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
-		/// <returns>GeometricPrimitive.</returns>
-		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be > 0</exception>
-		public static DrMesh CreateTeapotMesh(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
-		{
-			if (tessellation < 1)
-			{
-				throw new ArgumentOutOfRangeException(nameof(tessellation), "tessellation must be > 0");
-			}
-
-			var scaleVector = new Vector3(size, size, size);
-			var scaleNegateX = scaleVector;
-			scaleNegateX.X = -scaleNegateX.X;
-			var scaleNegateZ = scaleVector;
-			scaleNegateZ.Z = -scaleNegateZ.Z;
-			var scaleNegateXZ = new Vector3(-size, size, -size);
-
-			var builder = new MeshBuilder();
-			for (int i = 0; i < TeapotPatches.Length; i++)
-			{
-				var patch = TeapotPatches[i];
-
-				// Because the teapot is symmetrical from left to right, we only store
-				// data for one side, then tessellate each patch twice, mirroring in X.
-				TessellatePatch(builder, ref patch, tessellation, scaleVector, false);
-				TessellatePatch(builder, ref patch, tessellation, scaleNegateX, true);
-
-				if (patch.MirrorZ)
-				{
-					// Some parts of the teapot (the body, lid, and rim, but not the
-					// handle or spout) are also symmetrical from front to back, so
-					// we tessellate them four times, mirroring in Z as well as X.
-					TessellatePatch(builder, ref patch, tessellation, scaleNegateZ, true);
-					TessellatePatch(builder, ref patch, tessellation, scaleNegateXZ, false);
-				}
-			}
-
-			var texCoord = new Vector2(uScale, vScale);
-			for (var i = 0; i < builder.Vertices.Count; i++)
-			{
-				builder.Vertices[i] = new VertexPositionNormalTexture(builder.Vertices[i].Position, builder.Vertices[i].Normal, builder.Vertices[i].TextureCoordinate * texCoord);
-			}
-
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
-		}
-
 		// Performs a cubic bezier interpolation between four control points,
 		// returning the value at the specified time (t ranges 0 to 1).
 		// This template implementation can be used to interpolate Vector3,
@@ -466,6 +412,78 @@ namespace DigitalRiseModel.Primitives
 			int vbase = builder.Vertices.Count;
 			builder.AddIndicesRange(CreatePatchIndices(tessellation, isMirrored, vbase));
 			CreatePatchVertices(controlPoints, tessellation, isMirrored, builder.Vertices);
+		}
+
+		/// <summary>
+		/// Creates a teapot primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="size">The size.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>GeometricPrimitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be > 0</exception>
+		public static DrMeshPart CreateTeapotMeshPart(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		{
+			if (tessellation < 1)
+			{
+				throw new ArgumentOutOfRangeException(nameof(tessellation), "tessellation must be > 0");
+			}
+
+			var scaleVector = new Vector3(size, size, size);
+			var scaleNegateX = scaleVector;
+			scaleNegateX.X = -scaleNegateX.X;
+			var scaleNegateZ = scaleVector;
+			scaleNegateZ.Z = -scaleNegateZ.Z;
+			var scaleNegateXZ = new Vector3(-size, size, -size);
+
+			var builder = new MeshBuilder();
+			for (int i = 0; i < TeapotPatches.Length; i++)
+			{
+				var patch = TeapotPatches[i];
+
+				// Because the teapot is symmetrical from left to right, we only store
+				// data for one side, then tessellate each patch twice, mirroring in X.
+				TessellatePatch(builder, ref patch, tessellation, scaleVector, false);
+				TessellatePatch(builder, ref patch, tessellation, scaleNegateX, true);
+
+				if (patch.MirrorZ)
+				{
+					// Some parts of the teapot (the body, lid, and rim, but not the
+					// handle or spout) are also symmetrical from front to back, so
+					// we tessellate them four times, mirroring in Z as well as X.
+					TessellatePatch(builder, ref patch, tessellation, scaleNegateZ, true);
+					TessellatePatch(builder, ref patch, tessellation, scaleNegateXZ, false);
+				}
+			}
+
+			var texCoord = new Vector2(uScale, vScale);
+			for (var i = 0; i < builder.Vertices.Count; i++)
+			{
+				builder.Vertices[i] = new VertexPositionNormalTexture(builder.Vertices[i].Position, builder.Vertices[i].Normal, builder.Vertices[i].TextureCoordinate * texCoord);
+			}
+
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
+		}
+
+		/// <summary>
+		/// Creates a teapot primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="size">The size.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>GeometricPrimitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be > 0</exception>
+		public static DrMesh CreateTeapotMesh(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		{
+			var part = CreateTeapotMeshPart(graphicsDevice, size, tessellation, uScale, vScale, toLeftHanded);
+
+			return new DrMesh(part);
 		}
 	}
 }

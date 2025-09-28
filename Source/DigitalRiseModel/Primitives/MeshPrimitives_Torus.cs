@@ -93,7 +93,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A Torus primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation parameter out of range</exception>
-		public static DrMesh CreateTorusMesh(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateTorusMeshPart(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				throw new ArgumentOutOfRangeException("tessellation", "tessellation parameter out of range");
@@ -147,7 +147,25 @@ namespace DigitalRiseModel.Primitives
 			}
 
 			// Create the primitive object.
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
+		}
+
+		/// <summary>
+		/// Creates a torus primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="majorRadius">The major radius of the torus.</param>
+		/// <param name="minorRadius">The minor radius of the torus.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A Torus primitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation parameter out of range</exception>
+		public static DrMesh CreateTorusMesh(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		{
+			var part = CreateTorusMeshPart(graphicsDevice, majorRadius, minorRadius, tessellation, uScale, vScale, toLeftHanded);
+			return new DrMesh(part);
 		}
 	}
 }

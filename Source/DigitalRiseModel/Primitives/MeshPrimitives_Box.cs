@@ -100,7 +100,16 @@ namespace DigitalRiseModel.Primitives
 			new Vector2(0, 0),
 		};
 
-		private static MeshBuilder CreateBoxBuilder(Vector3 size, float uScale, float vScale)
+		/// <summary>
+		/// Creates a cube with six faces each one pointing in a different direction.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="size">The size.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A cube.</returns>
+		public static DrMeshPart CreateBoxMeshPart(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = new MeshBuilder();
 
@@ -142,21 +151,6 @@ namespace DigitalRiseModel.Primitives
 				builder.AddVertex(new VertexPositionNormalTexture((normal + side1 - side2) * size, normal, texCoords[3]));
 			}
 
-			return builder;
-		}
-
-		/// <summary>
-		/// Creates a cube with six faces each one pointing in a different direction.
-		/// </summary>
-		/// <param name="graphicsDevice"></param>
-		/// <param name="size">The size.</param>
-		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
-		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
-		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
-		/// <returns>A cube.</returns>
-		public static DrMeshPart CreateBoxMeshPart(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
-		{
-			var builder = CreateBoxBuilder(size, uScale, vScale);
 			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
@@ -171,8 +165,8 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A cube.</returns>
 		public static DrMesh CreateBoxMesh(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
-			var builder = CreateBoxBuilder(size, uScale, vScale);
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			var part = CreateBoxMeshPart(graphicsDevice, size, uScale, vScale, toLeftHanded);
+			return new DrMesh(part);
 		}
 	}
 }

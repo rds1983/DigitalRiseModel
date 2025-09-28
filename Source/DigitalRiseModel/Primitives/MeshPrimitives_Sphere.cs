@@ -81,7 +81,18 @@ namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{
-		private static MeshBuilder CreateSphereMeshBuilder(float radius, int tessellation, float uScale, float vScale)
+		/// <summary>
+		/// Creates a sphere primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="radius">The radius.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">The u scale.</param>
+		/// <param name="vScale">The v scale.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A sphere primitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
+		public static DrMeshPart CreateSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				throw new ArgumentOutOfRangeException("tessellation", "tessellation parameter out of range");
@@ -164,24 +175,6 @@ namespace DigitalRiseModel.Primitives
 			}
 
 			// Create the primitive object.
-			return builder;
-		}
-
-		/// <summary>
-		/// Creates a sphere primitive.
-		/// </summary>
-		/// <param name="graphicsDevice"></param>
-		/// <param name="radius">The radius.</param>
-		/// <param name="tessellation">The tessellation.</param>
-		/// <param name="uScale">The u scale.</param>
-		/// <param name="vScale">The v scale.</param>
-		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
-		/// <returns>A sphere primitive.</returns>
-		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
-		public static DrMeshPart CreateSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
-		{
-			var builder = CreateSphereMeshBuilder(radius, tessellation, uScale, vScale);
-
 			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
@@ -198,9 +191,8 @@ namespace DigitalRiseModel.Primitives
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
 		public static DrMesh CreateSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
-			var builder = CreateSphereMeshBuilder(radius, tessellation, uScale, vScale);
-
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			var part = CreateSphereMeshPart(graphicsDevice, radius, tessellation, uScale, vScale);
+			return new DrMesh(part);
 		}
 	}
 }

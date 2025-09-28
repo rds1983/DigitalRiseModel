@@ -93,7 +93,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A sphere primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
-		public static DrMesh CreateCapsuleMesh(GraphicsDevice graphicsDevice, float length = 1.0f, float radius = 0.5f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateCapsuleMeshPart(GraphicsDevice graphicsDevice, float length = 1.0f, float radius = 0.5f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				throw new ArgumentOutOfRangeException("tessellation", "tessellation parameter out of range");
@@ -165,7 +165,26 @@ namespace DigitalRiseModel.Primitives
 			}
 
 			// Create the primitive object.
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
+		}
+
+		/// <summary>
+		/// Creates a sphere primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="length">The length of the capsule. That is the distance between the two sphere centers.</param>
+		/// <param name="radius">The radius of the capsule.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A sphere primitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
+		public static DrMesh CreateCapsuleMesh(GraphicsDevice graphicsDevice, float length = 1.0f, float radius = 0.5f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		{
+			var part = CreateCapsuleMeshPart(graphicsDevice, length, radius, tessellation, uScale, vScale, toLeftHanded);
+
+			return new DrMesh(part);
 		}
 	}
 }

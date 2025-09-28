@@ -55,7 +55,7 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A Plane primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationX;tessellation must be > 0</exception>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationY;tessellation must be > 0</exception>
-		public static DrMesh CreatePlaneMesh(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
+		public static DrMeshPart CreatePlaneMeshPart(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
 		{
 			if (tessellationX < 1)
 			{
@@ -157,7 +157,30 @@ namespace DigitalRiseModel.Primitives
 			}
 
 			// Create the primitive object.
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
+		}
+
+		/// <summary>
+		/// Creates a Plane primitive on the X/Y plane with a normal equal to -<see cref="Vector3.UnitZ"/>.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="sizeX">The size X.</param>
+		/// <param name="sizeY">The size Y.</param>
+		/// <param name="tessellationX">The tessellation, as the number of quads per X axis.</param>
+		/// <param name="tessellationY">The tessellation, as the number of quads per Y axis.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="generateBackFace">Add a back face to the plane</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <param name="normalDirection">The direction of the plane normal</param>
+		/// <returns>A Plane primitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellationX;tessellation must be > 0</exception>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellationY;tessellation must be > 0</exception>
+		public static DrMesh CreatePlaneMesh(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
+		{
+			var part = CreatePlaneMeshPart(graphicsDevice, sizeX, sizeY, tessellationX, tessellationY, uScale, vScale, generateBackFace, toLeftHanded, normalDirection);
+
+			return new DrMesh(part);
 		}
 	}
 }

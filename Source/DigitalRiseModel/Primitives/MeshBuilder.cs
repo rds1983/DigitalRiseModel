@@ -85,13 +85,5 @@ namespace DigitalRiseModel.Primitives
 
 			return new DrMeshPart(vertexBuffer, indexBuffer, BoundingBox.CreateFromPoints(from v in Vertices select v.Position));
 		}
-
-
-		public DrMesh CreateMesh(GraphicsDevice graphicsDevice, bool toLeftHanded)
-		{
-			var meshpart = CreateMeshPart(graphicsDevice, toLeftHanded);
-
-			return new DrMesh(meshpart);
-		}
 	}
 }

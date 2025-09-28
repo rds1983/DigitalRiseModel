@@ -179,7 +179,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <param name="uScale"></param>
 		/// <returns>A Geodesic sphere.</returns>
-		public static unsafe DrMesh CreateGeoSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static unsafe DrMeshPart CreateGeoSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = new GeoSphereBuilder();
 
@@ -364,7 +364,7 @@ namespace DigitalRiseModel.Primitives
 				builder.IndicesPtr = (int*)0;
 			}
 
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
 		private static unsafe void FixPole(GeoSphereBuilder builder, int poleIndex)
@@ -444,6 +444,23 @@ namespace DigitalRiseModel.Primitives
 				// Now add it to the map.
 				builder.SubdividedEdges[edge] = outIndex;
 			}
+		}
+
+		/// <summary>
+		/// Creates a Geodesic sphere.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="radius">The radius.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="vScale"></param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <param name="uScale"></param>
+		/// <returns>A Geodesic sphere.</returns>
+		public static DrMesh CreateGeoSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		{
+			var part = CreateGeoSphereMeshPart(graphicsDevice, radius, tessellation, uScale, vScale, toLeftHanded);
+
+			return new DrMesh(part);
 		}
 	}
 }

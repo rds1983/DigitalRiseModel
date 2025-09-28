@@ -133,7 +133,20 @@ namespace DigitalRiseModel.Primitives
 			}
 		}
 
-		private static MeshBuilder CreateCylinderMeshBuilder(float height, float radius, int tessellation, float uScale, float vScale, bool capped)
+		/// <summary>
+		/// Creates a cylinder primitive.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="height">The height.</param>
+		/// <param name="radius">The radius.</param>
+		/// <param name="tessellation">The tessellation.</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="capped"></param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A cylinder primitive.</returns>
+		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
+		public static DrMeshPart CreateCylinderMeshPart(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
 		{
 			if (tessellation < 3) tessellation = 3;
 
@@ -172,26 +185,6 @@ namespace DigitalRiseModel.Primitives
 			}
 
 			// Create the primitive object.
-			return builder;
-		}
-
-		/// <summary>
-		/// Creates a cylinder primitive.
-		/// </summary>
-		/// <param name="graphicsDevice"></param>
-		/// <param name="height">The height.</param>
-		/// <param name="radius">The radius.</param>
-		/// <param name="tessellation">The tessellation.</param>
-		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
-		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
-		/// <param name="capped"></param>
-		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
-		/// <returns>A cylinder primitive.</returns>
-		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
-		public static DrMeshPart CreateCylinderMeshPart(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
-		{
-			var builder = CreateCylinderMeshBuilder(height, radius, tessellation, uScale, vScale, capped);
-
 			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
@@ -210,9 +203,8 @@ namespace DigitalRiseModel.Primitives
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
 		public static DrMesh CreateCylinderMesh(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
 		{
-			var builder = CreateCylinderMeshBuilder(height, radius, tessellation, uScale, vScale, capped);
-
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			var part = CreateCylinderMeshPart(graphicsDevice, height, radius, tessellation, uScale, vScale, capped, toLeftHanded);
+			return new DrMesh(part);
 		}
 	}
 }

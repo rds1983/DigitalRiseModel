@@ -9,7 +9,18 @@ namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{
-		private static MeshBuilder CreateConeMeshBuilder(float radius, float height, int tessellation, float uScale, float vScale)
+		/// <summary>
+		/// Creates a cone a circular base and a rolled face.
+		/// </summary>
+		/// <param name="graphicsDevice"></param>
+		/// <param name="radius">The radius or the base</param>
+		/// <param name="height">The height of the cone</param>
+		/// <param name="tessellation">The number of segments composing the base</param>
+		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
+		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
+		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
+		/// <returns>A cone.</returns>
+		public static DrMeshPart CreateConeMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				tessellation = 3;
@@ -95,24 +106,6 @@ namespace DigitalRiseModel.Primitives
 				}
 			}
 
-			return builder;
-		}
-
-		/// <summary>
-		/// Creates a cone a circular base and a rolled face.
-		/// </summary>
-		/// <param name="graphicsDevice"></param>
-		/// <param name="radius">The radius or the base</param>
-		/// <param name="height">The height of the cone</param>
-		/// <param name="tessellation">The number of segments composing the base</param>
-		/// <param name="uScale">Scale U coordinates between 0 and the values of this parameter.</param>
-		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
-		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
-		/// <returns>A cone.</returns>
-		public static DrMeshPart CreateConeMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
-		{
-			var builder = CreateConeMeshBuilder(radius, height, tessellation, uScale, vScale);
-
 			return builder.CreateMeshPart(graphicsDevice, toLeftHanded);
 		}
 
@@ -130,9 +123,9 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A cone.</returns>
 		public static DrMesh CreateConeMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
-			var builder = CreateConeMeshBuilder(radius, height, tessellation, uScale, vScale);
+			var part = CreateConeMeshPart(graphicsDevice, radius, height, tessellation, uScale, vScale, toLeftHanded);
 
-			return builder.CreateMesh(graphicsDevice, toLeftHanded);
+			return new DrMesh(part);
 		}
 	}
 }
