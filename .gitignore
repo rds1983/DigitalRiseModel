@@ -51,6 +51,6 @@ _ReSharper*/
 Samples/Assets/FNA/
 Samples/Assets/MonoGameDX11/
 Samples/Assets/MonoGameOGL/
-Source/DigitalRise.Graphics/Effects/FNA/
-Source/DigitalRise.Graphics/Effects/MonoGameDX11/
-Source/DigitalRise.Graphics/Effects/MonoGameOGL/
+Source/Nursia.Graphics/Effects/FNA/
+Source/Nursia.Graphics/Effects/MonoGameDX11/
+Source/Nursia.Graphics/Effects/MonoGameOGL/

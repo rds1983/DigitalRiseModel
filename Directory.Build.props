@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
-    <Authors>DigitalRiseModelTeam</Authors>
-    <Product>DigitalRiseModel</Product>
+    <Authors>NursiaModelTeam</Authors>
+    <Product>NursiaModel</Product>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/DigitalRiseEngine/DigitalRiseModel</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/NursiaEngine/NursiaModel</PackageProjectUrl>
     <Description>MonoGame/FNA library that provides simple 3D model class</Description>
-    <RootNamespace>DigitalRiseModel</RootNamespace>
+    <RootNamespace>NursiaModel</RootNamespace>
     <MonoGameTargetFramework>netstandard2.0</MonoGameTargetFramework>
     <AppMonoGameTargetFramework>net8.0</AppMonoGameTargetFramework>
     <FNATargetFramework>net8.0</FNATargetFramework>
