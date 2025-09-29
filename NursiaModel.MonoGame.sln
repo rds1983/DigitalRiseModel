@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.Samples.BasicEn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.Samples.ThirdPerson.MonoGame", "Samples\NursiaModel.Samples.ThirdPerson\NursiaModel.Samples.ThirdPerson.MonoGame.csproj", "{DB0A213A-DAB3-FEFF-EF06-E17FB08D6987}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.MonoGame", "Source\NursiaModel\NursiaModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.MonoGame", "Source\NursiaModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{D3447DFD-A975-4EAC-BCB6-EB5E9454351C}"
 EndProject

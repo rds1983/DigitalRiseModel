@@ -8,7 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.FNA.Core.csproj" />
-    <ProjectReference Include="..\..\Source\NursiaModel.Gltf\NursiaModel.Gltf.FNA.Core.csproj" />
     <ProjectReference Include="..\NursiaModel.Samples.BasicEngine\NursiaModel.Samples.BasicEngine.FNA.Core.csproj" />
   </ItemGroup>
 </Project>

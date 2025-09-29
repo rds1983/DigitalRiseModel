@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NursiaModel
 {
-	public static class NursiaModelGltfAssetsExt
+	public static class NursiaModelAssetsExt
 	{
 		private readonly static AssetLoader<NrmModel> _gltfLoader = (manager, assetName, settings, tag) =>
 		{

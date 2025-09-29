@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
 using static glTFLoader.Schema.AnimationChannelTarget;
@@ -146,7 +145,7 @@ namespace NursiaModel
 			GCHandle handle = GCHandle.Alloc(result, GCHandleType.Pinned);
 			try
 			{
-				IntPtr pointer = handle.AddrOfPinnedObject();
+				nint pointer = handle.AddrOfPinnedObject();
 				Marshal.Copy(bytes.Array, bytes.Offset, pointer, bytes.Count);
 			}
 			finally
@@ -243,8 +242,8 @@ namespace NursiaModel
 
 			var indexData = GetAccessorData(primitive.Indices.Value);
 
-			var elementSize = (indexAccessor.ComponentType == ComponentTypeEnum.SHORT ||
-				indexAccessor.ComponentType == ComponentTypeEnum.UNSIGNED_SHORT) ?
+			var elementSize = indexAccessor.ComponentType == ComponentTypeEnum.SHORT ||
+				indexAccessor.ComponentType == ComponentTypeEnum.UNSIGNED_SHORT ?
 				IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits;
 
 			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, BufferUsage.None);
@@ -432,7 +431,7 @@ namespace NursiaModel
 						{
 							Array.Copy(data.Array, data.Offset + j * sz, vertexData, j * vd.VertexStride + offset, sz);
 
-							switch(vertexInfos[i].Usage)
+							switch (vertexInfos[i].Usage)
 							{
 								case VertexElementUsage.Position:
 									unsafe
@@ -493,8 +492,8 @@ namespace NursiaModel
 
 					vertexBuffer.SetData(vertexData);
 
-/*					var vertices = vertexBuffer.To2DArray();
-					JsonExtensions.SerializeToFile(@"D:\Temp\data1.json", JsonExtensions.CreateOptions(), vertices);*/
+					/*					var vertices = vertexBuffer.To2DArray();
+										JsonExtensions.SerializeToFile(@"D:\Temp\data1.json", JsonExtensions.CreateOptions(), vertices);*/
 
 					var indexBuffer = CreateIndexBuffer(primitive);
 
