@@ -1,5 +1,6 @@
 ﻿using DigitalRiseModel.Animation;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -149,5 +150,23 @@ namespace DigitalRiseModel
 		/// <param name="name"></param>
 		/// <returns></returns>
 		public DrModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
+
+		public void ClearAllTags()
+		{
+			foreach (var bone in Bones)
+			{
+				bone.Tag = null;
+			}
+
+			foreach (var mesh in Meshes)
+			{
+				foreach (var part in mesh.MeshParts)
+				{
+					part.Tag = null;
+				}
+
+				mesh.Tag = null;
+			}
+		}
 	}
 }

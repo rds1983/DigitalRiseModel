@@ -13,6 +13,8 @@ namespace DigitalRiseModel
 			Bone = bone ?? throw new ArgumentNullException(nameof(bone));
 			InverseBindTransform = inverseBindTransform;
 		}
+
+		public override string ToString() => Bone.ToString();
 	}
 
 	public class DrSkin

@@ -20,9 +20,7 @@ namespace DigitalRiseModel
 				var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);
 				var color = GetColorForMeshPart(meshpart);
 
-				var transform = GlobalTransform;
-				var boundingBox = meshpart.BoundingBox.Transform(ref transform);
-				context.Render(meshpart, boundingBox, EffectType.Basic, GlobalTransform, texture, color, null);
+				context.Render(meshpart, EffectType.Basic, GlobalTransform, texture, color, null);
 			}
 		}
 	}

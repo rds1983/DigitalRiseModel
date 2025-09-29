@@ -23,17 +23,15 @@ namespace DigitalRiseModel
 					var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);
 					var color = GetColorForMeshPart(meshpart);
 
-					var boneTransform = ModelInstance.GetBoneGlobalTransform(bone.Index) * GlobalTransform;
-					var boundingBox = meshpart.BoundingBox.Transform(ref boneTransform);
-
 					if (bone.Skin != null)
 					{
 						var skinTransforms = ModelInstance.GetSkinTransforms(bone.Skin.SkinIndex);
-						context.Render(meshpart, boundingBox, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
+						context.Render(meshpart, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
 					}
 					else
 					{
-						context.Render(meshpart, boundingBox, EffectType.Basic, boneTransform, texture, color, null);
+						var boneTransform = ModelInstance.GetBoneGlobalTransform(bone.Index) * GlobalTransform;
+						context.Render(meshpart, EffectType.Basic, boneTransform, texture, color, null);
 					}
 				}
 			}

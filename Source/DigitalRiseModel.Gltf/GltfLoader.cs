@@ -5,9 +5,12 @@ using glTFLoader;
 using glTFLoader.Schema;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
 using static glTFLoader.Schema.AnimationChannelTarget;
@@ -19,7 +22,7 @@ namespace DigitalRiseModel
 	{
 		private delegate void PoseSetter<T>(ref SrtTransform pose, T data);
 
-		struct VertexElementInfo
+		private struct VertexElementInfo
 		{
 			public VertexElementFormat Format;
 			public VertexElementUsage Usage;
@@ -45,6 +48,13 @@ namespace DigitalRiseModel
 				Sampler = sampler;
 				Path = path;
 			}
+		}
+
+		private struct SkinnedVertexInfo
+		{
+			public Vector3 Position;
+			public Vector4 Indices;
+			public Vector4 Weights;
 		}
 
 		private AssetManager _assetManager;
@@ -307,6 +317,7 @@ namespace DigitalRiseModel
 					// Read vertex declaration
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
+					var hasSkinning = false;
 					foreach (var pair in primitive.Attributes)
 					{
 						var accessor = _gltf.Accessors[pair.Value];
@@ -318,9 +329,19 @@ namespace DigitalRiseModel
 
 						vertexCount = newVertexCount;
 
-						var element = new VertexElementInfo();
+						var element = new VertexElementInfo
+						{
+							Format = GetAccessorFormat(pair.Value),
+							AccessorIndex = pair.Value
+						};
+
 						if (pair.Key == "POSITION")
 						{
+							if (element.Format != VertexElementFormat.Vector3)
+							{
+								throw new NotSupportedException($"Positions only in Vector3 format are supported");
+							}
+
 							element.Usage = VertexElementUsage.Position;
 						}
 						else if (pair.Key == "NORMAL")
@@ -342,13 +363,25 @@ namespace DigitalRiseModel
 						}
 						else if (pair.Key.StartsWith("JOINTS_"))
 						{
+							if (element.Format != VertexElementFormat.Byte4 && element.Format != VertexElementFormat.Short4)
+							{
+								throw new NotSupportedException($"Blend indices only in Byte4 format are supported");
+							}
+
 							element.Usage = VertexElementUsage.BlendIndices;
 							element.UsageIndex = int.Parse(pair.Key.Substring(7));
+							hasSkinning = true;
 						}
 						else if (pair.Key.StartsWith("WEIGHTS_"))
 						{
+							if (element.Format != VertexElementFormat.Vector4)
+							{
+								throw new NotSupportedException($"Blend weights only in Vector4 format are supported");
+							}
+
 							element.Usage = VertexElementUsage.BlendWeight;
 							element.UsageIndex = int.Parse(pair.Key.Substring(8));
+							hasSkinning = true;
 						}
 						else if (pair.Key.StartsWith("COLOR_"))
 						{
@@ -359,9 +392,6 @@ namespace DigitalRiseModel
 						{
 							throw new Exception($"Attribute of type '{pair.Key}' isn't supported.");
 						}
-
-						element.Format = GetAccessorFormat(pair.Value);
-						element.AccessorIndex = pair.Value;
 
 						vertexInfos.Add(element);
 					}
@@ -385,6 +415,13 @@ namespace DigitalRiseModel
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
 					var positions = new List<Vector3>();
+					SkinnedVertexInfo[] skinnedVertexInfos = null;
+
+					if (hasSkinning)
+					{
+						skinnedVertexInfos = new SkinnedVertexInfo[vertexCount.Value];
+					}
+
 					offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
 					{
@@ -395,16 +432,59 @@ namespace DigitalRiseModel
 						{
 							Array.Copy(data.Array, data.Offset + j * sz, vertexData, j * vd.VertexStride + offset, sz);
 
-							if (vertexInfos[i].Usage == VertexElementUsage.Position)
+							switch(vertexInfos[i].Usage)
 							{
-								unsafe
-								{
-									fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+								case VertexElementUsage.Position:
+									unsafe
 									{
-										Vector3* vptr = (Vector3*)bptr;
-										positions.Add(*vptr);
+										fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+										{
+											Vector3* vptr = (Vector3*)bptr;
+											positions.Add(*vptr);
+
+											if (hasSkinning)
+											{
+												skinnedVertexInfos[j].Position = *vptr;
+											}
+										}
 									}
-								}
+									break;
+
+								case VertexElementUsage.BlendIndices:
+									if (hasSkinning)
+									{
+										unsafe
+										{
+											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+											{
+												Vector4 indices;
+												if (vertexInfos[i].Format == VertexElementFormat.Byte4)
+												{
+													indices = (*(Byte4*)bptr).ToVector4();
+												}
+												else
+												{
+													indices = (*(Short4*)bptr).ToVector4();
+												}
+
+												skinnedVertexInfos[j].Indices = indices;
+											}
+										}
+									}
+									break;
+
+								case VertexElementUsage.BlendWeight:
+									if (hasSkinning)
+									{
+										unsafe
+										{
+											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+											{
+												skinnedVertexInfos[j].Weights = *(Vector4*)bptr;
+											}
+										}
+									}
+									break;
 							}
 						}
 
@@ -428,6 +508,12 @@ namespace DigitalRiseModel
 					{
 						Material = material
 					};
+
+					if (hasSkinning)
+					{
+						// Store for later bounding boxes calculation
+						meshpart.Tag = skinnedVertexInfos;
+					}
 
 					if (primitive.Material != null)
 					{
@@ -570,24 +656,8 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName)
+		private int GetRootBoneIndex()
 		{
-			_device = device ?? throw new ArgumentNullException(nameof(device));
-
-			_meshes.Clear();
-			_allBones.Clear();
-			_skins.Clear();
-
-			_assetManager = manager;
-			_assetName = assetName;
-			using (var stream = manager.Open(assetName))
-			{
-				_gltf = Interface.LoadModel(stream);
-			}
-
-			LoadMeshes();
-			LoadAllNodes();
-
 			var scene = _gltf.Scenes[_gltf.Scene.Value];
 
 			var rootIdx = scene.Nodes[0];
@@ -609,90 +679,163 @@ namespace DigitalRiseModel
 				rootIdx = _allBones.Count - 1;
 			}
 
-			var model = new DrModel(_allBones[rootIdx]);
-			if (_gltf.Animations != null)
+			return rootIdx;
+		}
+
+		private void UpdateBoundingBoxesForSkinnedModel(DrModel model)
+		{
+			Matrix[] absoluteTransforms = null;
+			foreach (var bone in model.Bones)
 			{
-				model.Animations = new Dictionary<string, AnimationClip>();
-				foreach (var gltfAnimation in _gltf.Animations)
+				if (bone.Skin == null || bone.Mesh == null)
 				{
-					var channelsDict = new Dictionary<int, List<PathInfo>>();
-					foreach (var channel in gltfAnimation.Channels)
-					{
-						if (!channelsDict.TryGetValue(channel.Target.Node.Value, out List<PathInfo> targets))
-						{
-							targets = new List<PathInfo>();
-							channelsDict[channel.Target.Node.Value] = targets;
-						}
+					continue;
+				}
 
-						targets.Add(new PathInfo(channel.Sampler, channel.Target.Path));
+				if (absoluteTransforms == null)
+				{
+					absoluteTransforms = new Matrix[model.Bones.Length];
+					model.CopyAbsoluteBoneTransformsTo(absoluteTransforms);
+				}
+
+				var skinMatrices = (from j in bone.Skin.Joints select j.InverseBindTransform * absoluteTransforms[j.Bone.Index]).ToArray();
+				var positions = new List<Vector3>();
+				foreach (var part in bone.Mesh.MeshParts)
+				{
+					var skinnedVertexesInfo = (SkinnedVertexInfo[])part.Tag;
+					foreach (var svi in skinnedVertexesInfo)
+					{
+						var v = Vector3.Zero;
+						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.X] * svi.Weights.X);
+						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.Y] * svi.Weights.Y);
+						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.Z] * svi.Weights.Z);
+						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.W] * svi.Weights.W);
+						positions.Add(v);
 					}
 
-					var channels = new List<AnimationChannel>();
-					float time = 0;
-					foreach (var pair in channelsDict)
-					{
-						var bone = _allBones[pair.Key];
-						var animationData = new SortedDictionary<float, SrtTransform>();
-
-						var translationMode = InterpolationMode.None;
-						var rotationMode = InterpolationMode.None;
-						var scaleMode = InterpolationMode.None;
-						foreach (var pathInfo in pair.Value)
-						{
-							var sampler = gltfAnimation.Samplers[pathInfo.Sampler];
-							var times = GetAccessorAs<float>(sampler.Input);
-
-							switch (pathInfo.Path)
-							{
-								case PathEnum.translation:
-									LoadAnimationTransforms(bone.DefaultPose, animationData,
-										(ref SrtTransform p, Vector3 d) => p.Translation = d,
-										times, sampler);
-									translationMode = sampler.Interpolation.ToInterpolationMode();
-									break;
-								case PathEnum.rotation:
-									LoadAnimationTransforms(bone.DefaultPose, animationData,
-										(ref SrtTransform p, Quaternion d) => p.Rotation = d,
-										times, sampler);
-									rotationMode = sampler.Interpolation.ToInterpolationMode();
-									break;
-								case PathEnum.scale:
-									LoadAnimationTransforms(bone.DefaultPose, animationData,
-										(ref SrtTransform p, Vector3 d) => p.Scale = d,
-										times, sampler);
-									scaleMode = sampler.Interpolation.ToInterpolationMode();
-									break;
-								case PathEnum.weights:
-									break;
-							}
-						}
-
-						var keyframes = new List<AnimationChannelKeyframe>();
-						foreach (var pair2 in animationData)
-						{
-							keyframes.Add(new AnimationChannelKeyframe(TimeSpan.FromSeconds(pair2.Key), pair2.Value));
-
-							if (pair2.Key > time)
-							{
-								time = pair2.Key;
-							}
-						}
-
-						var animationChannel = new AnimationChannel(bone.Index, keyframes.ToArray())
-						{
-							TranslationMode = translationMode,
-							RotationMode = rotationMode,
-							ScaleMode = scaleMode
-						};
-
-						channels.Add(animationChannel);
-					}
-
-					var id = gltfAnimation.Name ?? "(default)";
-					var animation = new AnimationClip(id, TimeSpan.FromSeconds(time), channels.ToArray());
-					model.Animations[id] = animation;
+					part.BoundingBox = BoundingBox.CreateFromPoints(positions);
 				}
 			}
+		}
+
+		private void LoadAnimations(DrModel model)
+		{
+			if (_gltf.Animations == null)
+			{
+				return;
+			}
+
+			model.Animations = new Dictionary<string, AnimationClip>();
+			foreach (var gltfAnimation in _gltf.Animations)
+			{
+				var channelsDict = new Dictionary<int, List<PathInfo>>();
+				foreach (var channel in gltfAnimation.Channels)
+				{
+					if (!channelsDict.TryGetValue(channel.Target.Node.Value, out List<PathInfo> targets))
+					{
+						targets = new List<PathInfo>();
+						channelsDict[channel.Target.Node.Value] = targets;
+					}
+
+					targets.Add(new PathInfo(channel.Sampler, channel.Target.Path));
+				}
+
+				var channels = new List<AnimationChannel>();
+				float time = 0;
+				foreach (var pair in channelsDict)
+				{
+					var bone = _allBones[pair.Key];
+					var animationData = new SortedDictionary<float, SrtTransform>();
+
+					var translationMode = InterpolationMode.None;
+					var rotationMode = InterpolationMode.None;
+					var scaleMode = InterpolationMode.None;
+					foreach (var pathInfo in pair.Value)
+					{
+						var sampler = gltfAnimation.Samplers[pathInfo.Sampler];
+						var times = GetAccessorAs<float>(sampler.Input);
+
+						switch (pathInfo.Path)
+						{
+							case PathEnum.translation:
+								LoadAnimationTransforms(bone.DefaultPose, animationData,
+									(ref SrtTransform p, Vector3 d) => p.Translation = d,
+									times, sampler);
+								translationMode = sampler.Interpolation.ToInterpolationMode();
+								break;
+							case PathEnum.rotation:
+								LoadAnimationTransforms(bone.DefaultPose, animationData,
+									(ref SrtTransform p, Quaternion d) => p.Rotation = d,
+									times, sampler);
+								rotationMode = sampler.Interpolation.ToInterpolationMode();
+								break;
+							case PathEnum.scale:
+								LoadAnimationTransforms(bone.DefaultPose, animationData,
+									(ref SrtTransform p, Vector3 d) => p.Scale = d,
+									times, sampler);
+								scaleMode = sampler.Interpolation.ToInterpolationMode();
+								break;
+							case PathEnum.weights:
+								break;
+						}
+					}
+
+					var keyframes = new List<AnimationChannelKeyframe>();
+					foreach (var pair2 in animationData)
+					{
+						keyframes.Add(new AnimationChannelKeyframe(TimeSpan.FromSeconds(pair2.Key), pair2.Value));
+
+						if (pair2.Key > time)
+						{
+							time = pair2.Key;
+						}
+					}
+
+					var animationChannel = new AnimationChannel(bone.Index, keyframes.ToArray())
+					{
+						TranslationMode = translationMode,
+						RotationMode = rotationMode,
+						ScaleMode = scaleMode
+					};
+
+					channels.Add(animationChannel);
+				}
+
+				var id = gltfAnimation.Name ?? "(default)";
+				var animation = new AnimationClip(id, TimeSpan.FromSeconds(time), channels.ToArray());
+				model.Animations[id] = animation;
+			}
+		}
+
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName)
+		{
+			_device = device ?? throw new ArgumentNullException(nameof(device));
+
+			_meshes.Clear();
+			_allBones.Clear();
+			_skins.Clear();
+
+			_assetManager = manager;
+			_assetName = assetName;
+			using (var stream = manager.Open(assetName))
+			{
+				_gltf = Interface.LoadModel(stream);
+			}
+
+			LoadMeshes();
+			LoadAllNodes();
+
+			// Create the model
+			var model = new DrModel(_allBones[GetRootBoneIndex()]);
+
+			// Update bounding boxes for skinned models
+			UpdateBoundingBoxesForSkinnedModel(model);
+
+			// Load animations
+			LoadAnimations(model);
+
+			// Clear all tags
+			model.ClearAllTags();
 
 			return model;
 		}

@@ -205,8 +205,9 @@ namespace DigitalRiseModel
 			_lastEffect = null;
 		}
 
-		public void Render(DrMeshPart meshpart, BoundingBox boundingBox, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
+		public void Render(DrMeshPart meshpart, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
 		{
+			var boundingBox = meshpart.BoundingBox.Transform(ref transform);
 			if (DrawBoundingBoxes)
 			{
 				var scale = Matrix.CreateScale(boundingBox.ToScale()) * Matrix.CreateTranslation(boundingBox.Min);

@@ -20,7 +20,7 @@ namespace DigitalRiseModel
 		public IndexBuffer IndexBuffer { get; }
 		public int StartIndex { get; }
 
-		public BoundingBox BoundingBox { get; }
+		public BoundingBox BoundingBox { get; set; }
 
 		public bool HasNormals { get; }
 
