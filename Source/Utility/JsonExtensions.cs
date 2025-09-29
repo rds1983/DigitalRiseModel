@@ -9,6 +9,19 @@ namespace NursiaModel.Utility
 {
 	internal static class JsonExtensions
 	{
+		public static string GetId(this JObject data)
+		{
+			var result = string.Empty;
+
+			JToken obj;
+			if (data.TryGetValue("id", out obj) && obj != null)
+			{
+				result = obj.ToString();
+			}
+
+			return result;
+		}
+
 		public static JToken EnsureJToken(this JObject obj, string fieldName)
 		{
 			var token = obj[fieldName];
@@ -99,7 +112,7 @@ namespace NursiaModel.Utility
 
 		public static float ToFloat(this string value)
 		{
-			if (!float.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out float result))
+			if (!float.TryParse(value, CultureInfo.InvariantCulture, out float result))
 			{
 				RaiseError($"Can't parse '{value}' as float value.");
 			}
@@ -154,6 +167,13 @@ namespace NursiaModel.Utility
 			}
 
 			return result;
+		}
+
+		public static Quaternion ToQuaternion(this JToken data, float defW = 0.0f)
+		{
+			var v = data.ToVector4(defW);
+
+			return new Quaternion(v.X, v.Y, v.Z, v.W);
 		}
 
 		public static int EnsureInt(this JObject obj, string fieldName)

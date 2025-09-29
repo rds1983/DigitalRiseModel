@@ -28,6 +28,19 @@ namespace NursiaModel
 
 		public object Tag { get; set; }
 
+		private NrmMeshPart(PrimitiveType primitiveType, int primitiveCount, VertexBuffer vertexBuffer, int vertexOffset, int numVertices, IndexBuffer indexBuffer, int startIndex, BoundingBox boundingBox, bool hasNormals)
+		{
+			PrimitiveType = primitiveType;
+			PrimitiveCount = primitiveCount;
+			VertexBuffer = vertexBuffer;
+			VertexOffset = vertexOffset;
+			NumVertices = numVertices;
+			IndexBuffer = indexBuffer;
+			StartIndex = startIndex;
+			BoundingBox = boundingBox;
+			HasNormals = hasNormals;
+		}
+
 		public NrmMeshPart(VertexBuffer vertexBuffer, IndexBuffer indexBuffer, BoundingBox boundingBox, PrimitiveType primitiveType = PrimitiveType.TriangleList, int? numVertices = null, int? primitiveCount = null, int vertexOffset = 0, int startIndex = 0)
 		{
 			if (indexBuffer == null && primitiveCount == null)
@@ -130,6 +143,15 @@ namespace NursiaModel
 				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, 0, NumVertices, StartIndex, PrimitiveCount);
 #endif
 			}
+		}
+
+		public NrmMeshPart Clone()
+		{
+			return new NrmMeshPart(PrimitiveType, PrimitiveCount, VertexBuffer, VertexOffset, NumVertices, IndexBuffer, StartIndex, BoundingBox, HasNormals)
+			{
+				Material = Material?.Clone(),
+				Tag = Tag
+			};
 		}
 	}
 }

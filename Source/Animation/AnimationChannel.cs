@@ -85,5 +85,7 @@ namespace NursiaModel.Animation
 			int index = GetKeyframeIndexByTime(time);
 			return Keyframes[index];
 		}
+
+		public override string ToString() => $"{BoneIndex}:{Keyframes.Length}";
 	}
 }

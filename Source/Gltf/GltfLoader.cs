@@ -269,28 +269,14 @@ namespace NursiaModel
 			{
 				var data = new short[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
-
-				for (var i = 0; i < data.Length / 3; i++)
-				{
-					var temp = data[i * 3];
-					data[i * 3] = data[i * 3 + 2];
-					data[i * 3 + 2] = temp;
-				}
-
+				data.Unwind();
 				indexBuffer.SetData(data);
 			}
 			else
 			{
 				var data = new uint[indexData.Count / 4];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
-
-				for (var i = 0; i < data.Length / 3; i++)
-				{
-					var temp = data[i * 3];
-					data[i * 3] = data[i * 3 + 2];
-					data[i * 3 + 2] = temp;
-				}
-
+				data.Unwind();
 				indexBuffer.SetData(data);
 			}
 
@@ -655,32 +641,6 @@ namespace NursiaModel
 			}
 		}
 
-		private int GetRootBoneIndex()
-		{
-			var scene = _gltf.Scenes[_gltf.Scene.Value];
-
-			var rootIdx = scene.Nodes[0];
-			if (scene.Nodes.Length > 1)
-			{
-				// Multiple roots
-				// Create one root to store it
-				var rootNode = new NrmModelBone("_Root");
-
-				var children = new List<NrmModelBone>();
-				foreach (var idx in scene.Nodes)
-				{
-					children.Add(_allBones[idx]);
-				}
-
-				rootNode.Children = children.ToArray();
-
-				_allBones.Add(rootNode);
-				rootIdx = _allBones.Count - 1;
-			}
-
-			return rootIdx;
-		}
-
 		private void UpdateBoundingBoxesForSkinnedModel(NrmModel model)
 		{
 			Matrix[] absoluteTransforms = null;
@@ -824,8 +784,13 @@ namespace NursiaModel
 			LoadMeshes();
 			LoadAllNodes();
 
+			// Fix root
+			var scene = _gltf.Scenes[_gltf.Scene.Value];
+			var roots = (from idx in scene.Nodes select _allBones[idx]).ToList();
+			var root = roots.FixRoot(_allBones[scene.Nodes[0]]);
+
 			// Create the model
-			var model = new NrmModel(_allBones[GetRootBoneIndex()]);
+			var model = new NrmModel(root);
 
 			// Update bounding boxes for skinned models
 			UpdateBoundingBoxesForSkinnedModel(model);

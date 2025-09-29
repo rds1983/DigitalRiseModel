@@ -1,4 +1,6 @@
-﻿using System;
+﻿using glTFLoader.Schema;
+using System;
+using System.Collections.Generic;
 
 namespace NursiaModel.Utility
 {
@@ -33,6 +35,28 @@ namespace NursiaModel.Utility
 			T temp = obj1;
 			obj1 = obj2;
 			obj2 = temp;
+		}
+
+		public static NrmModelBone FixRoot(this List<NrmModelBone> roots, NrmModelBone currentRoot)
+		{
+			if (roots.Count < 2)
+			{
+				return currentRoot;
+			}
+
+			// Multiple roots
+			// Create one root to store it
+			var newRoot = new NrmModelBone("_Root");
+
+			var children = new List<NrmModelBone>();
+			foreach (var root in roots)
+			{
+				children.Add(root);
+			}
+
+			newRoot.Children = children.ToArray();
+
+			return newRoot;
 		}
 	}
 }

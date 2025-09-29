@@ -158,6 +158,16 @@ namespace NursiaModel.Utility
 			return result;
 		}
 
+		public static void Unwind<T>(this T[] data) where T: struct
+		{
+			for (var i = 0; i < data.Length / 3; i++)
+			{
+				var temp = data[i * 3];
+				data[i * 3] = data[i * 3 + 2];
+				data[i * 3 + 2] = temp;
+			}
+		}
+
 		public static IEnumerable<Vector3> GetPositions(this VertexPositionNormalTexture[] vertices) => (from v in vertices select v.Position);
 		public static IEnumerable<Vector3> GetPositions(this VertexPositionTexture[] vertices) => (from v in vertices select v.Position);
 		public static IEnumerable<Vector3> GetPositions(this VertexPositionNormal[] vertices) => (from v in vertices select v.Position);

@@ -57,7 +57,6 @@ namespace NursiaModel.Samples.ModelViewer
 		{
 			try
 			{
-
 				if (!string.IsNullOrEmpty(file))
 				{
 					var folder = Path.GetDirectoryName(file);
@@ -65,7 +64,15 @@ namespace NursiaModel.Samples.ModelViewer
 
 					var assetManager = AssetManager.CreateFileAssetManager(folder);
 
-					var model = assetManager.LoadGltf(GraphicsDevice, f);
+					NrmModel model;
+					if (file.EndsWith(".g3dj"))
+					{
+						model = assetManager.LoadG3d(GraphicsDevice, f);
+					}
+					else
+					{
+						model = assetManager.LoadGltf(GraphicsDevice, f);
+					}
 					ModelInstance.Model = model;
 
 					_mainPanel._comboAnimations.Widgets.Clear();

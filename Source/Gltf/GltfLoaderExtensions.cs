@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using static glTFLoader.Schema.Accessor;
 
-namespace NursiaModel.Utility
+namespace NursiaModel
 {
 	internal static class GltfLoaderExtensions
 	{

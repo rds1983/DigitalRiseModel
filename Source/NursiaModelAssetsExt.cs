@@ -13,7 +13,19 @@ namespace NursiaModel
 			return loader.Load(device, manager, assetName);
 		};
 
-		public static NrmModel LoadGltf(this AssetManager assetManager, GraphicsDevice device, string path) => 
+		private readonly static AssetLoader<NrmModel> _g3dLoader = (manager, assetName, settings, tag) =>
+		{
+			var device = (GraphicsDevice)tag;
+
+			var json = manager.ReadAsString(assetName);
+
+			return G3dLoader.LoadFromJson(device, json, n => manager.LoadTexture2D(device, n));
+		};
+
+		public static NrmModel LoadGltf(this AssetManager assetManager, GraphicsDevice device, string path) =>
 			assetManager.UseLoader(_gltfLoader, path, tag: device);
+
+		public static NrmModel LoadG3d(this AssetManager assetManager, GraphicsDevice device, string path) =>
+			assetManager.UseLoader(_g3dLoader, path, tag: device);
 	}
 }
