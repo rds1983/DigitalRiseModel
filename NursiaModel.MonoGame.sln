@@ -13,11 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.Samples.ThirdPe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.MonoGame", "Source\NursiaModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{D3447DFD-A975-4EAC-BCB6-EB5E9454351C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{83FAAD5C-7554-4BE6-8155-D032A71B87C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xnb2Gltf.BatchConverter", "Tools\Xnb2Gltf.BatchConverter\Xnb2Gltf.BatchConverter.csproj", "{E1E133F7-B8AC-DD27-92AC-67F452B176B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NursiaModel.Tests", "Tests\NursiaModel.Tests\NursiaModel.Tests.csproj", "{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +45,10 @@ Global
 		{E1E133F7-B8AC-DD27-92AC-67F452B176B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1E133F7-B8AC-DD27-92AC-67F452B176B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1E133F7-B8AC-DD27-92AC-67F452B176B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,7 +57,6 @@ Global
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9876750C-9A62-09EA-3954-309DF950F1AD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{DB0A213A-DAB3-FEFF-EF06-E17FB08D6987} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{F5D82392-65B8-E10C-0563-DF130FB4BF42} = {D3447DFD-A975-4EAC-BCB6-EB5E9454351C}
 		{E1E133F7-B8AC-DD27-92AC-67F452B176B9} = {83FAAD5C-7554-4BE6-8155-D032A71B87C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
