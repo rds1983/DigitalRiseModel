@@ -49,13 +49,6 @@ namespace NursiaModel
 			}
 		}
 
-		private struct SkinnedVertexInfo
-		{
-			public Vector3 Position;
-			public Vector4 Indices;
-			public Vector4 Weights;
-		}
-
 		private AssetManager _assetManager;
 		private string _assetName;
 		private Gltf _gltf;
@@ -249,21 +242,16 @@ namespace NursiaModel
 			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, BufferUsage.None);
 			indexBuffer.SetData(0, indexData.Array, indexData.Offset, indexData.Count);
 
+			uint[] uintIndices;
 			// Since gltf uses ccw winding by default
 			// We need to unwind it
 			if (indexAccessor.ComponentType == ComponentTypeEnum.UNSIGNED_SHORT)
 			{
 				var data = new ushort[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
-
-				for (var i = 0; i < data.Length / 3; i++)
-				{
-					var temp = data[i * 3];
-					data[i * 3] = data[i * 3 + 2];
-					data[i * 3 + 2] = temp;
-				}
-
+				data.Unwind();
 				indexBuffer.SetData(data);
+				uintIndices = data.ToUnsignedIntArray();
 			}
 			else if (indexAccessor.ComponentType == ComponentTypeEnum.SHORT)
 			{
@@ -271,6 +259,7 @@ namespace NursiaModel
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
 				indexBuffer.SetData(data);
+				uintIndices = data.ToUnsignedIntArray();
 			}
 			else
 			{
@@ -278,7 +267,10 @@ namespace NursiaModel
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
 				indexBuffer.SetData(data);
+				uintIndices = data;
 			}
+
+			indexBuffer.Tag = uintIndices;
 
 			return indexBuffer;
 		}
@@ -400,11 +392,11 @@ namespace NursiaModel
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
 					var positions = new List<Vector3>();
-					SkinnedVertexInfo[] skinnedVertexInfos = null;
+					SkinnedVertexInfo skinnedVertexInfos = null;
 
 					if (hasSkinning)
 					{
-						skinnedVertexInfos = new SkinnedVertexInfo[vertexCount.Value];
+						skinnedVertexInfos = new SkinnedVertexInfo(vertexCount.Value);
 					}
 
 					offset = 0;
@@ -429,7 +421,7 @@ namespace NursiaModel
 
 											if (hasSkinning)
 											{
-												skinnedVertexInfos[j].Position = *vptr;
+												skinnedVertexInfos.SetPosition(j, *vptr);
 											}
 										}
 									}
@@ -452,7 +444,7 @@ namespace NursiaModel
 													indices = (*(Short4*)bptr).ToVector4();
 												}
 
-												skinnedVertexInfos[j].Indices = indices;
+												skinnedVertexInfos.SetIndices(j, indices);
 											}
 										}
 									}
@@ -465,7 +457,7 @@ namespace NursiaModel
 										{
 											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
 											{
-												skinnedVertexInfos[j].Weights = *(Vector4*)bptr;
+												skinnedVertexInfos.SetWeights(j, *(Vector4*)bptr);
 											}
 										}
 									}
@@ -489,7 +481,7 @@ namespace NursiaModel
 					};
 
 					var box = BoundingBox.CreateFromPoints(positions);
-					var meshpart = new NrmMeshPart(vertexBuffer, indexBuffer, box)
+					var meshPart = new NrmMeshPart(vertexBuffer, indexBuffer, box)
 					{
 						Material = material
 					};
@@ -497,7 +489,7 @@ namespace NursiaModel
 					if (hasSkinning)
 					{
 						// Store for later bounding boxes calculation
-						meshpart.Tag = skinnedVertexInfos;
+						vertexBuffer.Tag = skinnedVertexInfos;
 					}
 
 					if (primitive.Material != null)
@@ -535,7 +527,7 @@ namespace NursiaModel
 						}
 					}
 
-					mesh.MeshParts.Add(meshpart);
+					mesh.MeshParts.Add(meshPart);
 				}
 
 				_meshes.Add(mesh);
@@ -636,43 +628,13 @@ namespace NursiaModel
 
 				if (gltfNode.Skin != null)
 				{
-					bone.Skin = _skins[gltfNode.Skin.Value];
-				}
-			}
-		}
-
-		private void UpdateBoundingBoxesForSkinnedModel(NrmModel model)
-		{
-			Matrix[] absoluteTransforms = null;
-			foreach (var bone in model.Bones)
-			{
-				if (bone.Skin == null || bone.Mesh == null)
-				{
-					continue;
-				}
-
-				if (absoluteTransforms == null)
-				{
-					absoluteTransforms = new Matrix[model.Bones.Length];
-					model.CopyAbsoluteBoneTransformsTo(absoluteTransforms);
-				}
-
-				var skinMatrices = (from j in bone.Skin.Joints select j.InverseBindTransform * absoluteTransforms[j.Bone.Index]).ToArray();
-				var positions = new List<Vector3>();
-				foreach (var part in bone.Mesh.MeshParts)
-				{
-					var skinnedVertexesInfo = (SkinnedVertexInfo[])part.Tag;
-					foreach (var svi in skinnedVertexesInfo)
+					if (bone.Mesh != null)
 					{
-						var v = Vector3.Zero;
-						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.X] * svi.Weights.X);
-						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.Y] * svi.Weights.Y);
-						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.Z] * svi.Weights.Z);
-						v += Vector3.Transform(svi.Position, skinMatrices[(int)svi.Indices.W] * svi.Weights.W);
-						positions.Add(v);
+						foreach (var part in bone.Mesh.MeshParts)
+						{
+							part.Skin = _skins[gltfNode.Skin.Value];
+						}
 					}
-
-					part.BoundingBox = BoundingBox.CreateFromPoints(positions);
 				}
 			}
 		}
@@ -793,7 +755,7 @@ namespace NursiaModel
 			var model = new NrmModel(root);
 
 			// Update bounding boxes for skinned models
-			UpdateBoundingBoxesForSkinnedModel(model);
+			model.UpdateBoundingBoxesForSkinnedModel();
 
 			// Load animations
 			LoadAnimations(model);

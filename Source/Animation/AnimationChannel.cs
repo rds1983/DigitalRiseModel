@@ -21,9 +21,9 @@ namespace NursiaModel.Animation
 		public int BoneIndex { get; }	
 		public AnimationChannelKeyframe[] Keyframes { get; }
 
-		public InterpolationMode TranslationMode { get; set; }
-		public InterpolationMode RotationMode { get; set; }
-		public InterpolationMode ScaleMode { get; set; }
+		public InterpolationMode TranslationMode { get; set; } = InterpolationMode.Linear;
+		public InterpolationMode RotationMode { get; set; } = InterpolationMode.Linear;
+		public InterpolationMode ScaleMode { get; set; } = InterpolationMode.Linear;
 
 		public AnimationChannel(int boneIndex, AnimationChannelKeyframe[] keyframes)
 		{

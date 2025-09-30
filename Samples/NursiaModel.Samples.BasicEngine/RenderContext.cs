@@ -205,9 +205,9 @@ namespace NursiaModel
 			_lastEffect = null;
 		}
 
-		public void Render(NrmMeshPart meshpart, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
+		public void Render(NrmMeshPart part, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
 		{
-			var boundingBox = meshpart.BoundingBox.Transform(ref transform);
+			var boundingBox = part.BoundingBox.Transform(ref transform);
 			if (DrawBoundingBoxes)
 			{
 				var scale = Matrix.CreateScale(boundingBox.ToScale()) * Matrix.CreateTranslation(boundingBox.Min);
@@ -252,11 +252,11 @@ namespace NursiaModel
 			{
 				pass.Apply();
 
-				meshpart.Draw(GraphicsDevice);
+				part.Draw(GraphicsDevice);
 
 				++_statistics.DrawCalls;
-				_statistics.VerticesDrawn += meshpart.NumVertices;
-				_statistics.PrimitivesDrawn += meshpart.PrimitiveCount;
+				_statistics.VerticesDrawn += part.NumVertices;
+				_statistics.PrimitivesDrawn += part.PrimitiveCount;
 			}
 
 			++_statistics.MeshesDrawn;

@@ -23,7 +23,7 @@ namespace NursiaModel
 		private bool _transformsDirty = true;
 		private Matrix[] _localTransforms;
 		private Matrix[] _worldTransforms;
-		private SkinInfo[] _skinInfos;
+		private Dictionary<int, SkinInfo> _skinInfos;
 
 		private NrmModel _model;
 
@@ -51,17 +51,23 @@ namespace NursiaModel
 					_worldTransforms = new Matrix[_model.Bones.Length];
 
 					var skinInfos = new List<SkinInfo>();
-					foreach (var n in _model.Bones)
+					foreach (var mesh in _model.Meshes)
 					{
-						if (n.Skin == null)
+						foreach (var part in mesh.MeshParts)
 						{
-							continue;
+							if (part.Skin == null)
+							{
+								continue;
+							}
+
+							if (_skinInfos == null)
+							{
+								_skinInfos = new Dictionary<int, SkinInfo>();
+							}
+
+							_skinInfos[part.Skin.SkinIndex] = new SkinInfo(part.Skin);
 						}
-
-						skinInfos.Add(new SkinInfo(n.Skin));
 					}
-
-					_skinInfos = skinInfos.ToArray();
 
 					ResetTransforms();
 
@@ -120,9 +126,9 @@ namespace NursiaModel
 			// Update skin transforms
 			if (_skinInfos != null)
 			{
-				for (var i = 0; i < _skinInfos.Length; ++i)
+				foreach(var pair in _skinInfos)
 				{
-					var skinInfo = _skinInfos[i];
+					var skinInfo = pair.Value;
 					for (var j = 0; j < skinInfo.Skin.Joints.Length; ++j)
 					{
 						var joint = skinInfo.Skin.Joints[j];
@@ -143,9 +149,13 @@ namespace NursiaModel
 			foreach (var mesh in _model.Meshes)
 			{
 				var bone = mesh.ParentBone;
-				var m = bone.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
-				var bb = bone.Mesh.BoundingBox.Transform(ref m);
-				boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);
+
+				foreach(var part in mesh.MeshParts)
+				{
+					var m = part.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
+					var bb = bone.Mesh.BoundingBox.Transform(ref m);
+					boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);
+				}
 			}
 
 			return boundingBox;

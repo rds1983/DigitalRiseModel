@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NursiaModel
 {
-	public class NrmModel: NrmDisposable
+	public class NrmModel : NrmDisposable
 	{
 		public NrmModelBone Root { get; }
 
@@ -162,6 +162,13 @@ namespace NursiaModel
 				foreach (var part in mesh.MeshParts)
 				{
 					part.Tag = null;
+
+					part.VertexBuffer.Tag = null;
+
+					if (part.IndexBuffer != null)
+					{
+						part.IndexBuffer.Tag = null;
+					}
 				}
 
 				mesh.Tag = null;

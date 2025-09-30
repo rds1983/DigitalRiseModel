@@ -346,9 +346,10 @@ namespace NursiaModel.Animation
 					SrtTransform channelPose;
 
 					// Search for the current channel in the cross fade clip
-					if (_crossFadeAnimationClip.TryGetChannelByBoneIndex(animationChannel.BoneIndex, out animationChannel))
+					AnimationChannel animationChannel2;
+					if (_crossFadeAnimationClip.TryGetChannelByBoneIndex(animationChannel.BoneIndex, out animationChannel2))
 					{
-						InterpolateChannelPose(animationChannel, TimeSpan.Zero, out channelPose);
+						InterpolateChannelPose(animationChannel2, TimeSpan.Zero, out channelPose);
 					}
 					else
 					{

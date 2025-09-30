@@ -25,6 +25,7 @@ namespace NursiaModel
 		public bool HasNormals { get; }
 
 		public NrmMaterial Material { get; set; }
+		public NrmSkin Skin { get; set; }
 
 		public object Tag { get; set; }
 

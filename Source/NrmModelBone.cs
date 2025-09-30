@@ -42,8 +42,6 @@ namespace NursiaModel
 
 		public NrmMesh Mesh { get; }
 
-		public NrmSkin Skin { get; set; }
-
 		public object Tag { get; set; }
 
 		public NrmModelBone(string name, NrmMesh mesh = null)

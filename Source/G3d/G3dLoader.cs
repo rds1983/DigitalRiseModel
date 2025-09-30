@@ -6,9 +6,7 @@ using NursiaModel.Animation;
 using NursiaModel.Utility;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NursiaModel
 {
@@ -55,17 +53,6 @@ namespace NursiaModel
 		};
 
 		internal const string IdName = "name";
-
-		private static Stream EnsureOpen(Func<string, Stream> streamOpener, string name)
-		{
-			var result = streamOpener(name);
-			if (result == null)
-			{
-				throw new Exception(string.Format("stream is null for name '{0}'", name));
-			}
-
-			return result;
-		}
 
 		private static SrtTransform LoadTransform(JObject data)
 		{
@@ -128,32 +115,35 @@ namespace NursiaModel
 			return new VertexDeclaration(elements.ToArray());
 		}
 
-		private static void LoadFloat(byte[] dest, ref int destIdx, float data)
+		private static float LoadFloat(byte[] dest, ref int destIdx, float data)
 		{
 			var byteData = BitConverter.GetBytes(data);
 
-			var aaa = BitConverter.ToSingle(byteData, 0);
 			Array.Copy(byteData, 0, dest, destIdx, byteData.Length);
 			destIdx += byteData.Length;
+
+			return data;
 		}
 
-		private static void LoadByte(byte[] dest, ref int destIdx, int data)
+		private static byte LoadByte(byte[] dest, ref int destIdx, int data)
 		{
 			if (data > byte.MaxValue)
 			{
 				throw new Exception(string.Format("Only byte NrmModelBone indices suported. {0}", data));
 			}
 
-			dest[destIdx] = (byte)data;
+			var b = (byte)data;
+			dest[destIdx] = b;
 			++destIdx;
+
+			return b;
 		}
 
-		private static VertexBuffer LoadVertexBuffer(
+		private static (VertexBuffer buffer, List<Vector3> positions) LoadVertexBuffer(
 			GraphicsDevice graphicsDevice,
 			ref VertexDeclaration declaration,
 			int elementsPerRow,
-			JArray data,
-			out List<Vector3> positions)
+			JArray data)
 		{
 			var rowsCount = data.Count / elementsPerRow;
 			var elements = declaration.GetVertexElements();
@@ -163,10 +153,11 @@ namespace NursiaModel
 									where e.VertexElementUsage == VertexElementUsage.BlendWeight
 									select e).Count();
 			var hasBlendWeight = blendWeightCount > 0;
-			if (blendWeightCount > 4)
+			if (blendWeightCount > 0 && blendWeightCount != 4)
 			{
-				throw new Exception("4 is maximum amount of weights per bone");
+				throw new NotSupportedException("Only 4 bones per mesh is supported");
 			}
+
 			if (hasBlendWeight)
 			{
 				blendWeightOffset = (from e in elements
@@ -182,8 +173,14 @@ namespace NursiaModel
 				declaration = new VertexDeclaration(newElements.ToArray());
 			}
 
-			positions = new List<Vector3>();
+			var positions = new List<Vector3>();
 			var byteData = new byte[rowsCount * declaration.VertexStride];
+
+			SkinnedVertexInfo skinnedVertexInfo = null;
+			if (hasBlendWeight)
+			{
+				skinnedVertexInfo = new SkinnedVertexInfo(rowsCount);
+			}
 
 			for (var i = 0; i < rowsCount; ++i)
 			{
@@ -204,10 +201,12 @@ namespace NursiaModel
 						}
 
 						var offset = i * declaration.VertexStride + blendWeightOffset + weightsCount;
-						LoadByte(byteData, ref offset, (int)(float)data[srcIdx++]);
+						var boneIndex = LoadByte(byteData, ref offset, (int)(float)data[srcIdx++]);
+						skinnedVertexInfo.SetIndex(i, weightsCount, boneIndex);
 
 						offset = i * declaration.VertexStride + blendWeightOffset + 4 + weightsCount * 4;
-						LoadFloat(byteData, ref offset, (float)data[srcIdx++]);
+						var boneWeight = LoadFloat(byteData, ref offset, (float)data[srcIdx++]);
+						skinnedVertexInfo.SetWeight(i, weightsCount, boneWeight);
 						++weightsCount;
 						continue;
 					}
@@ -226,6 +225,10 @@ namespace NursiaModel
 							if (element.VertexElementUsage == VertexElementUsage.Position)
 							{
 								positions.Add(v);
+								if (hasBlendWeight)
+								{
+									skinnedVertexInfo.SetPosition(i, v);
+								}
 							}
 
 							LoadFloat(byteData, ref destIdx, v.X);
@@ -256,7 +259,9 @@ namespace NursiaModel
 			var result = new VertexBuffer(graphicsDevice, declaration, rowsCount, BufferUsage.None);
 			result.SetData(byteData);
 
-			return result;
+			result.Tag = skinnedVertexInfo;
+
+			return (result, positions);
 		}
 
 		private static void LoadMeshData(LoadContext context)
@@ -283,18 +288,7 @@ namespace NursiaModel
 					}
 				}
 
-				if (bonesCount > 0 && bonesCount != 4)
-				{
-					throw new NotSupportedException("Only 4 bones per mesh are supported");
-				}
-
-				List<Vector3> positions;
-				var vertexBuffer = LoadVertexBuffer(
-					context.GraphicsDevice,
-					ref declaration,
-					elementsPerRow,
-					vertices,
-					out positions);
+				var vb = LoadVertexBuffer(context.GraphicsDevice, ref declaration, elementsPerRow, vertices);
 
 				var partsData = (JArray)meshData["parts"];
 				foreach (JObject partData in partsData)
@@ -304,22 +298,28 @@ namespace NursiaModel
 					// var type = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), partData.EnsureString("type"));
 					var partPositions = new List<Vector3>();
 					var indicesData = (JArray)partData["indices"];
-					var indices = new short[indicesData.Count];
+					var indices = new ushort[indicesData.Count];
+					
+					// IntIndices are required to calculate proper bounding box for the mesh part
+					var uintIndices = new uint[indicesData.Count];
 					for (var i = 0; i < indicesData.Count; ++i)
 					{
-						var idx = Convert.ToInt16(indicesData[i]);
+						var idx = Convert.ToUInt16(indicesData[i]);
 						indices[i] = idx;
-						partPositions.Add(positions[idx]);
+						partPositions.Add(vb.positions[idx]);
+
+						uintIndices[i] = idx;
 					}
 
 					indices.Unwind();
 
 					var indexBuffer = new IndexBuffer(context.GraphicsDevice, IndexElementSize.SixteenBits, indices.Length, BufferUsage.None);
 					indexBuffer.SetData(indices);
+					indexBuffer.Tag = uintIndices;
 
 					var boundingBox = BoundingBox.CreateFromPoints(partPositions);
-
-					context.Meshes[id] = new NrmMeshPart(vertexBuffer, indexBuffer, boundingBox);
+					var part = new NrmMeshPart(vb.buffer, indexBuffer, boundingBox);
+					context.Meshes[id] = part;
 				}
 			}
 		}
@@ -358,7 +358,6 @@ namespace NursiaModel
 		private static NrmModelBone LoadNode(LoadContext context, JObject data)
 		{
 			NrmModelBone result;
-			Dictionary<string, SrtTransform> jointsDict = null;
 			if (data.ContainsKey("parts"))
 			{
 				// Mesh
@@ -375,14 +374,13 @@ namespace NursiaModel
 					{
 						var jointsData = (JArray)partData["bones"];
 
-						if (jointsDict == null)
-						{
-							jointsDict = new Dictionary<string, SrtTransform>();
-						}
+						var jointsDict = new Dictionary<string, SrtTransform>();
 						foreach (JObject jointData in jointsData)
 						{
 							jointsDict[jointData.EnsureString("node")] = LoadTransform(jointData);
 						}
+
+						meshPart.Tag = jointsDict;
 					}
 				}
 
@@ -394,7 +392,6 @@ namespace NursiaModel
 			}
 
 			result.DefaultPose = LoadTransform(data);
-			result.Tag = jointsDict;
 
 			var childNodes = new List<NrmModelBone>();
 			if (data.ContainsKey("children"))
@@ -433,25 +430,28 @@ namespace NursiaModel
 		private static void ProcessSkins(NrmModel model)
 		{
 			var skinIndex = 0;
-			foreach (var bone in model.Bones)
+			foreach (var mesh in model.Meshes)
 			{
-				if (bone.Tag == null)
+				foreach (var part in mesh.MeshParts)
 				{
-					continue;
+					if (part.Tag == null)
+					{
+						continue;
+					}
+
+					var jointsDict = (Dictionary<string, SrtTransform>)part.Tag;
+					var joints = new List<NrmSkinJoint>();
+					foreach (var pair in jointsDict)
+					{
+						var joint = new NrmSkinJoint(model.FindBoneByName(pair.Key), Matrix.Invert(pair.Value.ToMatrix()));
+						joints.Add(joint);
+					}
+
+					var skin = new NrmSkin(skinIndex, joints.ToArray());
+					part.Skin = skin;
+
+					++skinIndex;
 				}
-
-				var jointsDict = (Dictionary<string, SrtTransform>)bone.Tag;
-				var joints = new List<NrmSkinJoint>();
-				foreach (var pair in jointsDict)
-				{
-					var joint = new NrmSkinJoint(model.FindBoneByName(pair.Key), Matrix.Invert(pair.Value.ToMatrix()));
-					joints.Add(joint);
-				}
-
-				var skin = new NrmSkin(skinIndex, joints.ToArray());
-				bone.Skin = skin;
-
-				++skinIndex;
 			}
 		}
 
@@ -538,6 +538,8 @@ namespace NursiaModel
 
 			// Process skins
 			ProcessSkins(result);
+
+			result.UpdateBoundingBoxesForSkinnedModel();
 
 			result.ClearAllTags();
 

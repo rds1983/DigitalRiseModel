@@ -17,21 +17,20 @@ namespace NursiaModel
 
 			foreach (var mesh in ModelInstance.Model.Meshes)
 			{
-				var bone = mesh.ParentBone;
-				foreach (var meshpart in bone.Mesh.MeshParts)
+				foreach (var part in mesh.MeshParts)
 				{
-					var texture = GetTextureForMeshPart(meshpart, context.WhiteTexture);
-					var color = GetColorForMeshPart(meshpart);
+					var texture = GetTextureForMeshPart(part, context.WhiteTexture);
+					var color = GetColorForMeshPart(part);
 
-					if (bone.Skin != null)
+					if (part.Skin != null)
 					{
-						var skinTransforms = ModelInstance.GetSkinTransforms(bone.Skin.SkinIndex);
-						context.Render(meshpart, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
+						var skinTransforms = ModelInstance.GetSkinTransforms(part.Skin.SkinIndex);
+						context.Render(part, EffectType.Skinned, GlobalTransform, texture, color, skinTransforms);
 					}
 					else
 					{
-						var boneTransform = ModelInstance.GetBoneGlobalTransform(bone.Index) * GlobalTransform;
-						context.Render(meshpart, EffectType.Basic, boneTransform, texture, color, null);
+						var boneTransform = ModelInstance.GetBoneGlobalTransform(mesh.ParentBone.Index) * GlobalTransform;
+						context.Render(part, EffectType.Basic, boneTransform, texture, color, null);
 					}
 				}
 			}
