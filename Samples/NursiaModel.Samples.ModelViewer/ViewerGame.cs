@@ -188,6 +188,10 @@ namespace NursiaModel.Samples.ModelViewer
 			_renderer.DirectionalLight0.DiffuseColor = Color.White;
 			_renderer.DirectionalLight0.Enabled = true;
 
+			_renderer.DirectionalLight1.Direction = new Vector3(0, 0, 1);
+			_renderer.DirectionalLight1.DiffuseColor = Color.White;
+			_renderer.DirectionalLight1.Enabled = true;
+
 			var camera = new CameraNode();
 			_controller = new CameraInputController(camera);
 

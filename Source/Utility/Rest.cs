@@ -1,90 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace NursiaModel.Utility
 {
-	internal class SkinnedVertexInfo
-	{
-		private readonly Vector3[] _positions;
-		private readonly byte[,] _indices;
-		private readonly float[,] _weights;
-
-		public int Length => _positions.Length;
-
-		public SkinnedVertexInfo(int count)
-		{
-			_positions = new Vector3[count];
-			_indices = new byte[count, 4];
-			_weights = new float[count, 4];
-		}
-
-		public void SetPosition(int index, Vector3 position)
-		{
-			_positions[index] = position;
-		}
-
-		public void SetIndices(int index, Vector4 v)
-		{
-			_indices[index, 0] = (byte)v.X;
-			_indices[index, 1] = (byte)v.Y;
-			_indices[index, 2] = (byte)v.Z;
-			_indices[index, 3] = (byte)v.W;
-		}
-
-		public void SetIndex(int index, int bone, byte val)
-		{
-			_indices[index, bone] = val;
-		}
-
-		public void SetWeights(int index, Vector4 w)
-		{
-			_weights[index, 0] = w.X;
-			_weights[index, 1] = w.Y;
-			_weights[index, 2] = w.Z;
-			_weights[index, 3] = w.W;
-		}
-
-		public void SetWeight(int index, int bone, float val)
-		{
-			_weights[index, bone] = val;
-		}
-
-		public BoundingBox CalculateBoundingBox(NrmModel model, NrmMeshPart part, Matrix[] absoluteTransforms)
-		{
-			if (absoluteTransforms == null)
-			{
-				absoluteTransforms = new Matrix[model.Bones.Length];
-				model.CopyAbsoluteBoneTransformsTo(absoluteTransforms);
-			}
-
-			var skinMatrices = (from j in part.Skin.Joints select j.InverseBindTransform * absoluteTransforms[j.Bone.Index]).ToArray();
-			var positions = new List<Vector3>();
-
-			var skinnedVertexesInfo = (SkinnedVertexInfo)part.VertexBuffer.Tag;
-			var indices = (uint[])part.IndexBuffer.Tag;
-
-			for (var i = 0; i < indices.Length; ++i)
-			{
-				var idx = indices[i];
-
-				var transform = new Matrix();
-				transform += skinMatrices[_indices[idx, 0]] * _weights[idx, 0];
-				transform += skinMatrices[_indices[idx, 1]] * _weights[idx, 1];
-				transform += skinMatrices[_indices[idx, 2]] * _weights[idx, 2];
-				transform += skinMatrices[_indices[idx, 3]] * _weights[idx, 3];
-
-				var pos = _positions[idx];
-				var v = Vector3.Transform(pos, transform);
-				positions.Add(v);
-			}
-
-			return BoundingBox.CreateFromPoints(positions);
-		}
-	}
-
 	internal static class Rest
 	{
 		/// <summary>
@@ -140,20 +59,29 @@ namespace NursiaModel.Utility
 			return newRoot;
 		}
 
-		public static void UpdateBoundingBoxesForSkinnedModel(this NrmModel model)
+		public static void UpdateBoundingBoxes(this NrmModel model)
 		{
 			Matrix[] absoluteTransforms = null;
 			foreach (var mesh in model.Meshes)
 			{
 				foreach (var part in mesh.MeshParts)
 				{
+					var bounndingBoxData = (VertexBufferBoundingBoxData)part.VertexBuffer.Tag;
+					var indices = (uint[])part.IndexBuffer.Tag;
 					if (part.Skin == null)
 					{
-						continue;
+						part.BoundingBox = bounndingBoxData.CalculateNonSkinned(indices);
 					}
+					else
+					{
+						if (absoluteTransforms == null)
+						{
+							absoluteTransforms = new Matrix[model.Bones.Length];
+							model.CopyAbsoluteBoneTransformsTo(absoluteTransforms);
+						}
 
-					var skinnedVertexesInfo = (SkinnedVertexInfo)part.VertexBuffer.Tag;
-					part.BoundingBox = skinnedVertexesInfo.CalculateBoundingBox(model, part, absoluteTransforms);
+						part.BoundingBox = bounndingBoxData.CalculateSkinned(indices, part.Skin, absoluteTransforms);
+					}
 				}
 			}
 		}

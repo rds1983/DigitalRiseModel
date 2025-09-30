@@ -12,23 +12,6 @@ namespace NursiaModel.G3d
 {
 	internal static class G3dLoader
 	{
-		private class AttributeInfo
-		{
-			public int Size { get; private set; }
-			public int ElementsCount { get; private set; }
-			public VertexElementFormat Format { get; private set; }
-			public VertexElementUsage Usage { get; private set; }
-
-			public AttributeInfo(int size, int elementsCount,
-				VertexElementFormat format, VertexElementUsage usage)
-			{
-				Size = size;
-				ElementsCount = elementsCount;
-				Format = format;
-				Usage = usage;
-			}
-		}
-
 		private class LoadContext
 		{
 			public GraphicsDevice GraphicsDevice { get; }
@@ -43,18 +26,35 @@ namespace NursiaModel.G3d
 			}
 		}
 
-		private static readonly Dictionary<string, AttributeInfo> _attributes = new Dictionary<string, AttributeInfo>
+		private class DataArray
 		{
-			["POSITION"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Position),
-			["NORMAL"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Normal),
-			["TEXCOORD"] = new AttributeInfo(8, 2, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate),
-			["BLENDWEIGHT"] = new AttributeInfo(8, 2, VertexElementFormat.Vector2, VertexElementUsage.BlendWeight),
-			["COLORPACKED"] = new AttributeInfo(4, 1, VertexElementFormat.Color, VertexElementUsage.Color),
-			["TANGENT"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Tangent),
-			["BINORMAL"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Tangent),
-		};
+			private readonly JArray _array;
+			private int _index = 0;
 
-		internal const string IdName = "name";
+			public DataArray(JArray arr)
+			{
+				_array = arr ?? throw new ArgumentNullException(nameof(arr));
+			}
+
+			public float GetFloat()
+			{
+				var result = (float)_array[_index];
+				++_index;
+
+				return result;
+			}
+
+			public Vector3 GetVector3() => new Vector3(GetFloat(), GetFloat(), GetFloat());
+			public Vector4 GetVector4() => new Vector4(GetFloat(), GetFloat(), GetFloat(), GetFloat());
+
+			public int GetInt()
+			{
+				var result = (int)_array[_index];
+				++_index;
+
+				return result;
+			}
+		}
 
 		private static SrtTransform LoadTransform(JObject data)
 		{
@@ -80,42 +80,13 @@ namespace NursiaModel.G3d
 			return result;
 		}
 
-		private static VertexDeclaration LoadDeclaration(JArray data, out int elementsPerData)
+		private static void LoadColor(byte[] dest, ref int destIdx, Color data)
 		{
-			elementsPerData = 0;
-			var elements = new List<VertexElement>();
-			var offset = 0;
-			foreach (var elementData in data)
-			{
-				var name = elementData.ToString();
-				var usage = 0;
-
-				// Remove last digit
-				var lastChar = name[name.Length - 1];
-				if (char.IsDigit(lastChar))
-				{
-					name = name.Substring(0, name.Length - 1);
-					usage = int.Parse(lastChar.ToString());
-				}
-
-				AttributeInfo attributeInfo;
-				if (!_attributes.TryGetValue(name, out attributeInfo))
-				{
-					throw new Exception(string.Format("Unknown attribute '{0}'", name));
-				}
-
-				var element = new VertexElement(offset,
-					attributeInfo.Format,
-					attributeInfo.Usage,
-					usage);
-				elements.Add(element);
-
-				offset += attributeInfo.Size;
-				elementsPerData += attributeInfo.ElementsCount;
-			}
-
-			return new VertexDeclaration(elements.ToArray());
+			var byteData = BitConverter.GetBytes(data.PackedValue);
+			Array.Copy(byteData, 0, dest, destIdx, byteData.Length);
+			destIdx += byteData.Length;
 		}
+
 
 		private static float LoadFloat(byte[] dest, ref int destIdx, float data)
 		{
@@ -141,119 +112,106 @@ namespace NursiaModel.G3d
 			return b;
 		}
 
-		private static (VertexBuffer buffer, List<Vector3> positions) LoadVertexBuffer(
-			GraphicsDevice graphicsDevice,
-			ref VertexDeclaration declaration,
-			int elementsPerRow,
-			JArray data)
+		private static VertexBuffer LoadVertexBuffer(GraphicsDevice graphicsDevice, G3dAttribute[] attributes, JArray data)
 		{
+			var dataArray = new DataArray(data);
+			var elementsPerRow = attributes.CalculateElementsPerRow();
 			var rowsCount = data.Count / elementsPerRow;
-			var elements = declaration.GetVertexElements();
 
+			var declaration = attributes.BuildDeclaration();
 			var blendWeightOffset = 0;
-			var blendWeightCount = (from e in elements
-									where e.VertexElementUsage == VertexElementUsage.BlendWeight
-									select e).Count();
-			var hasBlendWeight = blendWeightCount > 0;
-			if (blendWeightCount > 0 && blendWeightCount != 4)
+			var hasBlendWeight = false;
+
+			var elements = declaration.GetVertexElements();
+			for (var i = 0; i < declaration.GetVertexElements().Length; ++i)
 			{
-				throw new NotSupportedException("Only 4 bones per mesh is supported");
+				var el = elements[i];
+				if (el.VertexElementUsage == VertexElementUsage.BlendIndices)
+				{
+					blendWeightOffset = el.Offset;
+					hasBlendWeight = true;
+					break;
+				}
 			}
 
-			if (hasBlendWeight)
-			{
-				blendWeightOffset = (from e in elements
-									 where e.VertexElementUsage == VertexElementUsage.BlendWeight
-									 select e).First().Offset;
-
-				var newElements = new List<VertexElement>();
-				newElements.AddRange(from e in elements
-									 where e.VertexElementUsage != VertexElementUsage.BlendWeight
-									 select e);
-				newElements.Add(new VertexElement(blendWeightOffset, VertexElementFormat.Byte4, VertexElementUsage.BlendIndices, 0));
-				newElements.Add(new VertexElement(blendWeightOffset + 4, VertexElementFormat.Vector4, VertexElementUsage.BlendWeight, 0));
-				declaration = new VertexDeclaration(newElements.ToArray());
-			}
-
-			var positions = new List<Vector3>();
 			var byteData = new byte[rowsCount * declaration.VertexStride];
 
-			SkinnedVertexInfo skinnedVertexInfo = null;
-			if (hasBlendWeight)
-			{
-				skinnedVertexInfo = new SkinnedVertexInfo(rowsCount);
-			}
-
+			VertexBufferBoundingBoxData vertexInfo = new VertexBufferBoundingBoxData(rowsCount, hasBlendWeight);
 			for (var i = 0; i < rowsCount; ++i)
 			{
 				var destIdx = i * declaration.VertexStride;
-				var srcIdx = i * elementsPerRow;
 				var weightsCount = 0;
-				for (var j = 0; j < elements.Length; ++j)
+				for (var j = 0; j < attributes.Length; ++j)
 				{
-					var element = elements[j];
+					var attribute = attributes[j];
 
-					if (element.VertexElementUsage == VertexElementUsage.BlendWeight)
+					var usage = attribute.GetUsage();
+					if (usage == VertexElementUsage.BlendWeight)
 					{
 						// Convert from libgdx multiple vector2 blendweight
 						// to single int4 blendindices/vector4 blendweight
-						if (element.VertexElementFormat != VertexElementFormat.Vector2)
-						{
-							throw new Exception("Only Vector2 format for BlendWeight supported.");
-						}
-
 						var offset = i * declaration.VertexStride + blendWeightOffset + weightsCount;
-						var boneIndex = LoadByte(byteData, ref offset, (int)(float)data[srcIdx++]);
-						skinnedVertexInfo.SetIndex(i, weightsCount, boneIndex);
+						var boneIndex = LoadByte(byteData, ref offset, (int)dataArray.GetFloat());
+						vertexInfo.SetBoneIndex(i, weightsCount, boneIndex);
 
 						offset = i * declaration.VertexStride + blendWeightOffset + 4 + weightsCount * 4;
-						var boneWeight = LoadFloat(byteData, ref offset, (float)data[srcIdx++]);
-						skinnedVertexInfo.SetWeight(i, weightsCount, boneWeight);
+						var boneWeight = LoadFloat(byteData, ref offset, dataArray.GetFloat());
+						vertexInfo.SetBoneWeight(i, weightsCount, boneWeight);
 						++weightsCount;
 						continue;
 					}
 
-					switch (element.VertexElementFormat)
+					var format = attribute.GetFormat();
+					switch (format)
 					{
 						case VertexElementFormat.Vector2:
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
 							break;
 						case VertexElementFormat.Vector3:
-							var v = new Vector3((float)data[srcIdx++],
-								(float)data[srcIdx++],
-								(float)data[srcIdx++]);
-
-							if (element.VertexElementUsage == VertexElementUsage.Position)
 							{
-								positions.Add(v);
-								if (hasBlendWeight)
-								{
-									skinnedVertexInfo.SetPosition(i, v);
-								}
-							}
+								var v = dataArray.GetVector3();
 
-							LoadFloat(byteData, ref destIdx, v.X);
-							LoadFloat(byteData, ref destIdx, v.Y);
-							LoadFloat(byteData, ref destIdx, v.Z);
+								if (usage == VertexElementUsage.Position)
+								{
+									vertexInfo.SetPosition(i, v);
+								}
+
+								LoadFloat(byteData, ref destIdx, v.X);
+								LoadFloat(byteData, ref destIdx, v.Y);
+								LoadFloat(byteData, ref destIdx, v.Z);
+							}
 							break;
 						case VertexElementFormat.Vector4:
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
+							LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
 							break;
 						case VertexElementFormat.Byte4:
-							LoadByte(byteData, ref destIdx, (int)data[srcIdx++]);
-							LoadByte(byteData, ref destIdx, (int)data[srcIdx++]);
-							LoadByte(byteData, ref destIdx, (int)data[srcIdx++]);
-							LoadByte(byteData, ref destIdx, (int)data[srcIdx++]);
+							LoadByte(byteData, ref destIdx, dataArray.GetInt());
+							LoadByte(byteData, ref destIdx, dataArray.GetInt());
+							LoadByte(byteData, ref destIdx, dataArray.GetInt());
+							LoadByte(byteData, ref destIdx, dataArray.GetInt());
 							break;
 						case VertexElementFormat.Color:
-							LoadFloat(byteData, ref destIdx, (float)data[srcIdx++]);
+							var elementsCount = attribute.GetElementsCount();
+							if (elementsCount == 1)
+							{
+								// Color packed in one float value
+								LoadFloat(byteData, ref destIdx, dataArray.GetFloat());
+							} else
+							{
+								// Color is presented as 4 float values
+								var v = dataArray.GetVector4();
+								var c = new Color(v);
+
+								LoadColor(byteData, ref destIdx, c);
+							}
+
 							break;
 						default:
-							throw new Exception(string.Format("{0} not supported", element.VertexElementFormat));
+							throw new Exception($"{format} not supported");
 					}
 				}
 			}
@@ -261,9 +219,9 @@ namespace NursiaModel.G3d
 			var result = new VertexBuffer(graphicsDevice, declaration, rowsCount, BufferUsage.None);
 			result.SetData(byteData);
 
-			result.Tag = skinnedVertexInfo;
+			result.Tag = vertexInfo;
 
-			return (result, positions);
+			return result;
 		}
 
 		private static void LoadMeshData(LoadContext context)
@@ -271,45 +229,26 @@ namespace NursiaModel.G3d
 			var meshesData = context.Root["meshes"];
 			foreach (JObject meshData in meshesData)
 			{
-				// Determine vertex type
-				int elementsPerRow;
-				var declaration = LoadDeclaration((JArray)meshData["attributes"], out elementsPerRow);
+				var attributes = (from d in (JArray)meshData["attributes"] select G3dUtility.FromName(d.ToString())).ToArray();
 				var vertices = (JArray)meshData["vertices"];
 
-				int bonesCount = 0;
-				foreach (var element in declaration.GetVertexElements())
-				{
-					if (element.VertexElementUsage != VertexElementUsage.BlendWeight)
-					{
-						continue;
-					}
-
-					if (element.UsageIndex + 1 > bonesCount)
-					{
-						bonesCount = element.UsageIndex + 1;
-					}
-				}
-
-				var vb = LoadVertexBuffer(context.GraphicsDevice, ref declaration, elementsPerRow, vertices);
-
+				var vb = LoadVertexBuffer(context.GraphicsDevice, attributes, vertices);
+				var vl = (VertexBufferBoundingBoxData)vb.Tag;
 				var partsData = (JArray)meshData["parts"];
 				foreach (JObject partData in partsData)
 				{
 					var id = partData.GetId();
 
 					// var type = (PrimitiveType)Enum.Parse(typeof(PrimitiveType), partData.EnsureString("type"));
-					var partPositions = new List<Vector3>();
 					var indicesData = (JArray)partData["indices"];
 					var indices = new ushort[indicesData.Count];
-					
+
 					// IntIndices are required to calculate proper bounding box for the mesh part
 					var uintIndices = new uint[indicesData.Count];
 					for (var i = 0; i < indicesData.Count; ++i)
 					{
 						var idx = Convert.ToUInt16(indicesData[i]);
 						indices[i] = idx;
-						partPositions.Add(vb.positions[idx]);
-
 						uintIndices[i] = idx;
 					}
 
@@ -319,8 +258,9 @@ namespace NursiaModel.G3d
 					indexBuffer.SetData(indices);
 					indexBuffer.Tag = uintIndices;
 
-					var boundingBox = BoundingBox.CreateFromPoints(partPositions);
-					var part = new NrmMeshPart(vb.buffer, indexBuffer, boundingBox);
+					// Use empty bounding box for now
+					// It'll be recalculated in the end
+					var part = new NrmMeshPart(vb, indexBuffer, new BoundingBox());
 					context.Meshes[id] = part;
 				}
 			}
@@ -334,7 +274,9 @@ namespace NursiaModel.G3d
 				var material = new NrmMaterial
 				{
 					Name = materialData.GetId(),
-					DiffuseColor = Color.White
+					DiffuseColor = Color.White,
+					SpecularFactor = 0.0f,
+					SpecularPower = 250.0f
 				};
 
 				JToken obj;
@@ -370,6 +312,7 @@ namespace NursiaModel.G3d
 				{
 					var meshPart = context.Meshes[partData["meshpartid"].ToString()].Clone();
 					meshPart.Material = context.Materials[partData["materialid"].ToString()].Clone();
+
 					mesh.MeshParts.Add(meshPart);
 
 					if (partData.ContainsKey("bones"))
@@ -464,8 +407,6 @@ namespace NursiaModel.G3d
 				return;
 			}
 
-			model.Animations = new Dictionary<string, AnimationClip>();
-
 			var animationsData = (JArray)context.Root["animations"];
 			foreach (JObject animationData in animationsData)
 			{
@@ -520,7 +461,17 @@ namespace NursiaModel.G3d
 					channels.Add(channel);
 				}
 
+				if (channels.Count == 0)
+				{
+					continue;
+				}
+
 				var clip = new AnimationClip(animationData.GetId(), maxTime, channels.ToArray());
+
+				if (model.Animations == null)
+				{
+					model.Animations = new Dictionary<string, AnimationClip>();
+				}
 				model.Animations[animationData.GetId()] = clip;
 			}
 		}
@@ -539,7 +490,7 @@ namespace NursiaModel.G3d
 			// Process skins
 			ProcessSkins(result);
 
-			result.UpdateBoundingBoxesForSkinnedModel();
+			result.UpdateBoundingBoxes();
 
 			result.ClearAllTags();
 

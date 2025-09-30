@@ -391,13 +391,7 @@ namespace NursiaModel
 
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
-					var positions = new List<Vector3>();
-					SkinnedVertexInfo skinnedVertexInfos = null;
-
-					if (hasSkinning)
-					{
-						skinnedVertexInfos = new SkinnedVertexInfo(vertexCount.Value);
-					}
+					var boundingBoxData = new VertexBufferBoundingBoxData(vertexCount.Value, hasSkinning);
 
 					offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
@@ -417,48 +411,37 @@ namespace NursiaModel
 										fixed (byte* bptr = &data.Array[data.Offset + j * sz])
 										{
 											Vector3* vptr = (Vector3*)bptr;
-											positions.Add(*vptr);
-
-											if (hasSkinning)
-											{
-												skinnedVertexInfos.SetPosition(j, *vptr);
-											}
+											boundingBoxData.SetPosition(j, *vptr);
 										}
 									}
 									break;
 
 								case VertexElementUsage.BlendIndices:
-									if (hasSkinning)
+									unsafe
 									{
-										unsafe
+										fixed (byte* bptr = &data.Array[data.Offset + j * sz])
 										{
-											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+											Vector4 indices;
+											if (vertexInfos[i].Format == VertexElementFormat.Byte4)
 											{
-												Vector4 indices;
-												if (vertexInfos[i].Format == VertexElementFormat.Byte4)
-												{
-													indices = (*(Byte4*)bptr).ToVector4();
-												}
-												else
-												{
-													indices = (*(Short4*)bptr).ToVector4();
-												}
-
-												skinnedVertexInfos.SetIndices(j, indices);
+												indices = (*(Byte4*)bptr).ToVector4();
 											}
+											else
+											{
+												indices = (*(Short4*)bptr).ToVector4();
+											}
+
+											boundingBoxData.SetBonesIndices(j, indices);
 										}
 									}
 									break;
 
 								case VertexElementUsage.BlendWeight:
-									if (hasSkinning)
+									unsafe
 									{
-										unsafe
+										fixed (byte* bptr = &data.Array[data.Offset + j * sz])
 										{
-											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
-											{
-												skinnedVertexInfos.SetWeights(j, *(Vector4*)bptr);
-											}
+											boundingBoxData.SetBonesWeights(j, *(Vector4*)bptr);
 										}
 									}
 									break;
@@ -480,8 +463,9 @@ namespace NursiaModel
 						DiffuseColor = Color.White,
 					};
 
-					var box = BoundingBox.CreateFromPoints(positions);
-					var meshPart = new NrmMeshPart(vertexBuffer, indexBuffer, box)
+					// Use empty bounding box for now
+					// It'll be recalculated in the end
+					var meshPart = new NrmMeshPart(vertexBuffer, indexBuffer, new BoundingBox())
 					{
 						Material = material
 					};
@@ -489,7 +473,7 @@ namespace NursiaModel
 					if (hasSkinning)
 					{
 						// Store for later bounding boxes calculation
-						vertexBuffer.Tag = skinnedVertexInfos;
+						vertexBuffer.Tag = boundingBoxData;
 					}
 
 					if (primitive.Material != null)
@@ -755,7 +739,7 @@ namespace NursiaModel
 			var model = new NrmModel(root);
 
 			// Update bounding boxes for skinned models
-			model.UpdateBoundingBoxesForSkinnedModel();
+			model.UpdateBoundingBoxes();
 
 			// Load animations
 			LoadAnimations(model);
