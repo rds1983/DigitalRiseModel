@@ -15,5 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" PrivateAssets="All" Version="$(MonoGameVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="XNAssets.MonoGame" Version="$(XNAssetsVersion)" />
   </ItemGroup>
 </Project>

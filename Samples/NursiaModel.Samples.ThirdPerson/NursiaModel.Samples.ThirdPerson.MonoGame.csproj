@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\NursiaModel.Gltf\NursiaModel.Gltf.MonoGame.csproj" />
     <ProjectReference Include="..\NursiaModel.Samples.BasicEngine\NursiaModel.Samples.BasicEngine.MonoGame.csproj" />
   </ItemGroup>
 

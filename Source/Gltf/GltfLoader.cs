@@ -138,7 +138,7 @@ namespace NursiaModel
 			GCHandle handle = GCHandle.Alloc(result, GCHandleType.Pinned);
 			try
 			{
-				nint pointer = handle.AddrOfPinnedObject();
+				var pointer = handle.AddrOfPinnedObject();
 				Marshal.Copy(bytes.Array, bytes.Offset, pointer, bytes.Count);
 			}
 			finally

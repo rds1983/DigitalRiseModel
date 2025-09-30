@@ -112,7 +112,7 @@ namespace NursiaModel.Utility
 
 		public static float ToFloat(this string value)
 		{
-			if (!float.TryParse(value, CultureInfo.InvariantCulture, out float result))
+			if (!float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
 			{
 				RaiseError($"Can't parse '{value}' as float value.");
 			}
