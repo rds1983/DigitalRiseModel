@@ -21,6 +21,4 @@ jobs:
     - name: Install NuGet
       uses: NuGet/setup-nuget@v2
     - name: Publish NursiaModel.MonoGame to NuGet
-      run: nuget.exe push Source\NursiaModel\bin\MonoGame\Release\NursiaModel.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
-    - name: Publish NursiaModel.Gltf.MonoGame to NuGet
-      run: nuget.exe push Source\NursiaModel.Gltf\bin\MonoGame\Release\NursiaModel.Gltf.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json      
+      run: nuget.exe push Source\bin\MonoGame\Release\NursiaModel.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
