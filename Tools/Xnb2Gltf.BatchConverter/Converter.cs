@@ -174,6 +174,7 @@ namespace BatchConverter
 						var indicesShort = new ushort[part.PrimitiveCount * 3];
 						part.IndexBuffer.GetData(part.StartIndex * sizeof(short), indicesShort, 0, part.PrimitiveCount * 3);
 
+						indicesShort.Unwind();
 						primitive.Indices = ms.WriteData(bufferViews, accessors, indicesShort.ToArray());
 
 						if (part.Effect != null)

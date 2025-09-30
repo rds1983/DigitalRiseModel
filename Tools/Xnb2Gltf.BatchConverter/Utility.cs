@@ -74,5 +74,15 @@ namespace BatchConverter
 						m.M31, m.M32, m.M33, m.M34,
 						m.M41, m.M42, m.M43, m.M44,
 			};
+
+		public static void Unwind<T>(this T[] data) where T : struct
+		{
+			for (var i = 0; i < data.Length / 3; i++)
+			{
+				var temp = data[i * 3];
+				data[i * 3] = data[i * 3 + 2];
+				data[i * 3 + 2] = temp;
+			}
+		}
 	}
 }

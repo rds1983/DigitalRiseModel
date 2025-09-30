@@ -66,11 +66,11 @@ namespace NursiaModel.Utility
 			{
 				foreach (var part in mesh.MeshParts)
 				{
-					var bounndingBoxData = (VertexBufferBoundingBoxData)part.VertexBuffer.Tag;
+					var boundingBoxData = (VertexBufferBoundingBoxData)part.VertexBuffer.Tag;
 					var indices = (uint[])part.IndexBuffer.Tag;
 					if (part.Skin == null)
 					{
-						part.BoundingBox = bounndingBoxData.CalculateNonSkinned(indices);
+						part.BoundingBox = boundingBoxData.CalculateNonSkinned(indices);
 					}
 					else
 					{
@@ -80,7 +80,7 @@ namespace NursiaModel.Utility
 							model.CopyAbsoluteBoneTransformsTo(absoluteTransforms);
 						}
 
-						part.BoundingBox = bounndingBoxData.CalculateSkinned(indices, part.Skin, absoluteTransforms);
+						part.BoundingBox = boundingBoxData.CalculateSkinned(indices, part.Skin, absoluteTransforms);
 					}
 				}
 			}

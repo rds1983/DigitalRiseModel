@@ -470,11 +470,8 @@ namespace NursiaModel
 						Material = material
 					};
 
-					if (hasSkinning)
-					{
-						// Store for later bounding boxes calculation
-						vertexBuffer.Tag = boundingBoxData;
-					}
+					// Store for later bounding boxes calculation
+					vertexBuffer.Tag = boundingBoxData;
 
 					if (primitive.Material != null)
 					{
