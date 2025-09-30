@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NursiaModel.Utility
@@ -65,7 +66,7 @@ namespace NursiaModel.Utility
 			var skinnedVertexesInfo = (SkinnedVertexInfo)part.VertexBuffer.Tag;
 			var indices = (uint[])part.IndexBuffer.Tag;
 
-			for(var i = 0; i < indices.Length; ++i)
+			for (var i = 0; i < indices.Length; ++i)
 			{
 				var idx = indices[i];
 
@@ -160,7 +161,7 @@ namespace NursiaModel.Utility
 		public static uint[] ToUnsignedIntArray(this ushort[] data)
 		{
 			var result = new uint[data.Length];
-			for(var i = 0; i < data.Length; ++i)
+			for (var i = 0; i < data.Length; ++i)
 			{
 				result[i] = data[i];
 			}

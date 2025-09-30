@@ -64,15 +64,7 @@ namespace NursiaModel.Samples.ModelViewer
 
 					var assetManager = AssetManager.CreateFileAssetManager(folder);
 
-					NrmModel model;
-					if (file.EndsWith(".g3dj"))
-					{
-						model = assetManager.LoadG3d(GraphicsDevice, f);
-					}
-					else
-					{
-						model = assetManager.LoadGltf(GraphicsDevice, f);
-					}
+					var model = assetManager.LoadModel(GraphicsDevice, f);
 					ModelInstance.Model = model;
 
 					_mainPanel._comboAnimations.Widgets.Clear();

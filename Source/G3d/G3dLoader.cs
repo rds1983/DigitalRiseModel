@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NursiaModel
+namespace NursiaModel.G3d
 {
 	internal static class G3dLoader
 	{
@@ -49,7 +49,9 @@ namespace NursiaModel
 			["NORMAL"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Normal),
 			["TEXCOORD"] = new AttributeInfo(8, 2, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate),
 			["BLENDWEIGHT"] = new AttributeInfo(8, 2, VertexElementFormat.Vector2, VertexElementUsage.BlendWeight),
-			["COLORPACKED"] = new AttributeInfo(4, 1, VertexElementFormat.Color, VertexElementUsage.Color)
+			["COLORPACKED"] = new AttributeInfo(4, 1, VertexElementFormat.Color, VertexElementUsage.Color),
+			["TANGENT"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Tangent),
+			["BINORMAL"] = new AttributeInfo(12, 3, VertexElementFormat.Vector3, VertexElementUsage.Tangent),
 		};
 
 		internal const string IdName = "name";
@@ -523,10 +525,8 @@ namespace NursiaModel
 			}
 		}
 
-		public static NrmModel LoadFromJson(GraphicsDevice graphicsDevice, string json, Func<string, Texture2D> textureGetter)
+		public static NrmModel LoadFromJObject(GraphicsDevice graphicsDevice, JObject root, Func<string, Texture2D> textureGetter)
 		{
-			var root = JObject.Parse(json);
-
 			var context = new LoadContext(graphicsDevice, root);
 			LoadMeshData(context);
 			LoadMaterials(context, textureGetter);
