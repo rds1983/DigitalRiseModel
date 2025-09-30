@@ -5,6 +5,7 @@ on:
         paths:
             - 'Source/**'
             - 'Samples/**'
+            - 'Tests/**'
     workflow_dispatch:
 
 jobs:
