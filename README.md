@@ -31,6 +31,7 @@ Now add every required project .FNA.Core.csproj to your project
 
 ### Usage
 Models are loaded through [XNAssets](https://github.com/rds1983/XNAssets).
+
 Firstly create the AssetManager:
 ```c#
 AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Models");
