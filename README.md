@@ -8,7 +8,7 @@
 NursiaModel is MonoGame/FNA library that provides alternative API to XNA's 3D modelling.
 NursiaModel has following features(that XNA lacks):
 * Construct 3D models in code
-* Load 3D models from GLTF/GLB in the run-time
+* Load 3D models from GLTF/GLB and [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) in the run-time
 * Skeletal animation
 * Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
 
@@ -16,14 +16,29 @@ It's important to note that NursiaModel lacks functionality to render models. Th
 
 However [Samples](Samples) section demonstrates how it could be done. It implements simple rendering engine that is based on XNA stock effects such as BasicEffect and SkinnedEffect.
 
-### Adding Reference
-NursiaModel consists of following assemblies(click on the name for MonoGame nuget link):
-Name|Description
-----|-----------
-[NursiaModel](https://www.nuget.org/packages/NursiaModel.MonoGame)|Base 3D modelling API and 3D primitives
-[NursiaModel.Gltf](https://www.nuget.org/packages/NursiaModel.Gltf.MonoGame)|Loading 3D models from GLTF/GLB
+### Adding Reference For MonoGame
+https://www.nuget.org/packages/NursiaModel.MonoGame
 
-See [this](https://github.com/NursiaEngine/NursiaModel/wiki/Adding-Reference-For-FNA-Project) on how to reference the library in the FNA project.
+### Adding Reference For FNA
+Clone following projects in one folder:
+Link|Description
+----|-----------
+https://github.com/FNA-XNA/FNA|FNA
+https://github.com/rds1983/XNAssets|Assets management library
+this repo|
+
+Now add every required project .FNA.Core.csproj to your project
+
+### Usage
+Models are loaded through [XNAssets](https://github.com/rds1983/XNAssets).
+Firstly create the AssetManager:
+```c#
+AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Models");
+```
+Now load the model in the GLTF/GLB and [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) formats:
+```c#
+NrmModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
+```
 
 ### Samples
 Right now, [Samples](Samples) is the best way to learn how to work with the library.
