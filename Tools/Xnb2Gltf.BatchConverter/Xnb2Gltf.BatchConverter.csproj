@@ -12,7 +12,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Include="..\..\Source\NursiaModel.Gltf\glTFLoader\**\*.cs" LinkBase="glTFLoader" />
+    <Compile Include="..\..\Source\Gltf\glTFLoader\**\*.cs" LinkBase="glTFLoader" />
   </ItemGroup>  
 
 </Project>

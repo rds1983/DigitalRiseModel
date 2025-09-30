@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using glTFLoader.Schema;
-using glTFLoader;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Text.Json;
+using glTFLoader.Schema;
+using glTFLoader;
 
 namespace BatchConverter
 {
