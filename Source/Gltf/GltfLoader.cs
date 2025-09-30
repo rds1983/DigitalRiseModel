@@ -738,13 +738,10 @@ namespace NursiaModel
 			// Create the model
 			var model = new NrmModel(root);
 
-			// Update bounding boxes for skinned models
 			model.UpdateBoundingBoxes();
 
-			// Load animations
 			LoadAnimations(model);
 
-			// Clear all tags
 			model.ClearAllTags();
 
 			return model;
