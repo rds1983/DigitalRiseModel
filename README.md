@@ -47,7 +47,7 @@ Right now, [Samples](Samples) is the best way to learn how to work with the libr
 Name|Description
 ----|-----------
 BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
-ModelViewer|Application to load and view 3D models in GLTF/GLB format. Skeletal animation is supported
+ModelViewer|Application to load and view 3D models in all supported formats. Skeletal animation is supported
 ThirdPerson|Application that demonstrates how simple third person controller could be done
 
 ### Building From Source For MonoGame
