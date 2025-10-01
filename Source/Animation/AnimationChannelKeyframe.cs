@@ -14,7 +14,7 @@
  */
 using System;
 
-namespace NursiaModel.Animation
+namespace DigitalRiseModel.Animation
 {
 	public struct AnimationChannelKeyframe
 	{

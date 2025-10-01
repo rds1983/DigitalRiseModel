@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	/// <summary>
 	/// Enumerates the different possible direction of a plane normal.

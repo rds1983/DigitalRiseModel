@@ -15,9 +15,9 @@
 using System;
 using Microsoft.Xna.Framework;
 using System.Globalization;
-using NursiaModel.Utility;
+using DigitalRiseModel.Utility;
 
-namespace NursiaModel
+namespace DigitalRiseModel
 {
 	/// <summary>
 	/// Specifies how translations, orientations and scales are interpolated between keyframes.

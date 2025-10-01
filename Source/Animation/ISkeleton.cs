@@ -1,4 +1,4 @@
-﻿namespace NursiaModel.Animation
+﻿namespace DigitalRiseModel.Animation
 {
 	public interface ISkeleton
 	{

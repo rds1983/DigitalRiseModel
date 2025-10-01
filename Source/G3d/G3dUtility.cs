@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using NursiaModel.Utility;
+using DigitalRiseModel.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NursiaModel.G3d
+namespace DigitalRiseModel.G3d
 {
 	internal static class G3dUtility
 	{

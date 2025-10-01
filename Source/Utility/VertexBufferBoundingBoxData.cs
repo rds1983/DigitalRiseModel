@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NursiaModel.Utility
+namespace DigitalRiseModel.Utility
 {
 	internal class VertexBufferBoundingBoxData
 	{

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>DrmViewer</AssemblyName>
+    <TargetFramework>$(FNATargetFramework)</TargetFramework>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Myra\src\Myra\Myra.FNA.Core.csproj" />
+    <ProjectReference Include="..\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.FNA.Core.csproj" />
+  </ItemGroup>
+</Project>

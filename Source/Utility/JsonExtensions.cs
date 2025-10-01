@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace NursiaModel.Utility
+namespace DigitalRiseModel.Utility
 {
 	internal static class JsonExtensions
 	{

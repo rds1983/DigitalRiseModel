@@ -73,13 +73,13 @@
 // contributors exclude the implied warranties of merchantability, fitness for a
 // particular purpose and non-infringement.
 
-using NursiaModel.Utility;
+using DigitalRiseModel.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{

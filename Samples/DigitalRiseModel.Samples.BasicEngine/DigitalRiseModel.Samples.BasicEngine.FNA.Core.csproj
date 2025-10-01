@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(FNATargetFramework)</TargetFramework>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\DigitalRiseModel.FNA.Core.csproj" />
+  </ItemGroup>
+</Project>

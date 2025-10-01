@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NursiaModel.Animation
+namespace DigitalRiseModel.Animation
 {
 	public class AnimationClip
 	{

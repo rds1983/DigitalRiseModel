@@ -15,7 +15,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace NursiaModel.Animation
+namespace DigitalRiseModel.Animation
 {
 	/// <summary>
 	/// Specifies how an animation clip is played.

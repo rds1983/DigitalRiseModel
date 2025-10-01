@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NursiaModel.Utility
+namespace DigitalRiseModel.Utility
 {
 	internal static class Rest
 	{

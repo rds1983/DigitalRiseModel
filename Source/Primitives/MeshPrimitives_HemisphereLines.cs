@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{

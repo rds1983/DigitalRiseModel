@@ -1,4 +1,4 @@
-﻿namespace NursiaModel.G3d
+﻿namespace DigitalRiseModel.G3d
 {
 	internal enum G3dAttribute
 	{

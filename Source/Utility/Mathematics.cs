@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace NursiaModel.Utility
+namespace DigitalRiseModel.Utility
 {
 	internal static class Mathematics
 	{

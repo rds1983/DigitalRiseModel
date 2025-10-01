@@ -1,10 +1,10 @@
-﻿using NursiaModel.Utility;
+﻿using DigitalRiseModel.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	internal class MeshBuilder
 	{

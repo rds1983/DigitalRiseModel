@@ -1,9 +1,9 @@
-﻿using NursiaModel.Vertices;
+﻿using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{

@@ -1,6 +1,6 @@
 ﻿using AssetManagementBase;
-using NursiaModel.Animation;
-using NursiaModel.Utility;
+using DigitalRiseModel.Animation;
+using DigitalRiseModel.Utility;
 using glTFLoader;
 using glTFLoader.Schema;
 using Microsoft.Xna.Framework;
@@ -13,9 +13,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
 using static glTFLoader.Schema.AnimationChannelTarget;
-using AnimationChannel = NursiaModel.Animation.AnimationChannel;
+using AnimationChannel = DigitalRiseModel.Animation.AnimationChannel;
 
-namespace NursiaModel
+namespace DigitalRiseModel
 {
 	internal class GltfLoader
 	{

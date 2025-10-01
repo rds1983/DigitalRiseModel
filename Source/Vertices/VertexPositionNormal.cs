@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 
-namespace NursiaModel.Vertices
+namespace DigitalRiseModel.Vertices
 {
 	/// <summary>
 	/// Describes a custom vertex format structure that contains position and normal vector.

@@ -76,7 +76,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	public static partial class MeshPrimitives
 	{

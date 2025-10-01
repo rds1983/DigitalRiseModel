@@ -1,11 +1,11 @@
-﻿using NursiaModel.Vertices;
+﻿using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NursiaModel.Utility
+namespace DigitalRiseModel.Utility
 {
 	internal static class XNA
 	{

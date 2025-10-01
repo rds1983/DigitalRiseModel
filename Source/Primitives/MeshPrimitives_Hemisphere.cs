@@ -2,14 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.TXT', which is part of this source code package.
 
-using NursiaModel.Vertices;
+using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Diagnostics;
 
 
-namespace NursiaModel.Primitives
+namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{
