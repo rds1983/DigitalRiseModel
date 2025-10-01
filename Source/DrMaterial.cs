@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace DigitalRiseModel
 {
-	public class DrMaterial
+	public class DrMaterial: DrDisposable
 	{
 		public string Name { get; set; }
 		public Color DiffuseColor { get; set; }
@@ -18,6 +18,16 @@ namespace DigitalRiseModel
 		public Texture2D SpecularTexture { get; set; }
 
 		public object Tag { get; set; }
+
+		public override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				DiffuseTexture?.Dispose();
+				NormalTexture?.Dispose();
+				SpecularTexture?.Dispose();
+			}
+		}
 
 		public DrMaterial Clone()
 		{

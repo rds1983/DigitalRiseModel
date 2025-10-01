@@ -117,8 +117,8 @@ namespace DigitalRiseModel
 		{
 			if (disposing)
 			{
-				VertexBuffer.SafeDispose();
-				IndexBuffer.SafeDispose();
+				VertexBuffer?.Dispose();
+				IndexBuffer?.Dispose();
 			}
 		}
 
