@@ -38,7 +38,7 @@ AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Mode
 ```
 Now load the model in the GLTF/GLB and [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) formats:
 ```c#
-NrmModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
+DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
 ```
 
 ### Samples
