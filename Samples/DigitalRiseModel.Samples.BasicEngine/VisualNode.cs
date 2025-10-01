@@ -9,7 +9,7 @@ namespace DigitalRiseModel
 		public Texture2D Texture { get; set; }
 		public Color? Color { get; set; }
 
-		protected Texture2D GetTextureForMeshPart(NrmMeshPart meshpart, Texture2D defaultTexture)
+		protected Texture2D GetTextureForMeshPart(DrMeshPart meshpart, Texture2D defaultTexture)
 		{
 			if (Texture != null)
 			{
@@ -24,7 +24,7 @@ namespace DigitalRiseModel
 			return meshpart.Material.DiffuseTexture;
 		}
 
-		protected Color GetColorForMeshPart(NrmMeshPart meshpart)
+		protected Color GetColorForMeshPart(DrMeshPart meshpart)
 		{
 			if (Color != null)
 			{

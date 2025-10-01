@@ -5,12 +5,12 @@ using System.Collections.Specialized;
 
 namespace DigitalRiseModel
 {
-	public class NrmMesh : NrmDisposable
+	public class DrMesh : DrDisposable
 	{
 		private BoundingBox? _boundingBox;
 
 		public string Name { get; set; }
-		public NrmModelBone ParentBone { get; internal set; }
+		public DrModelBone ParentBone { get; internal set; }
 
 		public BoundingBox BoundingBox
 		{
@@ -31,16 +31,16 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public ObservableCollection<NrmMeshPart> MeshParts { get; } = new ObservableCollection<NrmMeshPart>();
+		public ObservableCollection<DrMeshPart> MeshParts { get; } = new ObservableCollection<DrMeshPart>();
 
 		public object Tag { get; set; }
 
-		public NrmMesh()
+		public DrMesh()
 		{
 			MeshParts.CollectionChanged += MeshParts_CollectionChanged;
 		}
 
-		public NrmMesh(NrmMeshPart part): this()
+		public DrMesh(DrMeshPart part): this()
 		{
 			if (part == null)
 			{
@@ -54,14 +54,14 @@ namespace DigitalRiseModel
 		{
 			if (args.Action == NotifyCollectionChangedAction.Add)
 			{
-				foreach (NrmMeshPart n in args.NewItems)
+				foreach (DrMeshPart n in args.NewItems)
 				{
 					n.Mesh = this;
 				}
 			}
 			else if (args.Action == NotifyCollectionChangedAction.Remove)
 			{
-				foreach (NrmMeshPart n in args.OldItems)
+				foreach (DrMeshPart n in args.OldItems)
 
 					n.Mesh = null;
 			}

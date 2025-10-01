@@ -20,7 +20,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cone.</returns>
-		public static NrmMeshPart CreateDiscMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float sectorAngle = 2 * (float)Math.PI, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateDiscMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float sectorAngle = 2 * (float)Math.PI, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 4)
 				tessellation = 4;
@@ -80,11 +80,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cone.</returns>
-		public static NrmMesh CreateDiscMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, float sectorAngle = 2 * (float)Math.PI, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateDiscMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, float sectorAngle = 2 * (float)Math.PI, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateDiscMeshPart(graphicsDevice, radius, sectorAngle, tessellation, uScale, vScale, toLeftHanded);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

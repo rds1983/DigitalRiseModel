@@ -54,9 +54,9 @@ namespace DigitalRiseModel
 		private Gltf _gltf;
 		private GraphicsDevice _device;
 		private readonly Dictionary<int, byte[]> _bufferCache = new Dictionary<int, byte[]>();
-		private readonly List<NrmMesh> _meshes = new List<NrmMesh>();
-		private readonly List<NrmModelBone> _allBones = new List<NrmModelBone>();
-		private readonly List<NrmSkin> _skins = new List<NrmSkin>();
+		private readonly List<DrMesh> _meshes = new List<DrMesh>();
+		private readonly List<DrModelBone> _allBones = new List<DrModelBone>();
+		private readonly List<DrSkin> _skins = new List<DrSkin>();
 		private int _lastSkinIndex = 0;
 
 		private byte[] FileResolver(string path)
@@ -279,7 +279,7 @@ namespace DigitalRiseModel
 		{
 			foreach (var gltfMesh in _gltf.Meshes)
 			{
-				var mesh = new NrmMesh
+				var mesh = new DrMesh
 				{
 					Name = gltfMesh.Name
 				};
@@ -458,14 +458,14 @@ namespace DigitalRiseModel
 
 					var indexBuffer = CreateIndexBuffer(primitive);
 
-					var material = new NrmMaterial
+					var material = new DrMaterial
 					{
 						DiffuseColor = Color.White,
 					};
 
 					// Use empty bounding box for now
 					// It'll be recalculated in the end
-					var meshPart = new NrmMeshPart(vertexBuffer, indexBuffer, new BoundingBox())
+					var meshPart = new DrMeshPart(vertexBuffer, indexBuffer, new BoundingBox())
 					{
 						Material = material
 					};
@@ -515,7 +515,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private NrmSkin LoadSkin(int skinId)
+		private DrSkin LoadSkin(int skinId)
 		{
 			var gltfSkin = _gltf.Skins[skinId];
 			var transforms = GetAccessorAs<Matrix>(gltfSkin.InverseBindMatrices.Value);
@@ -524,14 +524,14 @@ namespace DigitalRiseModel
 				throw new Exception($"Skin {gltfSkin.Name} inconsistency. Joints amount: {gltfSkin.Joints.Length}, Inverse bind matrices amount: {transforms.Length}");
 			}
 
-			var joints = new List<NrmSkinJoint>();
+			var joints = new List<DrSkinJoint>();
 			for (var i = 0; i < gltfSkin.Joints.Length; ++i)
 			{
 				var jointIndex = gltfSkin.Joints[i];
-				joints.Add(new NrmSkinJoint(_allBones[jointIndex], transforms[i]));
+				joints.Add(new DrSkinJoint(_allBones[jointIndex], transforms[i]));
 			}
 
-			var result = new NrmSkin(_lastSkinIndex, joints.ToArray());
+			var result = new DrSkin(_lastSkinIndex, joints.ToArray());
 			Debug.WriteLine($"Skin {gltfSkin.Name} has {gltfSkin.Joints.Length} joints");
 
 			++_lastSkinIndex;
@@ -567,13 +567,13 @@ namespace DigitalRiseModel
 					}
 				}
 
-				NrmMesh mesh = null;
+				DrMesh mesh = null;
 				if (gltfNode.Mesh != null)
 				{
 					mesh = _meshes[gltfNode.Mesh.Value];
 				}
 
-				var bone = new NrmModelBone(gltfNode.Name, mesh)
+				var bone = new DrModelBone(gltfNode.Name, mesh)
 				{
 					DefaultPose = pose
 				};
@@ -598,7 +598,7 @@ namespace DigitalRiseModel
 
 				if (gltfNode.Children != null)
 				{
-					var children = new List<NrmModelBone>();
+					var children = new List<DrModelBone>();
 					foreach (var childIndex in gltfNode.Children)
 					{
 						children.Add(_allBones[childIndex]);
@@ -620,7 +620,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private void LoadAnimations(NrmModel model)
+		private void LoadAnimations(DrModel model)
 		{
 			if (_gltf.Animations == null)
 			{
@@ -709,7 +709,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public NrmModel Load(GraphicsDevice device, AssetManager manager, string assetName)
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName)
 		{
 			_device = device ?? throw new ArgumentNullException(nameof(device));
 
@@ -733,7 +733,7 @@ namespace DigitalRiseModel
 			var root = roots.FixRoot(_allBones[scene.Nodes[0]]);
 
 			// Create the model
-			var model = new NrmModel(root);
+			var model = new DrModel(root);
 
 			model.UpdateBoundingBoxes();
 

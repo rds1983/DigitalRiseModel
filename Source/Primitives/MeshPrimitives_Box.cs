@@ -109,7 +109,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cube.</returns>
-		public static NrmMeshPart CreateBoxMeshPart(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateBoxMeshPart(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = new MeshBuilder();
 
@@ -163,10 +163,10 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cube.</returns>
-		public static NrmMesh CreateBoxMesh(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateBoxMesh(GraphicsDevice graphicsDevice, Vector3 size, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateBoxMeshPart(graphicsDevice, size, uScale, vScale, toLeftHanded);
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

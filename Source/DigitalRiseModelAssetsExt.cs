@@ -9,7 +9,7 @@ namespace DigitalRiseModel
 {
 	public static class DigitalRiseModelAssetsExt
 	{
-		private readonly static AssetLoader<NrmModel> _gltfLoader = (manager, assetName, settings, tag) =>
+		private readonly static AssetLoader<DrModel> _gltfLoader = (manager, assetName, settings, tag) =>
 		{
 			var loader = new GltfLoader();
 
@@ -17,7 +17,7 @@ namespace DigitalRiseModel
 			return loader.Load(device, manager, assetName);
 		};
 
-		private readonly static AssetLoader<NrmModel> _g3djLoader = (manager, assetName, settings, tag) =>
+		private readonly static AssetLoader<DrModel> _g3djLoader = (manager, assetName, settings, tag) =>
 		{
 			var device = (GraphicsDevice)tag;
 
@@ -27,10 +27,10 @@ namespace DigitalRiseModel
 			return G3dLoader.LoadFromJObject(device, obj, n => manager.LoadTexture2D(device, n));
 		};
 
-		public static NrmModel LoadGltf(this AssetManager assetManager, GraphicsDevice device, string path) =>
+		public static DrModel LoadGltf(this AssetManager assetManager, GraphicsDevice device, string path) =>
 			assetManager.UseLoader(_gltfLoader, path, tag: device);
 
-		public static NrmModel LoadG3dj(this AssetManager assetManager, GraphicsDevice device, string path) =>
+		public static DrModel LoadG3dj(this AssetManager assetManager, GraphicsDevice device, string path) =>
 			assetManager.UseLoader(_g3djLoader, path, tag: device);
 
 		/// <summary>
@@ -40,7 +40,7 @@ namespace DigitalRiseModel
 		/// <param name="device"></param>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public static NrmModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path)
+		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path)
 		{
 			var ext = Path.GetExtension(path).ToLower();
 

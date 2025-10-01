@@ -4,7 +4,7 @@ namespace DigitalRiseModel
 {
 	public class ModelInstanceNode : VisualNode
 	{
-		public NrmModelInstance ModelInstance { get; set; }
+		public DrModelInstance ModelInstance { get; set; }
 
 		protected internal override void Render(RenderContext context)
 		{

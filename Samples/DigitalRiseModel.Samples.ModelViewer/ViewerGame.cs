@@ -29,10 +29,10 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		private ForwardRenderer _renderer;
 		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
 		{
-			ModelInstance = new NrmModelInstance()
+			ModelInstance = new DrModelInstance()
 		};
 
-		private NrmModelInstance ModelInstance => _modelNode.ModelInstance;
+		private DrModelInstance ModelInstance => _modelNode.ModelInstance;
 
 		public ViewerGame(string path)
 		{

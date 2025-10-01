@@ -146,7 +146,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cylinder primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
-		public static NrmMeshPart CreateCylinderMeshPart(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
+		public static DrMeshPart CreateCylinderMeshPart(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
 		{
 			if (tessellation < 3) tessellation = 3;
 
@@ -201,10 +201,10 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cylinder primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be &gt;= 3</exception>
-		public static NrmMesh CreateCylinderMesh(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
+		public static DrMesh CreateCylinderMesh(GraphicsDevice graphicsDevice, float height = 1.0f, float radius = 0.5f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool capped = true, bool toLeftHanded = false)
 		{
 			var part = CreateCylinderMeshPart(graphicsDevice, height, radius, tessellation, uScale, vScale, capped, toLeftHanded);
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

@@ -425,7 +425,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>GeometricPrimitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be > 0</exception>
-		public static NrmMeshPart CreateTeapotMeshPart(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateTeapotMeshPart(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 1)
 			{
@@ -479,11 +479,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>GeometricPrimitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation must be > 0</exception>
-		public static NrmMesh CreateTeapotMesh(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateTeapotMesh(GraphicsDevice graphicsDevice, float size = 1.0f, int tessellation = 8, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateTeapotMeshPart(graphicsDevice, size, tessellation, uScale, vScale, toLeftHanded);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

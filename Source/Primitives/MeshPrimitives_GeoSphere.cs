@@ -179,7 +179,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <param name="uScale"></param>
 		/// <returns>A Geodesic sphere.</returns>
-		public static unsafe NrmMeshPart CreateGeoSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static unsafe DrMeshPart CreateGeoSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var builder = new GeoSphereBuilder();
 
@@ -456,11 +456,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <param name="uScale"></param>
 		/// <returns>A Geodesic sphere.</returns>
-		public static NrmMesh CreateGeoSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateGeoSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateGeoSphereMeshPart(graphicsDevice, radius, tessellation, uScale, vScale, toLeftHanded);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

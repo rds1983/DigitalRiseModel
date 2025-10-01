@@ -11,12 +11,12 @@ namespace DigitalRiseModel.Primitives
 		/// </summary>
 		/// <param name="graphicsDevice"></param>
 		/// <param name="box"></param>
-		/// <returns>A new <see cref="NrmMeshPart"/> that represents a box line list.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a box line list.</returns>
 		/// <remarks>
-		/// If the returned <see cref="NrmMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="NrmMeshPart"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
-		public static NrmMeshPart CreateBoxLinesMeshPart(GraphicsDevice graphicsDevice, BoundingBox box)
+		public static DrMeshPart CreateBoxLinesMeshPart(GraphicsDevice graphicsDevice, BoundingBox box)
 		{
 			var vertices = new[]
 			{
@@ -48,7 +48,7 @@ namespace DigitalRiseModel.Primitives
 				3, 7
 			};
 
-			return new NrmMeshPart(graphicsDevice, vertices, indices, PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices, indices, PrimitiveType.LineList);
 		}
 	}
 }

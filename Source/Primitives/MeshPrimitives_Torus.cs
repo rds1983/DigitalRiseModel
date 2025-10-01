@@ -93,7 +93,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A Torus primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation parameter out of range</exception>
-		public static NrmMeshPart CreateTorusMeshPart(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateTorusMeshPart(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				throw new ArgumentOutOfRangeException("tessellation", "tessellation parameter out of range");
@@ -162,10 +162,10 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A Torus primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;tessellation parameter out of range</exception>
-		public static NrmMesh CreateTorusMesh(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateTorusMesh(GraphicsDevice graphicsDevice, float majorRadius = 0.5f, float minorRadius = 0.16666f, int tessellation = 32, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateTorusMeshPart(graphicsDevice, majorRadius, minorRadius, tessellation, uScale, vScale, toLeftHanded);
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

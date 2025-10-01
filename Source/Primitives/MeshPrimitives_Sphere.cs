@@ -92,7 +92,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A sphere primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
-		public static NrmMeshPart CreateSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateSphereMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				throw new ArgumentOutOfRangeException("tessellation", "tessellation parameter out of range");
@@ -189,10 +189,10 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A sphere primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellation;Must be &gt;= 3</exception>
-		public static NrmMesh CreateSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateSphereMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateSphereMeshPart(graphicsDevice, radius, tessellation, uScale, vScale);
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

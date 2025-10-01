@@ -19,15 +19,15 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="graphicsDevice"></param>
 		/// <param name="numberOfSegments">
 		/// The number of segments. This parameter controls the detail of the mesh.</param>
-		/// <returns>A new <see cref="NrmMeshPart"/> that represents a cylinder line list.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a cylinder line list.</returns>
 		/// <remarks>
-		/// If the returned <see cref="NrmMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetCylinderLines"/> to retrieve a shared <see cref="NrmMeshPart"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetCylinderLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.
 		/// </exception>
-		public static NrmMeshPart CreateCylinderLinesMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
+		public static DrMeshPart CreateCylinderLinesMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
 		{
 			if (numberOfSegments < 3)
 				throw new ArgumentOutOfRangeException("numberOfSegments", "numberOfSegments must be greater than 2");
@@ -79,7 +79,7 @@ namespace DigitalRiseModel.Primitives
 				indices.Add((ushort)(numberOfSegments + i * numberOfSegments / 4));
 			}
 
-			return new NrmMeshPart(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
+			return new DrMeshPart(graphicsDevice, vertices.ToArray(), indices.ToArray(), PrimitiveType.LineList);
 		}
 	}
 }

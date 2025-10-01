@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace DigitalRiseModel
 {
-	public class NrmMaterial
+	public class DrMaterial
 	{
 		public string Name { get; set; }
 		public Color DiffuseColor { get; set; }
@@ -19,9 +19,9 @@ namespace DigitalRiseModel
 
 		public object Tag { get; set; }
 
-		public NrmMaterial Clone()
+		public DrMaterial Clone()
 		{
-			return new NrmMaterial
+			return new DrMaterial
 			{
 				Name = Name,
 				DiffuseColor = DiffuseColor,

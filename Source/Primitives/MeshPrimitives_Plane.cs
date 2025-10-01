@@ -55,7 +55,7 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A Plane primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationX;tessellation must be > 0</exception>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationY;tessellation must be > 0</exception>
-		public static NrmMeshPart CreatePlaneMeshPart(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
+		public static DrMeshPart CreatePlaneMeshPart(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
 		{
 			if (tessellationX < 1)
 			{
@@ -176,11 +176,11 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A Plane primitive.</returns>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationX;tessellation must be > 0</exception>
 		/// <exception cref="System.ArgumentOutOfRangeException">tessellationY;tessellation must be > 0</exception>
-		public static NrmMesh CreatePlaneMesh(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
+		public static DrMesh CreatePlaneMesh(GraphicsDevice graphicsDevice, float sizeX = 1.0f, float sizeY = 1.0f, int tessellationX = 1, int tessellationY = 1, float uScale = 1f, float vScale = 1f, bool generateBackFace = false, bool toLeftHanded = false, NormalDirection normalDirection = 0)
 		{
 			var part = CreatePlaneMeshPart(graphicsDevice, sizeX, sizeY, tessellationX, tessellationY, uScale, vScale, generateBackFace, toLeftHanded, normalDirection);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

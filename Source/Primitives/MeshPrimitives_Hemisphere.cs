@@ -21,15 +21,15 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="graphicsDevice"></param>
 		/// <param name="numberOfSegments">
 		/// The number of segments. This parameter controls the detail of the mesh.</param>
-		/// <returns>A new <see cref="NrmMeshPart"/> that represents a hemisphere.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a hemisphere.</returns>
 		/// <remarks>
-		/// If the returned <see cref="NrmMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetHemisphere"/> to retrieve a shared <see cref="NrmMeshPart"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetHemisphere"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.
 		/// </exception>
-		public static NrmMeshPart CreateHemisphereMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
+		public static DrMeshPart CreateHemisphereMeshPart(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
 		{
 			if (numberOfSegments < 3)
 				throw new ArgumentOutOfRangeException("numberOfSegments", "numberOfSegments must be greater than 2");
@@ -118,7 +118,7 @@ namespace DigitalRiseModel.Primitives
 
 			Debug.Assert(i == numberOfIndices);
 
-			return new NrmMeshPart(graphicsDevice, vertices, indices);
+			return new DrMeshPart(graphicsDevice, vertices, indices);
 		}
 
 		/// <summary>
@@ -129,19 +129,19 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="graphicsDevice"></param>
 		/// <param name="numberOfSegments">
 		/// The number of segments. This parameter controls the detail of the mesh.</param>
-		/// <returns>A new <see cref="NrmMeshPart"/> that represents a hemisphere.</returns>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a hemisphere.</returns>
 		/// <remarks>
-		/// If the returned <see cref="NrmMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetHemisphere"/> to retrieve a shared <see cref="NrmMeshPart"/> instance.
+		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
+		/// to call <see cref="GetHemisphere"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.
 		/// </exception>
-		public static NrmMesh CreateHemisphereMesh(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
+		public static DrMesh CreateHemisphereMesh(GraphicsDevice graphicsDevice, int numberOfSegments = 32)
 		{
 			var part = CreateHemisphereMeshPart(graphicsDevice, numberOfSegments);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

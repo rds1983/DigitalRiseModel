@@ -20,7 +20,7 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cone.</returns>
-		public static NrmMeshPart CreateConeMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMeshPart CreateConeMeshPart(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			if (tessellation < 3)
 				tessellation = 3;
@@ -121,11 +121,11 @@ namespace DigitalRiseModel.Primitives
 		/// <param name="vScale">Scale V coordinates 0 and the values of this parameter.</param>
 		/// <param name="toLeftHanded">if set to <c>true</c> vertices and indices will be transformed to left handed. Default is false.</param>
 		/// <returns>A cone.</returns>
-		public static NrmMesh CreateConeMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
+		public static DrMesh CreateConeMesh(GraphicsDevice graphicsDevice, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
 		{
 			var part = CreateConeMeshPart(graphicsDevice, radius, height, tessellation, uScale, vScale, toLeftHanded);
 
-			return new NrmMesh(part);
+			return new DrMesh(part);
 		}
 	}
 }

@@ -113,7 +113,7 @@ namespace DigitalRiseModel
 
 		public BoundingFrustum BoundingFrustum { get; private set; }
 		public bool DrawBoundingBoxes { get; set; } = false;
-		private NrmMeshPart BoundingBoxMesh { get; }
+		private DrMeshPart BoundingBoxMesh { get; }
 
 		internal RenderContext(GraphicsDevice graphicsDevice)
 		{
@@ -205,7 +205,7 @@ namespace DigitalRiseModel
 			_lastEffect = null;
 		}
 
-		public void Render(NrmMeshPart part, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
+		public void Render(DrMeshPart part, EffectType effectType, Matrix transform, Texture2D texture, Color color, Matrix[] boneTransforms)
 		{
 			var boundingBox = part.BoundingBox.Transform(ref transform);
 			if (DrawBoundingBoxes)

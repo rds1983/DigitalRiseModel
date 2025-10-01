@@ -4,7 +4,7 @@ namespace DigitalRiseModel
 {
 	public class MeshNode : VisualNode
 	{
-		public NrmMesh Mesh { get; set; }
+		public DrMesh Mesh { get; set; }
 
 		protected internal override void Render(RenderContext context)
 		{

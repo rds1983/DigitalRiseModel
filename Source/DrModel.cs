@@ -6,13 +6,13 @@ using System.Linq;
 
 namespace DigitalRiseModel
 {
-	public class NrmModel : NrmDisposable
+	public class DrModel : DrDisposable
 	{
-		public NrmModelBone Root { get; }
+		public DrModelBone Root { get; }
 
-		public NrmModelBone[] Bones { get; }
+		public DrModelBone[] Bones { get; }
 
-		public NrmMesh[] Meshes { get; }
+		public DrMesh[] Meshes { get; }
 
 		public Dictionary<string, AnimationClip> Animations { get; set; }
 
@@ -24,7 +24,7 @@ namespace DigitalRiseModel
 		/// <param name="root">Root Bone</param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="ArgumentException"></exception>
-		public NrmModel(NrmModelBone root)
+		public DrModel(DrModelBone root)
 		{
 			if (root == null)
 			{
@@ -34,7 +34,7 @@ namespace DigitalRiseModel
 			Root = root;
 
 			// Set bone indexes and build correct traverse order starting from root
-			var traverseOrder = new List<NrmModelBone>();
+			var traverseOrder = new List<DrModelBone>();
 			var boneIndex = 0;
 			TraverseBones(bone =>
 			{
@@ -61,7 +61,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private static void TraverseBones(NrmModelBone root, Action<NrmModelBone> action)
+		private static void TraverseBones(DrModelBone root, Action<DrModelBone> action)
 		{
 			action(root);
 
@@ -76,7 +76,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private void TraverseBones(Action<NrmModelBone> action)
+		private void TraverseBones(Action<DrModelBone> action)
 		{
 			TraverseBones(Root, action);
 		}
@@ -148,7 +148,7 @@ namespace DigitalRiseModel
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public NrmModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
+		public DrModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
 
 		public void ClearAllTags()
 		{

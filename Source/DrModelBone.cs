@@ -2,9 +2,9 @@
 
 namespace DigitalRiseModel
 {
-	public class NrmModelBone
+	public class DrModelBone
 	{
-		private NrmModelBone[] _children;
+		private DrModelBone[] _children;
 
 		public string Name { get; }
 
@@ -12,9 +12,9 @@ namespace DigitalRiseModel
 
 		public SrtTransform DefaultPose = SrtTransform.Identity;
 
-		public NrmModelBone Parent { get; private set; }
+		public DrModelBone Parent { get; private set; }
 
-		public NrmModelBone[] Children
+		public DrModelBone[] Children
 		{
 			get => _children;
 
@@ -40,11 +40,11 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public NrmMesh Mesh { get; }
+		public DrMesh Mesh { get; }
 
 		public object Tag { get; set; }
 
-		public NrmModelBone(string name, NrmMesh mesh = null)
+		public DrModelBone(string name, DrMesh mesh = null)
 		{
 			Name = name;
 			if (mesh != null)

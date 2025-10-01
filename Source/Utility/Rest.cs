@@ -37,7 +37,7 @@ namespace DigitalRiseModel.Utility
 			obj2 = temp;
 		}
 
-		public static NrmModelBone FixRoot(this List<NrmModelBone> roots, NrmModelBone currentRoot)
+		public static DrModelBone FixRoot(this List<DrModelBone> roots, DrModelBone currentRoot)
 		{
 			if (roots.Count < 2)
 			{
@@ -46,9 +46,9 @@ namespace DigitalRiseModel.Utility
 
 			// Multiple roots
 			// Create one root to store it
-			var newRoot = new NrmModelBone("_Root");
+			var newRoot = new DrModelBone("_Root");
 
-			var children = new List<NrmModelBone>();
+			var children = new List<DrModelBone>();
 			foreach (var root in roots)
 			{
 				children.Add(root);
@@ -59,7 +59,7 @@ namespace DigitalRiseModel.Utility
 			return newRoot;
 		}
 
-		public static void UpdateBoundingBoxes(this NrmModel model)
+		public static void UpdateBoundingBoxes(this DrModel model)
 		{
 			Matrix[] absoluteTransforms = null;
 			foreach (var mesh in model.Meshes)

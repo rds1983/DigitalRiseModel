@@ -2,9 +2,9 @@
 
 namespace DigitalRiseModel
 {
-	public abstract class NrmDisposable: IDisposable
+	public abstract class DrDisposable: IDisposable
 	{
-		~NrmDisposable()
+		~DrDisposable()
 		{
 			Dispose(false);
 		}

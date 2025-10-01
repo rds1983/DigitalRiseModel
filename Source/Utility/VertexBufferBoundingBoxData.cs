@@ -66,7 +66,7 @@ namespace DigitalRiseModel.Utility
 			return BoundingBox.CreateFromPoints(positions);
 		}
 
-		public BoundingBox CalculateSkinned(uint[] indices, NrmSkin skin, Matrix[] absoluteTransforms)
+		public BoundingBox CalculateSkinned(uint[] indices, DrSkin skin, Matrix[] absoluteTransforms)
 		{
 			var skinMatrices = (from j in skin.Joints select j.InverseBindTransform * absoluteTransforms[j.Bone.Index]).ToArray();
 

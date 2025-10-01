@@ -27,7 +27,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 		private readonly SceneNode _rootNode = new SceneNode();
 		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
 		{
-			ModelInstance = new NrmModelInstance()
+			ModelInstance = new DrModelInstance()
 		};
 		private readonly SceneNode _cameraMount = new SceneNode();
 		private readonly CameraNode _mainCamera = new CameraNode();

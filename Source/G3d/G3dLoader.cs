@@ -16,8 +16,8 @@ namespace DigitalRiseModel.G3d
 		{
 			public GraphicsDevice GraphicsDevice { get; }
 			public JObject Root { get; }
-			public Dictionary<string, NrmMeshPart> Meshes { get; } = new Dictionary<string, NrmMeshPart>();
-			public Dictionary<string, NrmMaterial> Materials { get; } = new Dictionary<string, NrmMaterial>();
+			public Dictionary<string, DrMeshPart> Meshes { get; } = new Dictionary<string, DrMeshPart>();
+			public Dictionary<string, DrMaterial> Materials { get; } = new Dictionary<string, DrMaterial>();
 
 			public LoadContext(GraphicsDevice graphicsDevice, JObject root)
 			{
@@ -102,7 +102,7 @@ namespace DigitalRiseModel.G3d
 		{
 			if (data > byte.MaxValue)
 			{
-				throw new Exception(string.Format("Only byte NrmModelBone indices suported. {0}", data));
+				throw new Exception(string.Format("Only byte DrModelBone indices suported. {0}", data));
 			}
 
 			var b = (byte)data;
@@ -260,7 +260,7 @@ namespace DigitalRiseModel.G3d
 
 					// Use empty bounding box for now
 					// It'll be recalculated in the end
-					var part = new NrmMeshPart(vb, indexBuffer, new BoundingBox());
+					var part = new DrMeshPart(vb, indexBuffer, new BoundingBox());
 					context.Meshes[id] = part;
 				}
 			}
@@ -271,7 +271,7 @@ namespace DigitalRiseModel.G3d
 			var materialsData = (JArray)context.Root["materials"];
 			foreach (JObject materialData in materialsData)
 			{
-				var material = new NrmMaterial
+				var material = new DrMaterial
 				{
 					Name = materialData.GetId(),
 					DiffuseColor = Color.White,
@@ -299,13 +299,13 @@ namespace DigitalRiseModel.G3d
 			}
 		}
 
-		private static NrmModelBone LoadNode(LoadContext context, JObject data)
+		private static DrModelBone LoadNode(LoadContext context, JObject data)
 		{
-			NrmModelBone result;
+			DrModelBone result;
 			if (data.ContainsKey("parts"))
 			{
 				// Mesh
-				var mesh = new NrmMesh();
+				var mesh = new DrMesh();
 
 				var partsData = (JArray)data["parts"];
 				foreach (JObject partData in partsData)
@@ -329,16 +329,16 @@ namespace DigitalRiseModel.G3d
 					}
 				}
 
-				result = new NrmModelBone(data.GetId(), mesh);
+				result = new DrModelBone(data.GetId(), mesh);
 			}
 			else
 			{
-				result = new NrmModelBone(data.GetId());
+				result = new DrModelBone(data.GetId());
 			}
 
 			result.DefaultPose = LoadTransform(data);
 
-			var childNodes = new List<NrmModelBone>();
+			var childNodes = new List<DrModelBone>();
 			if (data.ContainsKey("children"))
 			{
 				var children = (JArray)data["children"];
@@ -354,12 +354,12 @@ namespace DigitalRiseModel.G3d
 			return result;
 		}
 
-		private static NrmModelBone LoadRootNode(LoadContext context)
+		private static DrModelBone LoadRootNode(LoadContext context)
 		{
 			// Load roots
 			var nodesData = (JArray)context.Root["nodes"];
 
-			var roots = new List<NrmModelBone>();
+			var roots = new List<DrModelBone>();
 			foreach (JObject data in nodesData)
 			{
 				var root = LoadNode(context, data);
@@ -372,7 +372,7 @@ namespace DigitalRiseModel.G3d
 			return oneRoot;
 		}
 
-		private static void ProcessSkins(NrmModel model)
+		private static void ProcessSkins(DrModel model)
 		{
 			var skinIndex = 0;
 			foreach (var mesh in model.Meshes)
@@ -385,14 +385,14 @@ namespace DigitalRiseModel.G3d
 					}
 
 					var jointsDict = (Dictionary<string, SrtTransform>)part.Tag;
-					var joints = new List<NrmSkinJoint>();
+					var joints = new List<DrSkinJoint>();
 					foreach (var pair in jointsDict)
 					{
-						var joint = new NrmSkinJoint(model.FindBoneByName(pair.Key), Matrix.Invert(pair.Value.ToMatrix()));
+						var joint = new DrSkinJoint(model.FindBoneByName(pair.Key), Matrix.Invert(pair.Value.ToMatrix()));
 						joints.Add(joint);
 					}
 
-					var skin = new NrmSkin(skinIndex, joints.ToArray());
+					var skin = new DrSkin(skinIndex, joints.ToArray());
 					part.Skin = skin;
 
 					++skinIndex;
@@ -400,7 +400,7 @@ namespace DigitalRiseModel.G3d
 			}
 		}
 
-		private static void LoadAnimations(LoadContext context, NrmModel model)
+		private static void LoadAnimations(LoadContext context, DrModel model)
 		{
 			if (!context.Root.ContainsKey("animations"))
 			{
@@ -476,7 +476,7 @@ namespace DigitalRiseModel.G3d
 			}
 		}
 
-		public static NrmModel LoadFromJObject(GraphicsDevice graphicsDevice, JObject root, Func<string, Texture2D> textureGetter)
+		public static DrModel LoadFromJObject(GraphicsDevice graphicsDevice, JObject root, Func<string, Texture2D> textureGetter)
 		{
 			var context = new LoadContext(graphicsDevice, root);
 			LoadMeshData(context);
@@ -485,7 +485,7 @@ namespace DigitalRiseModel.G3d
 			var rootNode = LoadRootNode(context);
 
 			// Create the model
-			var result = new NrmModel(rootNode);
+			var result = new DrModel(rootNode);
 
 			// Process skins
 			ProcessSkins(result);

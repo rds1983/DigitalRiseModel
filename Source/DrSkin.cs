@@ -3,12 +3,12 @@ using Microsoft.Xna.Framework;
 
 namespace DigitalRiseModel
 {
-	public class NrmSkinJoint
+	public class DrSkinJoint
 	{
-		public NrmModelBone Bone { get; }
+		public DrModelBone Bone { get; }
 		public Matrix InverseBindTransform { get; }
 
-		public NrmSkinJoint(NrmModelBone bone, Matrix inverseBindTransform)
+		public DrSkinJoint(DrModelBone bone, Matrix inverseBindTransform)
 		{
 			Bone = bone ?? throw new ArgumentNullException(nameof(bone));
 			InverseBindTransform = inverseBindTransform;
@@ -17,10 +17,10 @@ namespace DigitalRiseModel
 		public override string ToString() => Bone.ToString();
 	}
 
-	public class NrmSkin
+	public class DrSkin
 	{
 		public string Name { get; set; }
-		public NrmSkinJoint[] Joints { get; }
+		public DrSkinJoint[] Joints { get; }
 		public int SkinIndex { get; private set; }
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace DigitalRiseModel
 		/// <param name="joints"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="ArgumentException"></exception>
-		public NrmSkin(int skinIndex, NrmSkinJoint[] joints)
+		public DrSkin(int skinIndex, DrSkinJoint[] joints)
 		{
 			if (skinIndex < 0)
 			{

@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 namespace DigitalRiseModel
 {
-	public class NrmModelInstance : ISkeleton
+	public class DrModelInstance : ISkeleton
 	{
 		private class SkinInfo
 		{
-			public NrmSkin Skin { get; }
+			public DrSkin Skin { get; }
 			public Matrix[] Transforms { get; }
 
-			public SkinInfo(NrmSkin skin)
+			public SkinInfo(DrSkin skin)
 			{
 				Skin = skin ?? throw new ArgumentNullException(nameof(skin));
 				Transforms = new Matrix[skin.Joints.Length];
@@ -25,11 +25,11 @@ namespace DigitalRiseModel
 		private Matrix[] _worldTransforms;
 		private Dictionary<int, SkinInfo> _skinInfos;
 
-		private NrmModel _model;
+		private DrModel _model;
 
 		public BoundingBox? BoundingBox { get; private set; }
 
-		public NrmModel Model
+		public DrModel Model
 		{
 			get => _model;
 
@@ -82,11 +82,11 @@ namespace DigitalRiseModel
 
 		public object Tag { get; set; }
 
-		public NrmModelInstance()
+		public DrModelInstance()
 		{
 		}
 
-		public NrmModelInstance(NrmModel model)
+		public DrModelInstance(DrModel model)
 		{
 			Model = model;
 		}
@@ -183,9 +183,9 @@ namespace DigitalRiseModel
 			return _skinInfos[skinIndex].Transforms;
 		}
 
-		public NrmModelInstance Clone()
+		public DrModelInstance Clone()
 		{
-			var result = new NrmModelInstance
+			var result = new DrModelInstance
 			{
 				Model = Model
 			};

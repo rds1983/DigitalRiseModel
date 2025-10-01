@@ -12,7 +12,7 @@ namespace DigitalRiseModel.Tests
 			return AssetManager.CreateFileAssetManager(Path.Combine(Utility.ExecutingAssemblyDirectory, "Assets/Models"));
 		}
 
-		private static void TestDudeModel(NrmModel model, string rootName, int bonesCount)
+		private static void TestDudeModel(DrModel model, string rootName, int bonesCount)
 		{
 			Assert.IsNotNull(model.Root);
 			Assert.AreEqual(rootName, model.Root.Name);
