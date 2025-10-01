@@ -8,7 +8,7 @@
 DigitalRiseModel is MonoGame/FNA library that provides alternative API to XNA's 3D modelling.
 DigitalRiseModel has following features(that XNA lacks):
 * Construct 3D models in code
-* Load 3D models from GLTF/GLB and [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) in the run-time
+* Load 3D models from GLTF/GLB or [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) in the run-time
 * Skeletal animation
 * Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
 
@@ -36,7 +36,7 @@ Firstly create the AssetManager:
 ```c#
 AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Models");
 ```
-Now load the model in the GLTF/GLB and [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) formats:
+Now load the model in the GLTF/GLB or [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) formats:
 ```c#
 DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
 ```
