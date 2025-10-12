@@ -136,6 +136,7 @@ namespace DigitalRiseModel
 			}
 			else
 			{
+
 				graphicsDevice.Indices = IndexBuffer;
 
 #if MONOGAME
