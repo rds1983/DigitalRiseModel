@@ -7,11 +7,6 @@ namespace DigitalRiseModel.Tests
 	[TestClass]
 	public sealed class LoadTests
 	{
-		private static AssetManager CreateAssetManager()
-		{
-			return AssetManager.CreateFileAssetManager(Path.Combine(Utility.ExecutingAssemblyDirectory, "Assets/Models"));
-		}
-
 		private static void TestDudeModel(DrModel model, string rootName, int bonesCount)
 		{
 			Assert.IsNotNull(model.Root);
@@ -30,7 +25,7 @@ namespace DigitalRiseModel.Tests
 		[DataRow("dude.g3dj", "_Root")]
 		public void LoadDudeModel(string file, string rootName = "RootNode", int bonesCount = 60)
 		{
-			var manager = CreateAssetManager();
+			var manager = Utility.CreateAssetManager();
 			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, file);
 
 			TestDudeModel(model, rootName, bonesCount);

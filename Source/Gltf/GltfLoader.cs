@@ -213,7 +213,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private IndexBuffer CreateIndexBuffer(MeshPrimitive primitive)
+		private IndexBuffer CreateIndexBuffer(MeshPrimitive primitive, TangentsGenerator tangentsGenerator)
 		{
 			if (primitive.Indices == null)
 			{
@@ -250,6 +250,7 @@ namespace DigitalRiseModel
 				var data = new ushort[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
+				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data.ToUnsignedIntArray();
 			}
@@ -258,6 +259,7 @@ namespace DigitalRiseModel
 				var data = new short[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
+				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data.ToUnsignedIntArray();
 			}
@@ -266,6 +268,7 @@ namespace DigitalRiseModel
 				var data = new uint[indexData.Count / 4];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
+				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data;
 			}
@@ -275,7 +278,7 @@ namespace DigitalRiseModel
 			return indexBuffer;
 		}
 
-		private void LoadMeshes()
+		private void LoadMeshes(TangentsGeneration tangentsGeneration)
 		{
 			foreach (var gltfMesh in _gltf.Meshes)
 			{
@@ -295,6 +298,10 @@ namespace DigitalRiseModel
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
 					var hasSkinning = false;
+					var hasTangents = false;
+					var hasBinormals = false;
+					var hasNormals = false;
+					var hasUV = false;
 					foreach (var pair in primitive.Attributes)
 					{
 						var accessor = _gltf.Accessors[pair.Value];
@@ -324,19 +331,28 @@ namespace DigitalRiseModel
 						else if (pair.Key == "NORMAL")
 						{
 							element.Usage = VertexElementUsage.Normal;
+							hasNormals = true;
 						}
 						else if (pair.Key == "TANGENT" || pair.Key == "_TANGENT")
 						{
 							element.Usage = VertexElementUsage.Tangent;
+							if (pair.Key == "TANGENT" && tangentsGeneration != TangentsGeneration.None)
+							{
+								throw new NotSupportedException("Tangents generation is impossible if 'TANGENT' channel is present");
+							}
+
+							hasTangents = true;
 						}
 						else if (pair.Key == "_BINORMAL")
 						{
 							element.Usage = VertexElementUsage.Binormal;
+							hasBinormals = true;
 						}
 						else if (pair.Key.StartsWith("TEXCOORD_"))
 						{
 							element.Usage = VertexElementUsage.TextureCoordinate;
 							element.UsageIndex = int.Parse(pair.Key.Substring(9));
+							hasUV = true;
 						}
 						else if (pair.Key.StartsWith("JOINTS_"))
 						{
@@ -378,20 +394,53 @@ namespace DigitalRiseModel
 						throw new NotSupportedException("Vertex count is not set");
 					}
 
-					var vertexElements = new VertexElement[vertexInfos.Count];
+					var generateTangents = false;
+					if (tangentsGeneration == TangentsGeneration.Always ||
+						(tangentsGeneration == TangentsGeneration.IfDoesntExist && (!hasTangents || !hasBinormals)))
+					{
+						generateTangents = true;
+					}
+
+					if (generateTangents && !hasNormals)
+					{
+						throw new Exception("Can't generate tangents without normals");
+					}
+
+					if (generateTangents && !hasUV)
+					{
+						throw new Exception("Can't generate tangents without uvs");
+					}
+
+					var vertexElements = new List<VertexElement>();
 					var offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
 					{
-						vertexElements[i] = new VertexElement(offset, vertexInfos[i].Format, vertexInfos[i].Usage, vertexInfos[i].UsageIndex);
+						vertexElements.Add(new VertexElement(offset, vertexInfos[i].Format, vertexInfos[i].Usage, vertexInfos[i].UsageIndex));
 						offset += vertexInfos[i].Format.GetSize();
 					}
 
-					var vd = new VertexDeclaration(vertexElements);
+					if (generateTangents && !hasTangents)
+					{
+						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector3, VertexElementUsage.Tangent, 0));
+					}
+
+					if (generateTangents && !hasBinormals)
+					{
+						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector3, VertexElementUsage.Binormal, 0));
+					}
+
+					var vd = new VertexDeclaration(vertexElements.ToArray());
 					var vertexBuffer = new VertexBuffer(_device, vd, vertexCount.Value, BufferUsage.None);
 
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
 					var boundingBoxData = new VertexBufferBoundingBoxData(vertexCount.Value, hasSkinning);
+
+					TangentsGenerator tangentsGenerator = null;
+					if (generateTangents)
+					{
+						tangentsGenerator = new TangentsGenerator(vertexCount.Value);
+					}
 
 					offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
@@ -411,7 +460,9 @@ namespace DigitalRiseModel
 										fixed (byte* bptr = &data.Array[data.Offset + j * sz])
 										{
 											Vector3* vptr = (Vector3*)bptr;
-											boundingBoxData.SetPosition(j, *vptr);
+											var v = *vptr;
+											boundingBoxData.SetPosition(j, v);
+											tangentsGenerator?.SetPosition(j, v);
 										}
 									}
 									break;
@@ -445,6 +496,36 @@ namespace DigitalRiseModel
 										}
 									}
 									break;
+
+								case VertexElementUsage.Normal:
+									if (tangentsGenerator != null)
+									{
+										unsafe
+										{
+											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+											{
+												Vector3* vptr = (Vector3*)bptr;
+												var v = *vptr;
+												tangentsGenerator.SetNormal(j, v);
+											}
+										}
+									}
+									break;
+
+								case VertexElementUsage.TextureCoordinate:
+									if (tangentsGenerator != null && vertexInfos[i].UsageIndex == 0)
+									{
+										unsafe
+										{
+											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
+											{
+												Vector2* vptr = (Vector2*)bptr;
+												var v = *vptr;
+												tangentsGenerator.SetUV(j, v);
+											}
+										}
+									}
+									break;
 							}
 						}
 
@@ -453,10 +534,54 @@ namespace DigitalRiseModel
 
 					vertexBuffer.SetData(vertexData);
 
-					/*					var vertices = vertexBuffer.To2DArray();
-										JsonExtensions.SerializeToFile(@"D:\Temp\data1.json", JsonExtensions.CreateOptions(), vertices);*/
+					var indexBuffer = CreateIndexBuffer(primitive, tangentsGenerator);
 
-					var indexBuffer = CreateIndexBuffer(primitive);
+					if (tangentsGenerator != null)
+					{
+						Vector3[] tangents, binormals;
+
+						tangentsGenerator.CalculateTangentFrames(out tangents, out binormals);
+
+						// Set new tangents
+						if (!hasTangents || tangentsGeneration == TangentsGeneration.Always)
+						{
+							var ve = vd.EnsureElement(VertexElementUsage.Tangent);
+							offset = ve.Offset;
+							var sz = ve.VertexElementFormat.GetSize();
+							for (var j = 0; j < vertexCount.Value; ++j)
+							{
+								unsafe
+								{
+									fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
+									{
+										Vector3* vptr = (Vector3*)bptr;
+
+										*vptr = tangents[j];
+									}
+								}
+							}
+						}
+
+						// Set new binormals
+						if (!hasBinormals || tangentsGeneration == TangentsGeneration.Always)
+						{
+							var ve = vd.EnsureElement(VertexElementUsage.Binormal);
+							offset = ve.Offset;
+							var sz = ve.VertexElementFormat.GetSize();
+							for (var j = 0; j < vertexCount.Value; ++j)
+							{
+								unsafe
+								{
+									fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
+									{
+										Vector3* vptr = (Vector3*)bptr;
+
+										*vptr = binormals[j];
+									}
+								}
+							}
+						}
+					}
 
 					var material = new DrMaterial
 					{
@@ -709,7 +834,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName)
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, TangentsGeneration tangentsGeneration)
 		{
 			_device = device ?? throw new ArgumentNullException(nameof(device));
 
@@ -724,7 +849,7 @@ namespace DigitalRiseModel
 				_gltf = Interface.LoadModel(stream);
 			}
 
-			LoadMeshes();
+			LoadMeshes(tangentsGeneration);
 			LoadAllNodes();
 
 			// Fix root

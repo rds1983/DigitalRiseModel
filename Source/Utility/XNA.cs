@@ -31,18 +31,6 @@ namespace DigitalRiseModel.Utility
 			throw new NotSupportedException("Unknown primitive type.");
 		}
 
-		public static int CalculateStride(this IEnumerable<VertexElement> elements)
-		{
-			var result = 0;
-
-			foreach (var channel in elements)
-			{
-				result += channel.VertexElementFormat.GetSize();
-			}
-
-			return result;
-		}
-
 		public static int GetSize(this VertexElementFormat elementFormat)
 		{
 			switch (elementFormat)
@@ -76,18 +64,6 @@ namespace DigitalRiseModel.Utility
 			throw new Exception($"Unknown vertex element format {elementFormat}");
 		}
 
-		public static int CalculateElementsCount(this IEnumerable<VertexElement> elements)
-		{
-			var result = 0;
-
-			foreach (var channel in elements)
-			{
-				result += channel.VertexElementFormat.GetElementsCount();
-			}
-
-			return result;
-		}
-
 		public static int GetElementsCount(this VertexElementFormat elementFormat)
 		{
 			switch (elementFormat)
@@ -113,17 +89,18 @@ namespace DigitalRiseModel.Utility
 			throw new Exception($"Unknown vertex element format {elementFormat}");
 		}
 
-		public static int GetSize(this IndexElementSize indexType)
+		public static VertexElement EnsureElement(this VertexDeclaration vd, VertexElementUsage usage)
 		{
-			switch (indexType)
+			var ve = vd.GetVertexElements();
+			for(var i = 0; i < ve.Length; ++i)
 			{
-				case IndexElementSize.SixteenBits:
-					return 2;
-				case IndexElementSize.ThirtyTwoBits:
-					return 4;
+				if (ve[i].VertexElementUsage == usage)
+				{
+					return ve[i];
+				}
 			}
 
-			throw new Exception($"Unknown index buffer type {indexType}");
+			throw new Exception($"Could not find vertex element with usage {usage}");
 		}
 
 		public static VertexBuffer CreateVertexBuffer<T>(this T[] vertices, GraphicsDevice device) where T : struct, IVertexType
@@ -178,76 +155,5 @@ namespace DigitalRiseModel.Utility
 		public static BoundingBox BuildBoundingBox(this VertexPositionNormal[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
 		public static BoundingBox BuildBoundingBox(this VertexPosition[] vertices) => BoundingBox.CreateFromPoints(vertices.GetPositions());
 		public static BoundingBox BuildBoundingBox(this Vector3[] vertices) => BoundingBox.CreateFromPoints(vertices);
-
-		/// <summary>
-		/// Used for debugging purposes
-		/// </summary>
-		/// <param name="buffer"></param>
-		/// <returns></returns>
-		public static object[][] To2DArray(this VertexBuffer buffer)
-		{
-			var elements = buffer.VertexDeclaration.GetVertexElements();
-			var elementsCount = elements.CalculateElementsCount();
-
-			var result = new object[buffer.VertexCount][];
-			for (var i = 0; i < result.Length; ++i)
-			{
-				result[i] = new object[elementsCount];
-			}
-
-			var stride = elements.CalculateStride();
-			var data = new byte[buffer.VertexCount * stride];
-
-			buffer.GetData(data);
-
-			unsafe
-			{
-				fixed (byte* sptr = data)
-				{
-					var ptr = sptr;
-
-					for (var i = 0; i < buffer.VertexCount; ++i)
-					{
-						var idx = 0;
-						for (var j = 0; j < elements.Length; ++j)
-						{
-							var element = elements[j];
-							var format = element.VertexElementFormat;
-
-							for (var k = 0; k < format.GetElementsCount(); ++k)
-							{
-								if (format == VertexElementFormat.Byte4 || format == VertexElementFormat.Color)
-								{
-									var b = *ptr;
-									result[i][idx] = b;
-
-									++ptr;
-								}
-								else if (format == VertexElementFormat.Short2 || format == VertexElementFormat.Short4)
-								{
-									short s;
-									Buffer.MemoryCopy(ptr, &s, 2, 2);
-									result[i][idx] = s;
-
-									ptr += 2;
-								}
-								else
-								{
-									float f;
-									Buffer.MemoryCopy(ptr, &f, 4, 4);
-									result[i][idx] = f;
-
-									ptr += 4;
-								}
-
-								++idx;
-							}
-						}
-					}
-				}
-
-				return result;
-			}
-		}
 	}
 }

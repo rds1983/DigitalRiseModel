@@ -166,11 +166,10 @@ namespace DigitalRiseModel
 			foreach (var mesh in _model.Meshes)
 			{
 				var bone = mesh.ParentBone;
-
 				foreach(var part in mesh.MeshParts)
 				{
 					var m = part.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
-					var bb = bone.Mesh.BoundingBox.Transform(ref m);
+					var bb = part.BoundingBox.Transform(ref m);
 					boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);
 				}
 			}

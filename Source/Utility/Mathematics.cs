@@ -81,5 +81,15 @@ namespace DigitalRiseModel.Utility
 
 			return new BoundingBox(min, max);
 		}
+
+		public static bool IsFinite(this float v)
+		{
+			return !float.IsInfinity(v) && !float.IsNaN(v);
+		}
+
+		public static bool IsFinite(this Vector3 v)
+		{
+			return IsFinite(v.X) && IsFinite(v.Y) && IsFinite(v.Z);
+		}
 	}
 }
