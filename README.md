@@ -38,10 +38,11 @@ Firstly create the AssetManager:
 ```c#
 AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Models");
 ```
-Now load the model in the GLTF/GLB or [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) formats:
+Now load the model in the GLTF/GLB format:
 ```c#
 DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
 ```
+The DrModel API is pretty much similar to XNA Model.
 
 ### Samples
 Right now, [Samples](Samples) is the best way to learn how to work with the library.
