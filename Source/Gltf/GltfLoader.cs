@@ -278,6 +278,30 @@ namespace DigitalRiseModel
 			return indexBuffer;
 		}
 
+		private Texture2D LoadTexture(int index)
+		{
+			var gltfTexture = _gltf.Textures[index];
+			if (gltfTexture.Source != null)
+			{
+				var image = _gltf.Images[gltfTexture.Source.Value];
+
+				if (image.BufferView.HasValue)
+				{
+					throw new Exception("Embedded images arent supported.");
+				}
+				else if (image.Uri.StartsWith("data:image/"))
+				{
+					throw new Exception("Embedded images with uri arent supported.");
+				}
+				else
+				{
+					return _assetManager.LoadTexture2D(_device, image.Uri);
+				}
+			}
+
+			return null;
+		}
+
 		private void LoadMeshes(TangentsGeneration tangentsGeneration)
 		{
 			foreach (var gltfMesh in _gltf.Meshes)
@@ -299,7 +323,6 @@ namespace DigitalRiseModel
 					int? vertexCount = null;
 					var hasSkinning = false;
 					var hasTangents = false;
-					var hasBinormals = false;
 					var hasNormals = false;
 					var hasUV = false;
 					foreach (var pair in primitive.Attributes)
@@ -336,17 +359,11 @@ namespace DigitalRiseModel
 						else if (pair.Key == "TANGENT" || pair.Key == "_TANGENT")
 						{
 							element.Usage = VertexElementUsage.Tangent;
-							if (pair.Key == "TANGENT" && tangentsGeneration != TangentsGeneration.None)
-							{
-								throw new NotSupportedException("Tangents generation is impossible if 'TANGENT' channel is present");
-							}
-
-							hasTangents = true;
+							hasTangents = element.Format == VertexElementFormat.Vector4;
 						}
 						else if (pair.Key == "_BINORMAL")
 						{
 							element.Usage = VertexElementUsage.Binormal;
-							hasBinormals = true;
 						}
 						else if (pair.Key.StartsWith("TEXCOORD_"))
 						{
@@ -394,12 +411,8 @@ namespace DigitalRiseModel
 						throw new NotSupportedException("Vertex count is not set");
 					}
 
-					var generateTangents = false;
-					if (tangentsGeneration == TangentsGeneration.Always ||
-						(tangentsGeneration == TangentsGeneration.IfDoesntExist && (!hasTangents || !hasBinormals)))
-					{
-						generateTangents = true;
-					}
+					var generateTangents = tangentsGeneration == TangentsGeneration.Always ||
+						(tangentsGeneration == TangentsGeneration.IfDoesntExist && (!hasTangents));
 
 					if (generateTangents && !hasNormals)
 					{
@@ -415,18 +428,19 @@ namespace DigitalRiseModel
 					var offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
 					{
+						var usage = vertexInfos[i].Usage;
+						if (generateTangents && (usage == VertexElementUsage.Tangent || usage == VertexElementUsage.Binormal))
+						{
+							continue;
+						}
+
 						vertexElements.Add(new VertexElement(offset, vertexInfos[i].Format, vertexInfos[i].Usage, vertexInfos[i].UsageIndex));
 						offset += vertexInfos[i].Format.GetSize();
 					}
 
-					if (generateTangents && !hasTangents)
+					if (generateTangents)
 					{
-						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector3, VertexElementUsage.Tangent, 0));
-					}
-
-					if (generateTangents && !hasBinormals)
-					{
-						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector3, VertexElementUsage.Binormal, 0));
+						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector4, VertexElementUsage.Tangent, 0));
 					}
 
 					var vd = new VertexDeclaration(vertexElements.ToArray());
@@ -538,46 +552,21 @@ namespace DigitalRiseModel
 
 					if (tangentsGenerator != null)
 					{
-						Vector3[] tangents, binormals;
-
-						tangentsGenerator.CalculateTangentFrames(out tangents, out binormals);
+						var tangents = tangentsGenerator.CalculateTangentFrames();
 
 						// Set new tangents
-						if (!hasTangents || tangentsGeneration == TangentsGeneration.Always)
+						var ve = vd.EnsureElement(VertexElementUsage.Tangent);
+						offset = ve.Offset;
+						var sz = ve.VertexElementFormat.GetSize();
+						for (var j = 0; j < vertexCount.Value; ++j)
 						{
-							var ve = vd.EnsureElement(VertexElementUsage.Tangent);
-							offset = ve.Offset;
-							var sz = ve.VertexElementFormat.GetSize();
-							for (var j = 0; j < vertexCount.Value; ++j)
+							unsafe
 							{
-								unsafe
+								fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
 								{
-									fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
-									{
-										Vector3* vptr = (Vector3*)bptr;
+									Vector4* vptr = (Vector4*)bptr;
 
-										*vptr = tangents[j];
-									}
-								}
-							}
-						}
-
-						// Set new binormals
-						if (!hasBinormals || tangentsGeneration == TangentsGeneration.Always)
-						{
-							var ve = vd.EnsureElement(VertexElementUsage.Binormal);
-							offset = ve.Offset;
-							var sz = ve.VertexElementFormat.GetSize();
-							for (var j = 0; j < vertexCount.Value; ++j)
-							{
-								unsafe
-								{
-									fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
-									{
-										Vector3* vptr = (Vector3*)bptr;
-
-										*vptr = binormals[j];
-									}
+									*vptr = tangents[j];
 								}
 							}
 						}
@@ -586,6 +575,8 @@ namespace DigitalRiseModel
 					var material = new DrMaterial
 					{
 						DiffuseColor = Color.White,
+						SpecularFactor = 0.0f,
+						SpecularPower = 250.0f
 					};
 
 					// Use empty bounding box for now
@@ -607,27 +598,12 @@ namespace DigitalRiseModel
 							material.DiffuseColor = new Color(gltfMaterial.PbrMetallicRoughness.BaseColorFactor.ToVector4());
 							if (gltfMaterial.PbrMetallicRoughness.BaseColorTexture != null)
 							{
-								var gltfTexture = _gltf.Textures[gltfMaterial.PbrMetallicRoughness.BaseColorTexture.Index];
-								if (gltfTexture.Source != null)
-								{
-									var image = _gltf.Images[gltfTexture.Source.Value];
+								material.DiffuseTexture = LoadTexture(gltfMaterial.PbrMetallicRoughness.BaseColorTexture.Index);
+							}
 
-									if (image.BufferView.HasValue)
-									{
-										throw new Exception("Embedded images arent supported.");
-									}
-									else if (image.Uri.StartsWith("data:image/"))
-									{
-										throw new Exception("Embedded images with uri arent supported.");
-									}
-									else
-									{
-										// Create default material
-										material.SpecularFactor = 0.0f;
-										material.SpecularPower = 250.0f;
-										material.DiffuseTexture = _assetManager.LoadTexture2D(_device, image.Uri);
-									}
-								}
+							if (gltfMaterial.NormalTexture != null)
+							{
+								material.NormalTexture = LoadTexture(gltfMaterial.NormalTexture.Index);
 							}
 
 						}
