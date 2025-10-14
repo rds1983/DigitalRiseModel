@@ -59,6 +59,7 @@ namespace DigitalRiseModel
 		private readonly List<DrSkin> _skins = new List<DrSkin>();
 		private int _lastSkinIndex = 0;
 		private ModelLoadingSettings _loadingSettings;
+		private bool _ignoreMaterials;
 
 		private byte[] FileResolver(string path)
 		{
@@ -281,11 +282,6 @@ namespace DigitalRiseModel
 
 		private Texture2D LoadTexture(int index)
 		{
-			if (_loadingSettings.IgnoreTextures)
-			{
-				return null;
-			}
-
 			var gltfTexture = _gltf.Textures[index];
 			if (gltfTexture.Source != null)
 			{
@@ -579,12 +575,7 @@ namespace DigitalRiseModel
 
 					vertexBuffer.SetData(vertexData);
 
-					var material = new DrMaterial
-					{
-						DiffuseColor = Color.White,
-						SpecularFactor = 0.0f,
-						SpecularPower = 250.0f
-					};
+					var material = new DrMaterial();
 
 					// Use empty bounding box for now
 					// It'll be recalculated in the end
@@ -596,7 +587,7 @@ namespace DigitalRiseModel
 					// Store for later bounding boxes calculation
 					vertexBuffer.Tag = boundingBoxData;
 
-					if (primitive.Material != null)
+					if (!_ignoreMaterials && primitive.Material != null)
 					{
 						var gltfMaterial = _gltf.Materials[primitive.Material.Value];
 						material.Name = gltfMaterial.Name;
@@ -817,10 +808,11 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, ModelLoadingSettings loadingSettings)
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, ModelLoadingSettings loadingSettings, bool ignoreMaterials)
 		{
 			_device = device ?? throw new ArgumentNullException(nameof(device));
 			_loadingSettings = loadingSettings ?? throw new ArgumentNullException(nameof(loadingSettings));
+			_ignoreMaterials = ignoreMaterials;
 
 			_meshes.Clear();
 			_allBones.Clear();

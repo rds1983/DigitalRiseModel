@@ -3,19 +3,19 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace DigitalRiseModel
 {
-	public class DrMaterial: DrDisposable
+	public class DrMaterial : DrDisposable
 	{
 		public string Name { get; set; }
-		public Color DiffuseColor { get; set; }
-		public Color SpecularColor { get; set; }
-		public float SpecularFactor { get; set; }
-		public float SpecularPower { get; set; }
+		public Color DiffuseColor { get; set; } = Color.White;
+		public Color SpecularColor { get; set; } = Color.Black;
+		public Color EmissiveColor { get; set; } = Color.Black;
+		public float Shininess { get; set; }
 
 		public Texture2D DiffuseTexture { get; set; }
-
-		public Texture2D NormalTexture { get; set; }
-
 		public Texture2D SpecularTexture { get; set; }
+		public Texture2D EmissionTexture { get; set; }
+		public Texture2D NormalTexture { get; set; }
+		public Texture2D OcclusionTexture { get; set; }
 
 		public object Tag { get; set; }
 
@@ -36,11 +36,13 @@ namespace DigitalRiseModel
 				Name = Name,
 				DiffuseColor = DiffuseColor,
 				SpecularColor = SpecularColor,
-				SpecularFactor = SpecularFactor,
-				SpecularPower = SpecularPower,
+				EmissiveColor = EmissiveColor,
+				Shininess = Shininess,
 				DiffuseTexture = DiffuseTexture,
-				NormalTexture = NormalTexture,
 				SpecularTexture = SpecularTexture,
+				EmissionTexture = EmissionTexture,
+				NormalTexture = NormalTexture,
+				OcclusionTexture = OcclusionTexture
 			};
 		}
 	}

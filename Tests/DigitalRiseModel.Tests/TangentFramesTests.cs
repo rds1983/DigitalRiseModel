@@ -12,7 +12,8 @@ namespace DigitalRiseModel.Tests
 			var manager = Utility.CreateAssetManager();
 
 			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "dude.glb", 
-				generateTangents: TangentsGeneration.IfDoesntExist, ignoreTextures: true);
+				materialsLoadingMode: MaterialsLoadingMode.IgnoreEverything,
+				generateTangents: TangentsGeneration.IfDoesntExist);
 
 			// Make sure it has tangents and binormals
 			for (var i = 0; i < model.Meshes.Length; ++i)

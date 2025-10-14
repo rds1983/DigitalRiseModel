@@ -1,0 +1,17 @@
+{
+	"Cesium_Milk_Truck": [
+		{
+			"DiffuseColor": "blue",
+			"EmissiveColor": "yellow"
+		},
+		{
+			"SpecularColor": "#123456"
+		}
+	],
+	"Wheels": [
+		{
+			"DiffuseColor": "Red",
+			"SpecularColor": "White"
+		}
+	]
+}
