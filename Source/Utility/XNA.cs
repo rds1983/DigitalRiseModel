@@ -105,7 +105,7 @@ namespace DigitalRiseModel.Utility
 
 		public static VertexBuffer CreateVertexBuffer<T>(this T[] vertices, GraphicsDevice device) where T : struct, IVertexType
 		{
-			var result = new VertexBuffer(device, new T().VertexDeclaration, vertices.Length, BufferUsage.None);
+			var result = new VertexBuffer(device, new T().VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
 			result.SetData(vertices);
 
 			return result;
@@ -113,7 +113,7 @@ namespace DigitalRiseModel.Utility
 
 		public static VertexBuffer CreateVertexBuffer(this Vector3[] vertices, GraphicsDevice device)
 		{
-			var result = new VertexBuffer(device, VertexPosition.VertexDeclaration, vertices.Length, BufferUsage.None);
+			var result = new VertexBuffer(device, VertexPosition.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
 			result.SetData(vertices);
 
 			return result;
@@ -121,7 +121,7 @@ namespace DigitalRiseModel.Utility
 
 		public static IndexBuffer CreateIndexBuffer(this ushort[] indices, GraphicsDevice device)
 		{
-			var result = new IndexBuffer(device, IndexElementSize.SixteenBits, indices.Length, BufferUsage.None);
+			var result = new IndexBuffer(device, IndexElementSize.SixteenBits, indices.Length, BufferUsage.WriteOnly);
 			result.SetData(indices);
 
 			return result;
@@ -129,7 +129,7 @@ namespace DigitalRiseModel.Utility
 
 		public static IndexBuffer CreateIndexBuffer(this int[] indices, GraphicsDevice device)
 		{
-			var result = new IndexBuffer(device, IndexElementSize.ThirtyTwoBits, indices.Length, BufferUsage.None);
+			var result = new IndexBuffer(device, IndexElementSize.ThirtyTwoBits, indices.Length, BufferUsage.WriteOnly);
 			result.SetData(indices);
 
 			return result;
