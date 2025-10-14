@@ -312,8 +312,9 @@ namespace DigitalRiseModel
 					Name = gltfMesh.Name
 				};
 
-				foreach (var primitive in gltfMesh.Primitives)
+				for(var partIndex = 0; partIndex < gltfMesh.Primitives.Length; ++partIndex)
 				{
+					var primitive = gltfMesh.Primitives[partIndex];
 					if (primitive.Mode != MeshPrimitive.ModeEnum.TRIANGLES)
 					{
 						throw new NotSupportedException($"Primitive mode {primitive.Mode} isn't supported.");
@@ -523,6 +524,22 @@ namespace DigitalRiseModel
 						if (gltfMaterial.OcclusionTexture != null)
 						{
 							material.OcclusionTexture = LoadTexture(gltfMaterial.OcclusionTexture.Index);
+						}
+					}
+
+					if (material.NormalTexture != null)
+					{
+						// Warn about inability to do the normal mapping
+						if (meshPart.TangentsFormat == null && AMBConfiguration.Logger != null)
+						{
+							var meshName = mesh.Name ?? "(unnamed)";
+							AMBConfiguration.Logger($"Mesh {meshName} part {partIndex} material has normal texture, but lacks tangents channel");
+						}
+
+						if (meshPart.TangentsFormat != VertexElementFormat.Vector4 && AMBConfiguration.Logger != null)
+						{
+							var meshName = mesh.Name ?? "(unnamed)";
+							AMBConfiguration.Logger($"Mesh {meshName} part {partIndex} material has normal texture, but its tangents channel is not of type Vector4");
 						}
 					}
 

@@ -3,7 +3,6 @@ using DigitalRiseModel.Vertices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Linq;
 
 namespace DigitalRiseModel
 {
@@ -23,13 +22,15 @@ namespace DigitalRiseModel
 		public BoundingBox BoundingBox { get; set; }
 
 		public bool HasNormals { get; }
+		public VertexElementFormat? TangentsFormat { get; }
 
 		public DrMaterial Material { get; set; }
 		public DrSkin Skin { get; set; }
 
 		public object Tag { get; set; }
 
-		private DrMeshPart(PrimitiveType primitiveType, int primitiveCount, VertexBuffer vertexBuffer, int vertexOffset, int numVertices, IndexBuffer indexBuffer, int startIndex, BoundingBox boundingBox, bool hasNormals)
+		private DrMeshPart(PrimitiveType primitiveType, int primitiveCount, VertexBuffer vertexBuffer, int vertexOffset, int numVertices,
+			IndexBuffer indexBuffer, int startIndex, BoundingBox boundingBox, bool hasNormals, VertexElementFormat? tangentsFormat)
 		{
 			PrimitiveType = primitiveType;
 			PrimitiveCount = primitiveCount;
@@ -40,6 +41,7 @@ namespace DigitalRiseModel
 			StartIndex = startIndex;
 			BoundingBox = boundingBox;
 			HasNormals = hasNormals;
+			TangentsFormat = tangentsFormat;
 		}
 
 		public DrMeshPart(VertexBuffer vertexBuffer, IndexBuffer indexBuffer, BoundingBox boundingBox, PrimitiveType primitiveType = PrimitiveType.TriangleList, int? numVertices = null, int? primitiveCount = null, int vertexOffset = 0, int startIndex = 0)
@@ -60,7 +62,11 @@ namespace DigitalRiseModel
 			StartIndex = startIndex;
 
 			BoundingBox = boundingBox;
-			HasNormals = (from el in VertexBuffer.VertexDeclaration.GetVertexElements() where el.VertexElementUsage == VertexElementUsage.Normal select el).Count() > 0;
+
+			HasNormals = VertexBuffer.VertexDeclaration.FindElement(VertexElementUsage.Normal) != null;
+
+			var tangents = VertexBuffer.VertexDeclaration.FindElement(VertexElementUsage.Tangent);
+			TangentsFormat = tangents != null ? tangents.Value.VertexElementFormat : (VertexElementFormat?)null;
 		}
 
 		public DrMeshPart(GraphicsDevice graphicsDevice, VertexPositionNormalTexture[] vertices, ushort[] indices, PrimitiveType primitiveType = PrimitiveType.TriangleList) :
@@ -149,7 +155,7 @@ namespace DigitalRiseModel
 
 		public DrMeshPart Clone()
 		{
-			return new DrMeshPart(PrimitiveType, PrimitiveCount, VertexBuffer, VertexOffset, NumVertices, IndexBuffer, StartIndex, BoundingBox, HasNormals)
+			return new DrMeshPart(PrimitiveType, PrimitiveCount, VertexBuffer, VertexOffset, NumVertices, IndexBuffer, StartIndex, BoundingBox, HasNormals, TangentsFormat)
 			{
 				Material = Material?.Clone(),
 				Tag = Tag

@@ -89,10 +89,10 @@ namespace DigitalRiseModel.Utility
 			throw new Exception($"Unknown vertex element format {elementFormat}");
 		}
 
-		public static VertexElement EnsureElement(this VertexDeclaration vd, VertexElementUsage usage)
+		public static VertexElement? FindElement(this VertexDeclaration vd, VertexElementUsage usage)
 		{
 			var ve = vd.GetVertexElements();
-			for(var i = 0; i < ve.Length; ++i)
+			for (var i = 0; i < ve.Length; ++i)
 			{
 				if (ve[i].VertexElementUsage == usage)
 				{
@@ -100,7 +100,19 @@ namespace DigitalRiseModel.Utility
 				}
 			}
 
-			throw new Exception($"Could not find vertex element with usage {usage}");
+			return null;
+		}
+
+		public static VertexElement EnsureElement(this VertexDeclaration vd, VertexElementUsage usage)
+		{
+			var result = vd.FindElement(usage);
+
+			if (result == null)
+			{
+				throw new Exception($"Could not find vertex element with usage {usage}");
+			}
+
+			return result.Value;
 		}
 
 		public static VertexBuffer CreateVertexBuffer<T>(this T[] vertices, GraphicsDevice device) where T : struct, IVertexType
@@ -135,7 +147,7 @@ namespace DigitalRiseModel.Utility
 			return result;
 		}
 
-		public static void Unwind<T>(this T[] data) where T: struct
+		public static void Unwind<T>(this T[] data) where T : struct
 		{
 			for (var i = 0; i < data.Length / 3; i++)
 			{
