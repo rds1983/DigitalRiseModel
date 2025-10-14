@@ -13,7 +13,7 @@ namespace DigitalRiseModel
 
 		public Texture2D DiffuseTexture { get; set; }
 		public Texture2D SpecularTexture { get; set; }
-		public Texture2D EmissionTexture { get; set; }
+		public Texture2D EmissiveTexture { get; set; }
 		public Texture2D NormalTexture { get; set; }
 		public Texture2D OcclusionTexture { get; set; }
 
@@ -40,7 +40,7 @@ namespace DigitalRiseModel
 				Shininess = Shininess,
 				DiffuseTexture = DiffuseTexture,
 				SpecularTexture = SpecularTexture,
-				EmissionTexture = EmissionTexture,
+				EmissiveTexture = EmissiveTexture,
 				NormalTexture = NormalTexture,
 				OcclusionTexture = OcclusionTexture
 			};

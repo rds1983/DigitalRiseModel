@@ -58,8 +58,7 @@ namespace DigitalRiseModel
 		private readonly List<DrModelBone> _allBones = new List<DrModelBone>();
 		private readonly List<DrSkin> _skins = new List<DrSkin>();
 		private int _lastSkinIndex = 0;
-		private ModelLoadingSettings _loadingSettings;
-		private bool _ignoreMaterials;
+		private ModelLoadSettings _loadSettings;
 
 		private byte[] FileResolver(string path)
 		{
@@ -215,7 +214,7 @@ namespace DigitalRiseModel
 			}
 		}
 
-		private IndexBuffer CreateIndexBuffer(MeshPrimitive primitive, TangentsGenerator tangentsGenerator)
+		private IndexBuffer CreateIndexBuffer(MeshPrimitive primitive)
 		{
 			if (primitive.Indices == null)
 			{
@@ -241,7 +240,7 @@ namespace DigitalRiseModel
 				indexAccessor.ComponentType == ComponentTypeEnum.UNSIGNED_SHORT ?
 				IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits;
 
-			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, _loadingSettings.BufferUsage);
+			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, _loadSettings.BufferUsage);
 			indexBuffer.SetData(0, indexData.Array, indexData.Offset, indexData.Count);
 
 			uint[] uintIndices;
@@ -252,7 +251,6 @@ namespace DigitalRiseModel
 				var data = new ushort[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
-				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data.ToUnsignedIntArray();
 			}
@@ -261,7 +259,6 @@ namespace DigitalRiseModel
 				var data = new short[indexData.Count / 2];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
-				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data.ToUnsignedIntArray();
 			}
@@ -270,7 +267,6 @@ namespace DigitalRiseModel
 				var data = new uint[indexData.Count / 4];
 				System.Buffer.BlockCopy(indexData.Array, indexData.Offset, data, 0, indexData.Count);
 				data.Unwind();
-				tangentsGenerator?.SetIndices(data);
 				indexBuffer.SetData(data);
 				uintIndices = data;
 			}
@@ -297,7 +293,10 @@ namespace DigitalRiseModel
 				}
 				else
 				{
-					return _assetManager.LoadTexture2D(_device, image.Uri);
+					var result = _assetManager.LoadTexture2D(_device, image.Uri);
+					result.Name = image.Uri;
+
+					return result;
 				}
 			}
 
@@ -324,9 +323,6 @@ namespace DigitalRiseModel
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
 					var hasSkinning = false;
-					var hasTangents = false;
-					var hasNormals = false;
-					var hasUV = false;
 					foreach (var pair in primitive.Attributes)
 					{
 						var accessor = _gltf.Accessors[pair.Value];
@@ -356,12 +352,10 @@ namespace DigitalRiseModel
 						else if (pair.Key == "NORMAL")
 						{
 							element.Usage = VertexElementUsage.Normal;
-							hasNormals = true;
 						}
 						else if (pair.Key == "TANGENT" || pair.Key == "_TANGENT")
 						{
 							element.Usage = VertexElementUsage.Tangent;
-							hasTangents = element.Format == VertexElementFormat.Vector4;
 						}
 						else if (pair.Key == "_BINORMAL")
 						{
@@ -371,7 +365,6 @@ namespace DigitalRiseModel
 						{
 							element.Usage = VertexElementUsage.TextureCoordinate;
 							element.UsageIndex = int.Parse(pair.Key.Substring(9));
-							hasUV = true;
 						}
 						else if (pair.Key.StartsWith("JOINTS_"))
 						{
@@ -413,50 +406,20 @@ namespace DigitalRiseModel
 						throw new NotSupportedException("Vertex count is not set");
 					}
 
-					var generateTangents = _loadingSettings.GenerateTangents == TangentsGeneration.Always ||
-						(_loadingSettings.GenerateTangents == TangentsGeneration.IfDoesntExist && (!hasTangents));
-
-					if (generateTangents && !hasNormals)
-					{
-						throw new Exception("Can't generate tangents without normals");
-					}
-
-					if (generateTangents && !hasUV)
-					{
-						throw new Exception("Can't generate tangents without uvs");
-					}
-
 					var vertexElements = new List<VertexElement>();
 					var offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
 					{
-						var usage = vertexInfos[i].Usage;
-						if (generateTangents && (usage == VertexElementUsage.Tangent || usage == VertexElementUsage.Binormal))
-						{
-							continue;
-						}
-
 						vertexElements.Add(new VertexElement(offset, vertexInfos[i].Format, vertexInfos[i].Usage, vertexInfos[i].UsageIndex));
 						offset += vertexInfos[i].Format.GetSize();
 					}
 
-					if (generateTangents)
-					{
-						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector4, VertexElementUsage.Tangent, 0));
-					}
-
 					var vd = new VertexDeclaration(vertexElements.ToArray());
-					var vertexBuffer = new VertexBuffer(_device, vd, vertexCount.Value, _loadingSettings.BufferUsage);
+					var vertexBuffer = new VertexBuffer(_device, vd, vertexCount.Value, _loadSettings.BufferUsage);
 
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
 					var boundingBoxData = new VertexBufferBoundingBoxData(vertexCount.Value, hasSkinning);
-
-					TangentsGenerator tangentsGenerator = null;
-					if (generateTangents)
-					{
-						tangentsGenerator = new TangentsGenerator(vertexCount.Value);
-					}
 
 					offset = 0;
 					for (var i = 0; i < vertexInfos.Count; ++i)
@@ -478,7 +441,6 @@ namespace DigitalRiseModel
 											Vector3* vptr = (Vector3*)bptr;
 											var v = *vptr;
 											boundingBoxData.SetPosition(j, v);
-											tangentsGenerator?.SetPosition(j, v);
 										}
 									}
 									break;
@@ -512,68 +474,15 @@ namespace DigitalRiseModel
 										}
 									}
 									break;
-
-								case VertexElementUsage.Normal:
-									if (tangentsGenerator != null)
-									{
-										unsafe
-										{
-											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
-											{
-												Vector3* vptr = (Vector3*)bptr;
-												var v = *vptr;
-												tangentsGenerator.SetNormal(j, v);
-											}
-										}
-									}
-									break;
-
-								case VertexElementUsage.TextureCoordinate:
-									if (tangentsGenerator != null && vertexInfos[i].UsageIndex == 0)
-									{
-										unsafe
-										{
-											fixed (byte* bptr = &data.Array[data.Offset + j * sz])
-											{
-												Vector2* vptr = (Vector2*)bptr;
-												var v = *vptr;
-												tangentsGenerator.SetUV(j, v);
-											}
-										}
-									}
-									break;
 							}
 						}
 
 						offset += sz;
 					}
 
-					// Create index buffer now in order to update tangentsGenerator with indices data
-					var indexBuffer = CreateIndexBuffer(primitive, tangentsGenerator);
-
-					if (tangentsGenerator != null)
-					{
-						var tangents = tangentsGenerator.CalculateTangentFrames();
-
-						// Set new tangents
-						var ve = vd.EnsureElement(VertexElementUsage.Tangent);
-						offset = ve.Offset;
-						var sz = ve.VertexElementFormat.GetSize();
-						for (var j = 0; j < vertexCount.Value; ++j)
-						{
-							unsafe
-							{
-								fixed (byte* bptr = &vertexData[offset + j * vd.VertexStride])
-								{
-									Vector4* vptr = (Vector4*)bptr;
-
-									*vptr = tangents[j];
-								}
-							}
-						}
-					}
-
 					vertexBuffer.SetData(vertexData);
+
+					var indexBuffer = CreateIndexBuffer(primitive);
 
 					var material = new DrMaterial();
 
@@ -587,23 +496,33 @@ namespace DigitalRiseModel
 					// Store for later bounding boxes calculation
 					vertexBuffer.Tag = boundingBoxData;
 
-					if (!_ignoreMaterials && primitive.Material != null)
+					if (!_loadSettings.Flags.HasFlag(ModelLoadFlags.IgnoreMaterials) && primitive.Material != null)
 					{
 						var gltfMaterial = _gltf.Materials[primitive.Material.Value];
 						material.Name = gltfMaterial.Name;
 						if (gltfMaterial.PbrMetallicRoughness != null)
 						{
-							material.DiffuseColor = new Color(gltfMaterial.PbrMetallicRoughness.BaseColorFactor.ToVector4());
+							material.DiffuseColor = gltfMaterial.PbrMetallicRoughness.BaseColorFactor.ToColor();
 							if (gltfMaterial.PbrMetallicRoughness.BaseColorTexture != null)
 							{
 								material.DiffuseTexture = LoadTexture(gltfMaterial.PbrMetallicRoughness.BaseColorTexture.Index);
 							}
+						}
 
-							if (gltfMaterial.NormalTexture != null)
-							{
-								material.NormalTexture = LoadTexture(gltfMaterial.NormalTexture.Index);
-							}
+						if (gltfMaterial.EmissiveTexture != null)
+						{
+							material.EmissiveColor = gltfMaterial.EmissiveFactor.ToColor();
+							material.EmissiveTexture = LoadTexture(gltfMaterial.EmissiveTexture.Index);
+						}
 
+						if (gltfMaterial.NormalTexture != null)
+						{
+							material.NormalTexture = LoadTexture(gltfMaterial.NormalTexture.Index);
+						}
+
+						if (gltfMaterial.OcclusionTexture != null)
+						{
+							material.OcclusionTexture = LoadTexture(gltfMaterial.OcclusionTexture.Index);
 						}
 					}
 
@@ -808,11 +727,10 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, ModelLoadingSettings loadingSettings, bool ignoreMaterials)
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, ModelLoadSettings loadingSettings)
 		{
 			_device = device ?? throw new ArgumentNullException(nameof(device));
-			_loadingSettings = loadingSettings ?? throw new ArgumentNullException(nameof(loadingSettings));
-			_ignoreMaterials = ignoreMaterials;
+			_loadSettings = loadingSettings ?? throw new ArgumentNullException(nameof(loadingSettings));
 
 			_meshes.Clear();
 			_allBones.Clear();
