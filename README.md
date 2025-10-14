@@ -8,9 +8,10 @@
 DigitalRiseModel is MonoGame/FNA library that provides alternative API to XNA's 3D modelling.
 DigitalRiseModel has following features(that XNA lacks):
 * Construct 3D models in code
-* Load 3D models from GLTF/GLB or [G3DJ](https://xoppa.github.io/blog/loading-models-using-libgdx/) in the run-time
+* Load 3D models from GLTF/GLB in the run-time
 * Skeletal animation
 * Generate tangent frames if required
+* Optionally load materials from external json
 * Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
 
 It's important to note that DigitalRiseModel lacks functionality to render models. That is the responsibility of the developer. 
