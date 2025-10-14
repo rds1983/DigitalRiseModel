@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Xna.Framework;
 using System;
 using System.Linq;
 
@@ -69,6 +68,24 @@ namespace DigitalRiseModel.Tests
 			// manager should hold 2 models
 			var modelCount = (from pair in manager.Cache where pair.Value is DrModel select pair.Key).Count();
 			Assert.AreEqual(2, modelCount);
+		}
+
+		[TestMethod]
+		public void TestEnsureUVs()
+		{
+			var manager = Utility.CreateAssetManager();
+
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "BrainStem.glb", ModelLoadFlags.IgnoreMaterials);
+
+			// Make sure there isn't uv
+			var el = model.Meshes[0].MeshParts[0].VertexBuffer.VertexDeclaration.FindElement(Microsoft.Xna.Framework.Graphics.VertexElementUsage.TextureCoordinate);
+			Assert.IsNull(el, "This model should lack uv channel");
+
+			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "BrainStem.glb", ModelLoadFlags.IgnoreMaterials | ModelLoadFlags.EnsureUVs);
+
+			// Now there should be uv
+			el = model.Meshes[0].MeshParts[0].VertexBuffer.VertexDeclaration.FindElement(Microsoft.Xna.Framework.Graphics.VertexElementUsage.TextureCoordinate);
+			Assert.IsNotNull(el, "This model should have uv now");
 		}
 	}
 }

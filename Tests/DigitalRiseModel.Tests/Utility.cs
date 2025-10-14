@@ -139,20 +139,6 @@ namespace DigitalRiseModel.Tests
 			throw new Exception($"Unknown index buffer type {indexType}");
 		}
 
-		public static VertexElement EnsureElement(this VertexDeclaration vd, VertexElementUsage usage)
-		{
-			var ve = vd.GetVertexElements();
-			for (var i = 0; i < ve.Length; ++i)
-			{
-				if (ve[i].VertexElementUsage == usage)
-				{
-					return ve[i];
-				}
-			}
-
-			throw new Exception($"Could not find vertex element with usage {usage}");
-		}
-
 		/// <summary>
 		/// Used for debugging purposes
 		/// </summary>
@@ -243,6 +229,32 @@ namespace DigitalRiseModel.Tests
 					Assert.AreEqual(v1, v2, ZeroTolerance);
 				}
 			}
+		}
+
+		public static VertexElement? FindElement(this VertexDeclaration vd, VertexElementUsage usage)
+		{
+			var ve = vd.GetVertexElements();
+			for (var i = 0; i < ve.Length; ++i)
+			{
+				if (ve[i].VertexElementUsage == usage)
+				{
+					return ve[i];
+				}
+			}
+
+			return null;
+		}
+
+		public static VertexElement EnsureElement(this VertexDeclaration vd, VertexElementUsage usage)
+		{
+			var result = vd.FindElement(usage);
+
+			if (result == null)
+			{
+				throw new Exception($"Could not find vertex element with usage {usage}");
+			}
+
+			return result.Value;
 		}
 	}
 }

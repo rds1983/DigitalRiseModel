@@ -7,9 +7,25 @@ namespace DigitalRiseModel
 	[Flags]
 	public enum ModelLoadFlags
 	{
+		/// <summary>
+		/// No additional load options
+		/// </summary>
 		None = 0,
+
+		/// <summary>
+		/// Ignore loading materials
+		/// </summary>
 		IgnoreMaterials = 1 << 0,
+
+		/// <summary>
+		/// Create vertex/index buffers whose data could be retrieved through GetData
+		/// </summary>
 		ReadableBuffers = 1 << 1,
+
+		/// <summary>
+		/// If a mesh doesn't have uv channel, it'll be added with zero values
+		/// </summary>
+		EnsureUVs = 1 << 2,
 	}
 
 	internal class ModelLoadSettings : IAssetSettings

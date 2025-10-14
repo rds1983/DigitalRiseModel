@@ -324,6 +324,7 @@ namespace DigitalRiseModel
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
 					var hasSkinning = false;
+					var hasUvs = false;
 					foreach (var pair in primitive.Attributes)
 					{
 						var accessor = _gltf.Accessors[pair.Value];
@@ -366,6 +367,7 @@ namespace DigitalRiseModel
 						{
 							element.Usage = VertexElementUsage.TextureCoordinate;
 							element.UsageIndex = int.Parse(pair.Key.Substring(9));
+							hasUvs = true;
 						}
 						else if (pair.Key.StartsWith("JOINTS_"))
 						{
@@ -413,6 +415,12 @@ namespace DigitalRiseModel
 					{
 						vertexElements.Add(new VertexElement(offset, vertexInfos[i].Format, vertexInfos[i].Usage, vertexInfos[i].UsageIndex));
 						offset += vertexInfos[i].Format.GetSize();
+					}
+
+					if (!hasUvs && _loadSettings.Flags.HasFlag(ModelLoadFlags.EnsureUVs))
+					{
+						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0));
+						offset += VertexElementFormat.Vector2.GetSize();
 					}
 
 					var vd = new VertexDeclaration(vertexElements.ToArray());
