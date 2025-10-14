@@ -10,8 +10,6 @@ DigitalRiseModel has following features(that XNA lacks):
 * Construct 3D models in code
 * Load 3D models from GLTF/GLB in the run-time
 * Skeletal animation
-* Generate tangent frames if required using [MikkTSpaceSharp](https://github.com/rds1983/MikkTSpaceSharp)
-* Optionally load materials from external json
 * Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
 
 It's important to note that DigitalRiseModel lacks functionality to render models. That is the responsibility of the developer. 
