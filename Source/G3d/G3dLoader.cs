@@ -18,11 +18,13 @@ namespace DigitalRiseModel.G3d
 			public JObject Root { get; }
 			public Dictionary<string, DrMeshPart> Meshes { get; } = new Dictionary<string, DrMeshPart>();
 			public Dictionary<string, DrMaterial> Materials { get; } = new Dictionary<string, DrMaterial>();
+			public ModelLoadingSettings LoadingSettings { get; }
 
-			public LoadContext(GraphicsDevice graphicsDevice, JObject root)
+			public LoadContext(GraphicsDevice graphicsDevice, JObject root, ModelLoadingSettings loadingSettings)
 			{
 				GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
 				Root = root ?? throw new ArgumentNullException(nameof(root));
+				LoadingSettings = loadingSettings ?? throw new ArgumentNullException(nameof(LoadingSettings));
 			}
 		}
 
@@ -112,7 +114,7 @@ namespace DigitalRiseModel.G3d
 			return b;
 		}
 
-		private static VertexBuffer LoadVertexBuffer(GraphicsDevice graphicsDevice, G3dAttribute[] attributes, JArray data)
+		private static VertexBuffer LoadVertexBuffer(LoadContext context, G3dAttribute[] attributes, JArray data)
 		{
 			var dataArray = new DataArray(data);
 			var elementsPerRow = attributes.CalculateElementsPerRow();
@@ -216,7 +218,7 @@ namespace DigitalRiseModel.G3d
 				}
 			}
 
-			var result = new VertexBuffer(graphicsDevice, declaration, rowsCount, BufferUsage.None);
+			var result = new VertexBuffer(context.GraphicsDevice, declaration, rowsCount, context.LoadingSettings.BufferUsage);
 			result.SetData(byteData);
 
 			result.Tag = vertexInfo;
@@ -232,7 +234,7 @@ namespace DigitalRiseModel.G3d
 				var attributes = (from d in (JArray)meshData["attributes"] select G3dUtility.FromName(d.ToString())).ToArray();
 				var vertices = (JArray)meshData["vertices"];
 
-				var vb = LoadVertexBuffer(context.GraphicsDevice, attributes, vertices);
+				var vb = LoadVertexBuffer(context, attributes, vertices);
 				var vl = (VertexBufferBoundingBoxData)vb.Tag;
 				var partsData = (JArray)meshData["parts"];
 				foreach (JObject partData in partsData)
@@ -254,7 +256,7 @@ namespace DigitalRiseModel.G3d
 
 					indices.Unwind();
 
-					var indexBuffer = new IndexBuffer(context.GraphicsDevice, IndexElementSize.SixteenBits, indices.Length, BufferUsage.None);
+					var indexBuffer = new IndexBuffer(context.GraphicsDevice, IndexElementSize.SixteenBits, indices.Length, context.LoadingSettings.BufferUsage);
 					indexBuffer.SetData(indices);
 					indexBuffer.Tag = uintIndices;
 
@@ -289,7 +291,7 @@ namespace DigitalRiseModel.G3d
 				if (texturesData != null)
 				{
 					var name = texturesData[0]["filename"].ToString();
-					if (!string.IsNullOrEmpty(name))
+					if (!string.IsNullOrEmpty(name) && !context.LoadingSettings.IgnoreTextures)
 					{
 						material.DiffuseTexture = textureGetter(name);
 					}
@@ -476,9 +478,9 @@ namespace DigitalRiseModel.G3d
 			}
 		}
 
-		public static DrModel LoadFromJObject(GraphicsDevice graphicsDevice, JObject root, Func<string, Texture2D> textureGetter)
+		public static DrModel LoadFromJObject(GraphicsDevice graphicsDevice, JObject root, ModelLoadingSettings loadingSettings, Func<string, Texture2D> textureGetter)
 		{
-			var context = new LoadContext(graphicsDevice, root);
+			var context = new LoadContext(graphicsDevice, root, loadingSettings);
 			LoadMeshData(context);
 			LoadMaterials(context, textureGetter);
 

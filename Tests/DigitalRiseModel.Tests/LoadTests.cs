@@ -1,5 +1,6 @@
 ﻿using AssetManagementBase;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 
 namespace DigitalRiseModel.Tests
@@ -7,7 +8,7 @@ namespace DigitalRiseModel.Tests
 	[TestClass]
 	public sealed class LoadTests
 	{
-		private static void TestDudeModel(DrModel model, string rootName, int bonesCount)
+		private static void TestDudeModel(DrModel model, string rootName, int bonesCount, bool readableBuffers)
 		{
 			Assert.IsNotNull(model.Root);
 			Assert.AreEqual(rootName, model.Root.Name);
@@ -17,6 +18,21 @@ namespace DigitalRiseModel.Tests
 			Assert.AreEqual(1, model.Meshes.Length);
 			Assert.IsNotNull(model.Animations);
 			Assert.AreEqual(1, model.Animations.Count);
+
+			var firstPart = model.Meshes[0].MeshParts[0];
+			var data = new byte[firstPart.VertexBuffer.VertexCount * firstPart.VertexBuffer.VertexDeclaration.VertexStride];
+
+			if (readableBuffers)
+			{
+				firstPart.VertexBuffer.GetData(data);
+			}
+			else
+			{
+				Assert.ThrowsException<NotSupportedException>(() =>
+				{
+					firstPart.VertexBuffer.GetData(data);
+				});
+			}
 		}
 
 		[TestMethod]
@@ -26,9 +42,12 @@ namespace DigitalRiseModel.Tests
 		public void LoadDudeModel(string file, string rootName = "RootNode", int bonesCount = 60)
 		{
 			var manager = Utility.CreateAssetManager();
-			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, file);
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, file, ignoreTextures: true, readableBuffers: false);
+			TestDudeModel(model, rootName, bonesCount, false);
 
-			TestDudeModel(model, rootName, bonesCount);
+			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, file, ignoreTextures: true, readableBuffers: true);
+			TestDudeModel(model, rootName, bonesCount, true);
+
 		}
 	}
 }

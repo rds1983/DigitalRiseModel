@@ -16,22 +16,6 @@ namespace DigitalRiseModel
 
 	public static class DigitalRiseModelAssetsExt
 	{
-		private class ModelLoadingSettings : IAssetSettings
-		{
-			public TangentsGeneration GenerateTangents { get; }
-			private string CacheKey { get; }
-
-
-			public ModelLoadingSettings(TangentsGeneration generateTangents)
-			{
-				GenerateTangents = generateTangents;
-
-				CacheKey = GenerateTangents.ToString();
-			}
-
-			public string BuildKey() => CacheKey;
-		}
-
 		private readonly static AssetLoader<DrModel> _gltfLoader = (manager, assetName, settings, tag) =>
 		{
 			var loader = new GltfLoader();
@@ -44,7 +28,7 @@ namespace DigitalRiseModel
 			}
 
 			var device = (GraphicsDevice)tag;
-			return loader.Load(device, manager, assetName, generateTangents);
+			return loader.Load(device, manager, assetName, (ModelLoadingSettings)settings);
 		};
 
 		private readonly static AssetLoader<DrModel> _g3djLoader = (manager, assetName, settings, tag) =>
@@ -54,22 +38,8 @@ namespace DigitalRiseModel
 			var json = manager.ReadAsString(assetName);
 			var obj = JObject.Parse(json);
 
-			return G3dLoader.LoadFromJObject(device, obj, n => manager.LoadTexture2D(device, n));
+			return G3dLoader.LoadFromJObject(device, obj, (ModelLoadingSettings)settings, n => manager.LoadTexture2D(device, n));
 		};
-
-		public static DrModel LoadGltf(this AssetManager assetManager, GraphicsDevice device, string path, TangentsGeneration generateTangents = TangentsGeneration.None)
-		{
-			ModelLoadingSettings settings = null;
-			if (generateTangents != TangentsGeneration.None)
-			{
-				settings = new ModelLoadingSettings(generateTangents);
-			}
-
-			return assetManager.UseLoader(_gltfLoader, path, settings, tag: device);
-		}
-
-		public static DrModel LoadG3dj(this AssetManager assetManager, GraphicsDevice device, string path) =>
-			assetManager.UseLoader(_g3djLoader, path, tag: device);
 
 		/// <summary>
 		/// Loads a model determining its type on the extension
@@ -78,18 +48,29 @@ namespace DigitalRiseModel
 		/// <param name="device"></param>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path, TangentsGeneration generateTangents = TangentsGeneration.None)
+		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path,
+			bool ignoreTextures = false, TangentsGeneration generateTangents = TangentsGeneration.None, bool readableBuffers = false)
 		{
+			ModelLoadingSettings settings = null;
+			if (ignoreTextures == false && generateTangents == TangentsGeneration.None && readableBuffers == false)
+			{
+				settings = ModelLoadingSettings.Default;
+			}
+			else
+			{
+				settings = new ModelLoadingSettings(ignoreTextures, generateTangents, readableBuffers);
+			}
+
 			var ext = Path.GetExtension(path).ToLower();
 
 			switch (ext)
 			{
 				case ".gltf":
 				case ".glb":
-					return LoadGltf(assetManager, device, path, generateTangents);
+					return assetManager.UseLoader(_gltfLoader, path, settings, tag: device);
 
 				case ".g3dj":
-					return LoadG3dj(assetManager, device, path);
+					return assetManager.UseLoader(_g3djLoader, path, settings, tag: device);
 			}
 
 			throw new NotSupportedException($"Unknown extension {ext}");

@@ -83,7 +83,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 			_rootNode.Children.Add(planeNode);
 
 			// Model
-			var model = assetManager.LoadGltf(GraphicsDevice, "Models/mixamo_base.glb");
+			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo_base.glb");
 			_modelNode.ModelInstance.Model = model;
 
 			_rootNode.Children.Add(_modelNode);

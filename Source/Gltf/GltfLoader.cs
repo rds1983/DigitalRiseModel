@@ -58,6 +58,7 @@ namespace DigitalRiseModel
 		private readonly List<DrModelBone> _allBones = new List<DrModelBone>();
 		private readonly List<DrSkin> _skins = new List<DrSkin>();
 		private int _lastSkinIndex = 0;
+		private ModelLoadingSettings _loadingSettings;
 
 		private byte[] FileResolver(string path)
 		{
@@ -239,7 +240,7 @@ namespace DigitalRiseModel
 				indexAccessor.ComponentType == ComponentTypeEnum.UNSIGNED_SHORT ?
 				IndexElementSize.SixteenBits : IndexElementSize.ThirtyTwoBits;
 
-			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, BufferUsage.None);
+			var indexBuffer = new IndexBuffer(_device, elementSize, indexAccessor.Count, _loadingSettings.BufferUsage);
 			indexBuffer.SetData(0, indexData.Array, indexData.Offset, indexData.Count);
 
 			uint[] uintIndices;
@@ -280,6 +281,11 @@ namespace DigitalRiseModel
 
 		private Texture2D LoadTexture(int index)
 		{
+			if (_loadingSettings.IgnoreTextures)
+			{
+				return null;
+			}
+
 			var gltfTexture = _gltf.Textures[index];
 			if (gltfTexture.Source != null)
 			{
@@ -302,7 +308,7 @@ namespace DigitalRiseModel
 			return null;
 		}
 
-		private void LoadMeshes(TangentsGeneration tangentsGeneration)
+		private void LoadMeshes()
 		{
 			foreach (var gltfMesh in _gltf.Meshes)
 			{
@@ -411,8 +417,8 @@ namespace DigitalRiseModel
 						throw new NotSupportedException("Vertex count is not set");
 					}
 
-					var generateTangents = tangentsGeneration == TangentsGeneration.Always ||
-						(tangentsGeneration == TangentsGeneration.IfDoesntExist && (!hasTangents));
+					var generateTangents = _loadingSettings.GenerateTangents == TangentsGeneration.Always ||
+						(_loadingSettings.GenerateTangents == TangentsGeneration.IfDoesntExist && (!hasTangents));
 
 					if (generateTangents && !hasNormals)
 					{
@@ -444,7 +450,7 @@ namespace DigitalRiseModel
 					}
 
 					var vd = new VertexDeclaration(vertexElements.ToArray());
-					var vertexBuffer = new VertexBuffer(_device, vd, vertexCount.Value, BufferUsage.None);
+					var vertexBuffer = new VertexBuffer(_device, vd, vertexCount.Value, _loadingSettings.BufferUsage);
 
 					// Set vertex data
 					var vertexData = new byte[vertexCount.Value * vd.VertexStride];
@@ -546,8 +552,7 @@ namespace DigitalRiseModel
 						offset += sz;
 					}
 
-					vertexBuffer.SetData(vertexData);
-
+					// Create index buffer now in order to update tangentsGenerator with indices data
 					var indexBuffer = CreateIndexBuffer(primitive, tangentsGenerator);
 
 					if (tangentsGenerator != null)
@@ -571,6 +576,8 @@ namespace DigitalRiseModel
 							}
 						}
 					}
+
+					vertexBuffer.SetData(vertexData);
 
 					var material = new DrMaterial
 					{
@@ -810,9 +817,10 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, TangentsGeneration tangentsGeneration)
+		public DrModel Load(GraphicsDevice device, AssetManager manager, string assetName, ModelLoadingSettings loadingSettings)
 		{
 			_device = device ?? throw new ArgumentNullException(nameof(device));
+			_loadingSettings = loadingSettings ?? throw new ArgumentNullException(nameof(loadingSettings));
 
 			_meshes.Clear();
 			_allBones.Clear();
@@ -825,7 +833,7 @@ namespace DigitalRiseModel
 				_gltf = Interface.LoadModel(stream);
 			}
 
-			LoadMeshes(tangentsGeneration);
+			LoadMeshes();
 			LoadAllNodes();
 
 			// Fix root
