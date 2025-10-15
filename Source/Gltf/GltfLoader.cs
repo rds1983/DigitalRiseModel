@@ -419,6 +419,8 @@ namespace DigitalRiseModel
 
 					if (!hasUvs && _loadSettings.Flags.HasFlag(ModelLoadFlags.EnsureUVs))
 					{
+						Rest.Log($"Mesh {mesh.MeshName()} part {partIndex} material lacks uv channel. Adding it, since EnsureUVs flag is set");
+
 						vertexElements.Add(new VertexElement(offset, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0));
 						offset += VertexElementFormat.Vector2.GetSize();
 					}
@@ -535,18 +537,16 @@ namespace DigitalRiseModel
 						}
 					}
 
-					if (material.NormalTexture != null && AMBConfiguration.Logger != null)
+					if (material.NormalTexture != null)
 					{
 						// Warn about inability to do the normal mapping
 						if (meshPart.TangentsFormat == null)
 						{
-							var meshName = mesh.Name ?? "(unnamed)";
-							AMBConfiguration.Logger($"Mesh {meshName} part {partIndex} material has normal texture, but lacks tangents channel");
+							Rest.Log($"Mesh {mesh.MeshName()} part {partIndex} material has normal texture, but lacks tangents channel");
 						}
 						else if (meshPart.TangentsFormat != VertexElementFormat.Vector4)
 						{
-							var meshName = mesh.Name ?? "(unnamed)";
-							AMBConfiguration.Logger($"Mesh {meshName} part {partIndex} material has normal texture, but its tangents channel is not of type Vector4");
+							Rest.Log($"Mesh {mesh.MeshName()} part {partIndex} material has normal texture, but its tangents channel is not of type Vector4");
 						}
 					}
 

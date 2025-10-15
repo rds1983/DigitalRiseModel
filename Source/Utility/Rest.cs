@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AssetManagementBase;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 namespace DigitalRiseModel.Utility
@@ -88,5 +89,9 @@ namespace DigitalRiseModel.Utility
 
 			return result;
 		}
+
+		public static string MeshName(this DrMesh mesh) => mesh.Name ?? "(unnamed)";
+
+		public static void Log(string message) => AMBConfiguration.Logger?.Invoke(message);
 	}
 }
