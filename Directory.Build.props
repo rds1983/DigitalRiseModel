@@ -9,12 +9,11 @@
     <MonoGameTargetFramework>netstandard2.0</MonoGameTargetFramework>
     <AppMonoGameTargetFramework>net8.0</AppMonoGameTargetFramework>
     <FNATargetFramework>net8.0</FNATargetFramework>
-    <Version>0.6.2</Version>
+    <Version>0.6.3</Version>
     <MonoGameVersion>3.8.0.1641</MonoGameVersion>
     <AppMonoGameVersion>3.8.4</AppMonoGameVersion>
     <XNAssetsVersion>0.7.7</XNAssetsVersion>
     <NewtonsoftJsonVersion>13.0.4</NewtonsoftJsonVersion>
-    <MikkTSpaceSharpVersion>0.5.1</MikkTSpaceSharpVersion>
     <MyraVersion>1.5.9</MyraVersion>
   </PropertyGroup>
 </Project>
