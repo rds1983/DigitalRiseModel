@@ -143,7 +143,7 @@ namespace DigitalRiseModel
 			// Update skin transforms
 			if (_skinInfos != null)
 			{
-				foreach(var pair in _skinInfos)
+				foreach (var pair in _skinInfos)
 				{
 					var skinInfo = pair.Value;
 					for (var j = 0; j < skinInfo.Skin.Joints.Length; ++j)
@@ -163,14 +163,19 @@ namespace DigitalRiseModel
 			UpdateTransforms();
 
 			var boundingBox = new BoundingBox();
-			foreach (var mesh in _model.Meshes)
+
+			if (_model != null)
 			{
-				var bone = mesh.ParentBone;
-				foreach(var part in mesh.MeshParts)
+				foreach (var mesh in _model.Meshes)
 				{
-					var m = part.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
-					var bb = part.BoundingBox.Transform(ref m);
-					boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);
+					var bone = mesh.ParentBone;
+					foreach (var part in mesh.MeshParts)
+					{
+						var m = part.Skin != null ? Matrix.Identity : _worldTransforms[bone.Index];
+						var bb = part.BoundingBox.Transform(ref m);
+						boundingBox = Microsoft.Xna.Framework.BoundingBox.CreateMerged(boundingBox, bb);
+					}
+
 				}
 			}
 
