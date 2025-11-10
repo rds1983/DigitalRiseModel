@@ -15,7 +15,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
 using static glTFLoader.Schema.AnimationChannelTarget;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using AnimationChannel = DigitalRiseModel.Animation.AnimationChannel;
 
 namespace DigitalRiseModel

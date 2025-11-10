@@ -87,5 +87,23 @@ namespace DigitalRiseModel.Tests
 			el = model.Meshes[0].MeshParts[0].VertexBuffer.VertexDeclaration.FindElement(Microsoft.Xna.Framework.Graphics.VertexElementUsage.TextureCoordinate);
 			Assert.IsNotNull(el, "This model should have uv now");
 		}
+
+		[TestMethod]
+		public void TestEraseRootParent()
+		{
+			var manager = Utility.CreateAssetManager();
+
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "alien.glb", ModelLoadFlags.IgnoreMaterials);
+
+			Assert.IsNull(model.Root.Parent);
+		}
+
+		[TestMethod]
+		public void TestEmbeddedTexture()
+		{
+			var manager = Utility.CreateAssetManager();
+
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "orange_flower.glb");
+		}
 	}
 }
