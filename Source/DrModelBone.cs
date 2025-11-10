@@ -12,7 +12,7 @@ namespace DigitalRiseModel
 
 		public SrtTransform DefaultPose = SrtTransform.Identity;
 
-		public DrModelBone Parent { get; private set; }
+		public DrModelBone Parent { get; internal set; }
 
 		public DrModelBone[] Children
 		{

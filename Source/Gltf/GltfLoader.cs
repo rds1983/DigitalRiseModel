@@ -6,13 +6,16 @@ using glTFLoader.Schema;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using StbImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
 using static glTFLoader.Schema.AnimationChannelTarget;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using AnimationChannel = DigitalRiseModel.Animation.AnimationChannel;
 
 namespace DigitalRiseModel
@@ -285,7 +288,18 @@ namespace DigitalRiseModel
 
 				if (image.BufferView.HasValue)
 				{
-					throw new Exception("Embedded images arent supported.");
+					var bufferView = _gltf.BufferViews[image.BufferView.Value];
+					var buffer = GetBuffer(bufferView.Buffer);
+
+					ImageResult imageResult;
+					using (var stream = new MemoryStream(buffer, bufferView.ByteOffset, bufferView.ByteLength))
+					{
+						imageResult = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+					}
+
+					var result = new Texture2D(_device, imageResult.Width, imageResult.Height, false, SurfaceFormat.Color);
+					result.SetData(imageResult.Data);
+					return result;
 				}
 				else if (image.Uri.StartsWith("data:image/"))
 				{
@@ -773,7 +787,15 @@ namespace DigitalRiseModel
 			// Fix root
 			var scene = _gltf.Scenes[_gltf.Scene.Value];
 			var roots = (from idx in scene.Nodes select _allBones[idx]).ToList();
+
 			var root = roots.FixRoot(_allBones[scene.Nodes[0]]);
+
+			// Make sure roots have no parents
+			if (root.Parent != null)
+			{
+				// Setting parent children to null will automatically set its children parent to null
+				root.Parent.Children = null;
+			}
 
 			// Create the model
 			var model = new DrModel(root);
