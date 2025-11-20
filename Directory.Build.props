@@ -9,10 +9,10 @@
     <MonoGameTargetFramework>netstandard2.0</MonoGameTargetFramework>
     <AppMonoGameTargetFramework>net8.0</AppMonoGameTargetFramework>
     <FNATargetFramework>net8.0</FNATargetFramework>
-    <Version>0.6.5</Version>
+    <Version>0.6.6</Version>
     <MonoGameVersion>3.8.0.1641</MonoGameVersion>
-    <AppMonoGameVersion>3.8.4</AppMonoGameVersion>
-    <XNAssetsVersion>0.8.0</XNAssetsVersion>
+    <AppMonoGameVersion>3.8.4.1</AppMonoGameVersion>
+    <XNAssetsVersion>0.8.2</XNAssetsVersion>
     <NewtonsoftJsonVersion>13.0.4</NewtonsoftJsonVersion>
     <MyraVersion>1.5.9</MyraVersion>
   </PropertyGroup>
