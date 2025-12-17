@@ -128,31 +128,6 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public void Draw(GraphicsDevice graphicsDevice)
-		{
-			if (graphicsDevice == null)
-			{
-				throw new ArgumentNullException(nameof(graphicsDevice));
-			}
-
-			graphicsDevice.SetVertexBuffer(VertexBuffer);
-			if (IndexBuffer == null)
-			{
-				graphicsDevice.DrawPrimitives(PrimitiveType, VertexOffset, PrimitiveCount);
-			}
-			else
-			{
-
-				graphicsDevice.Indices = IndexBuffer;
-
-#if MONOGAME
-				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, StartIndex, PrimitiveCount);
-#else
-				graphicsDevice.DrawIndexedPrimitives(PrimitiveType, VertexOffset, 0, NumVertices, StartIndex, PrimitiveCount);
-#endif
-			}
-		}
-
 		public DrMeshPart Clone()
 		{
 			return new DrMeshPart(PrimitiveType, PrimitiveCount, VertexBuffer, VertexOffset, NumVertices, IndexBuffer, StartIndex, BoundingBox, HasNormals, TangentsFormat)

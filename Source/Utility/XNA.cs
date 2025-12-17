@@ -147,6 +147,7 @@ namespace DigitalRiseModel.Utility
 			return result;
 		}
 
+
 		public static void Unwind<T>(this T[] data) where T : struct
 		{
 			for (var i = 0; i < data.Length / 3; i++)

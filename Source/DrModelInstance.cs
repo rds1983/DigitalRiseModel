@@ -24,7 +24,6 @@ namespace DigitalRiseModel
 		private Matrix[] _localTransforms;
 		private Matrix[] _worldTransforms;
 		private Dictionary<int, SkinInfo> _skinInfos;
-		private Matrix _rootTransform = Matrix.Identity;
 
 		private DrModel _model;
 
@@ -81,22 +80,6 @@ namespace DigitalRiseModel
 			}
 		}
 
-		public Matrix RootTransform
-		{
-			get => _rootTransform;
-
-			set
-			{
-				if (value == _rootTransform)
-				{
-					return;
-				}
-
-				_rootTransform = value;
-				_transformsDirty = true;
-			}
-		}
-
 		public object Tag { get; set; }
 
 		public DrModelInstance()
@@ -132,7 +115,7 @@ namespace DigitalRiseModel
 
 				if (bone.Parent == null)
 				{
-					_worldTransforms[bone.Index] = _localTransforms[bone.Index] * _rootTransform;
+					_worldTransforms[bone.Index] = _localTransforms[bone.Index];
 				}
 				else
 				{
