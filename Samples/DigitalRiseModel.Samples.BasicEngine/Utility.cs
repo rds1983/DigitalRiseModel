@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace DigitalRiseModel.Samples.BasicEngine
@@ -100,6 +101,31 @@ namespace DigitalRiseModel.Samples.BasicEngine
 			return new Vector3(box.Max.X - box.Min.X,
 				box.Max.Y - box.Min.Y,
 				box.Max.Z - box.Min.Z);
+		}
+
+		public static void Draw(this DrMeshPart mesh, GraphicsDevice graphicsDevice)
+		{
+			if (graphicsDevice == null)
+			{
+				throw new ArgumentNullException(nameof(graphicsDevice));
+			}
+
+			graphicsDevice.SetVertexBuffer(mesh.VertexBuffer);
+			if (mesh.IndexBuffer == null)
+			{
+				graphicsDevice.DrawPrimitives(mesh.PrimitiveType, mesh.VertexOffset, mesh.PrimitiveCount);
+			}
+			else
+			{
+
+				graphicsDevice.Indices = mesh.IndexBuffer;
+
+#if MONOGAME
+				graphicsDevice.DrawIndexedPrimitives(mesh.PrimitiveType, mesh.VertexOffset, mesh.StartIndex, mesh.PrimitiveCount);
+#else
+				graphicsDevice.DrawIndexedPrimitives(mesh.PrimitiveType, mesh.VertexOffset, 0, mesh.NumVertices, mesh.StartIndex, mesh.PrimitiveCount);
+#endif
+			}
 		}
 	}
 }
