@@ -6,10 +6,8 @@ namespace DigitalRiseModel
 {
 	public static class DigitalRiseModelAssetsExt
 	{
-		private readonly static AssetLoader<DrModel> _gltfLoader = (manager, assetName, settings, tag) =>
+		private static readonly AssetLoader<DrModel> _gltfLoader = (manager, assetName, settings, tag) =>
 		{
-			var modelSettings = (ModelLoadSettings)settings;
-
 			var loader = new GltfLoader();
 			var device = (GraphicsDevice)tag;
 			return loader.Load(device, manager, assetName, (ModelLoadSettings)settings);
