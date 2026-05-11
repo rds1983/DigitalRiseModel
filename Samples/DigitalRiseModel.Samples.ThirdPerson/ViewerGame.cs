@@ -34,18 +34,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 		private ForwardRenderer _renderer;
 		private Desktop _desktop;
 		private MainPanel _mainPanel;
-
-		public static string ExecutingAssemblyDirectory
-		{
-			get
-			{
-				string codeBase = Assembly.GetExecutingAssembly().Location;
-				UriBuilder uri = new UriBuilder(codeBase);
-				string path = Uri.UnescapeDataString(uri.Path);
-				return Path.GetDirectoryName(path);
-			}
-		}
-
+		
 		public ViewerGame()
 		{
 			_graphics = new GraphicsDeviceManager(this)
@@ -68,7 +57,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 		{
 			base.LoadContent();
 
-			var assetManager = AssetManager.CreateFileAssetManager(Path.Combine(ExecutingAssemblyDirectory, "Assets"));
+			var assetManager = AssetManager.CreateFileAssetManager(Path.Combine(AppContext.BaseDirectory, "Assets"));
 
 			// Build up the scene
 			// Plane
