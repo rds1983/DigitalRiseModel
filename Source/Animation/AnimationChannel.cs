@@ -80,34 +80,7 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		/// <param name="time">The time to search for.</param>
 		/// <returns>The index of the nearest keyframe at or before the specified time.</returns>
-		public int GetKeyframeIndexByTime(TimeSpan time)
-		{
-			int keyframeIndex = 0;
-			int startIndex = 0;
-			int endIndex = Keyframes.Length - 1;
-
-			while (endIndex >= startIndex)
-			{
-				keyframeIndex = (startIndex + endIndex) / 2;
-
-				if (Keyframes[keyframeIndex].Time < time)
-					startIndex = keyframeIndex + 1;
-				else if (Keyframes[keyframeIndex].Time > time)
-					endIndex = keyframeIndex - 1;
-				else
-					break;
-			}
-
-			if (Keyframes[keyframeIndex].Time > time)
-				keyframeIndex--;
-
-			if (keyframeIndex < 0)
-			{
-				keyframeIndex = 0;
-			}
-
-			return keyframeIndex;
-		}
+		public int GetKeyframeIndexByTime(TimeSpan time) => Keyframes.GetKeyframeIndexByTime(time) ?? 0;
 
 		/// <summary>
 		/// Gets the keyframe at or just before the specified time.

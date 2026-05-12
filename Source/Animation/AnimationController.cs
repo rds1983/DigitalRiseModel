@@ -12,6 +12,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
+using DigitalRiseModel.Utility;
 using Microsoft.Xna.Framework;
 using System;
 
@@ -297,6 +298,12 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		private void UpdateAnimationTime()
 		{
+			var fDuration = (float)AnimationClip.Duration.TotalSeconds;
+			if (fDuration.IsZero())
+			{
+				return;
+			}
+
 			// Animation finished
 			if (_time < TimeSpan.Zero || _time > AnimationClip.Duration)
 			{
@@ -418,7 +425,9 @@ namespace DigitalRiseModel.Animation
 				}
 				// Otherwise don't interpolate
 				else
+				{
 					outPose = keyframe1.Pose;
+				}
 			}
 		}
 	}

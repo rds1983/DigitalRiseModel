@@ -1,5 +1,4 @@
 ﻿using AssetManagementBase;
-using DigitalRiseModel.Animation;
 using DigitalRiseModel.Utility;
 using glTFLoader;
 using glTFLoader.Schema;
@@ -14,15 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static glTFLoader.Schema.Accessor;
-using static glTFLoader.Schema.AnimationChannelTarget;
-using AnimationChannel = DigitalRiseModel.Animation.AnimationChannel;
 
 namespace DigitalRiseModel
 {
-	internal class GltfLoader
+	internal partial class GltfLoader
 	{
-		private delegate void PoseSetter<T>(ref SrtTransform pose, T data);
-
 		private struct VertexElementInfo
 		{
 			public VertexElementFormat Format;
@@ -36,18 +31,6 @@ namespace DigitalRiseModel
 				Usage = usage;
 				AccessorIndex = accessorIndex;
 				UsageIndex = usageIndex;
-			}
-		}
-
-		private struct PathInfo
-		{
-			public int Sampler;
-			public PathEnum Path;
-
-			public PathInfo(int sampler, PathEnum path)
-			{
-				Sampler = sampler;
-				Path = path;
 			}
 		}
 
@@ -190,30 +173,6 @@ namespace DigitalRiseModel
 			}
 
 			throw new NotSupportedException($"Accessor of type {accessor.Type} and component type {accessor.ComponentType} isn't supported");
-		}
-
-		private void LoadAnimationTransforms<T>(SrtTransform defaultPose, SortedDictionary<float, SrtTransform> poses, PoseSetter<T> poseSetter, float[] times, AnimationSampler sampler)
-		{
-			var data = GetAccessorAs<T>(sampler.Output);
-			if (times.Length != data.Length)
-			{
-				throw new NotSupportedException("Translation length is different from times length");
-			}
-
-			for (var i = 0; i < times.Length; ++i)
-			{
-				var time = times[i];
-
-				SrtTransform pose;
-				if (!poses.TryGetValue(time, out pose))
-				{
-					pose = defaultPose;
-				}
-
-				poseSetter(ref pose, data[i]);
-
-				poses[time] = pose;
-			}
 		}
 
 		private IndexBuffer CreateIndexBuffer(MeshPrimitive primitive)
@@ -672,95 +631,6 @@ namespace DigitalRiseModel
 						}
 					}
 				}
-			}
-		}
-
-		private void LoadAnimations(DrModel model)
-		{
-			if (_gltf.Animations == null)
-			{
-				return;
-			}
-
-			model.Animations = new Dictionary<string, AnimationClip>();
-			foreach (var gltfAnimation in _gltf.Animations)
-			{
-				var channelsDict = new Dictionary<int, List<PathInfo>>();
-				foreach (var channel in gltfAnimation.Channels)
-				{
-					if (!channelsDict.TryGetValue(channel.Target.Node.Value, out List<PathInfo> targets))
-					{
-						targets = new List<PathInfo>();
-						channelsDict[channel.Target.Node.Value] = targets;
-					}
-
-					targets.Add(new PathInfo(channel.Sampler, channel.Target.Path));
-				}
-
-				var channels = new List<AnimationChannel>();
-				float time = 0;
-				foreach (var pair in channelsDict)
-				{
-					var bone = _allBones[pair.Key];
-					var animationData = new SortedDictionary<float, SrtTransform>();
-
-					var translationMode = InterpolationMode.None;
-					var rotationMode = InterpolationMode.None;
-					var scaleMode = InterpolationMode.None;
-					foreach (var pathInfo in pair.Value)
-					{
-						var sampler = gltfAnimation.Samplers[pathInfo.Sampler];
-						var times = GetAccessorAs<float>(sampler.Input);
-
-						switch (pathInfo.Path)
-						{
-							case PathEnum.translation:
-								LoadAnimationTransforms(bone.DefaultPose, animationData,
-									(ref SrtTransform p, Vector3 d) => p.Translation = d,
-									times, sampler);
-								translationMode = sampler.Interpolation.ToInterpolationMode();
-								break;
-							case PathEnum.rotation:
-								LoadAnimationTransforms(bone.DefaultPose, animationData,
-									(ref SrtTransform p, Quaternion d) => p.Rotation = d,
-									times, sampler);
-								rotationMode = sampler.Interpolation.ToInterpolationMode();
-								break;
-							case PathEnum.scale:
-								LoadAnimationTransforms(bone.DefaultPose, animationData,
-									(ref SrtTransform p, Vector3 d) => p.Scale = d,
-									times, sampler);
-								scaleMode = sampler.Interpolation.ToInterpolationMode();
-								break;
-							case PathEnum.weights:
-								break;
-						}
-					}
-
-					var keyframes = new List<AnimationChannelKeyframe>();
-					foreach (var pair2 in animationData)
-					{
-						keyframes.Add(new AnimationChannelKeyframe(TimeSpan.FromSeconds(pair2.Key), pair2.Value));
-
-						if (pair2.Key > time)
-						{
-							time = pair2.Key;
-						}
-					}
-
-					var animationChannel = new AnimationChannel(bone.Index, keyframes.ToArray())
-					{
-						TranslationMode = translationMode,
-						RotationMode = rotationMode,
-						ScaleMode = scaleMode
-					};
-
-					channels.Add(animationChannel);
-				}
-
-				var id = gltfAnimation.Name ?? "(default)";
-				var animation = new AnimationClip(id, TimeSpan.FromSeconds(time), channels.ToArray());
-				model.Animations[id] = animation;
 			}
 		}
 
