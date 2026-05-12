@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace DigitalRiseModel
 {
+	/// <summary>
+	/// Represents an instance of a model that can be animated and rendered.
+	/// </summary>
 	public class DrModelInstance : ISkeleton
 	{
 		private class SkinInfo
@@ -27,8 +30,14 @@ namespace DigitalRiseModel
 
 		private DrModel _model;
 
+		/// <summary>
+		/// Gets the bounding box of this model instance in its current pose.
+		/// </summary>
 		public BoundingBox? BoundingBox { get; private set; }
 
+		/// <summary>
+		/// Gets or sets the model that this instance represents.
+		/// </summary>
 		public DrModel Model
 		{
 			get => _model;
@@ -80,17 +89,30 @@ namespace DigitalRiseModel
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets an arbitrary object associated with this model instance.
+		/// </summary>
 		public object Tag { get; set; }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DrModelInstance"/> class with no model.
+		/// </summary>
 		public DrModelInstance()
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DrModelInstance"/> class with the specified model.
+		/// </summary>
+		/// <param name="model">The model to instantiate.</param>
 		public DrModelInstance(DrModel model)
 		{
 			Model = model;
 		}
 
+		/// <summary>
+		/// Resets all bone transforms to their default poses.
+		/// </summary>
 		public void ResetTransforms()
 		{
 			if (Model == null)
@@ -165,14 +187,29 @@ namespace DigitalRiseModel
 			return boundingBox;
 		}
 
+		/// <summary>
+		/// Gets the local transformation matrix of a bone.
+		/// </summary>
+		/// <param name="boneIndex">The index of the bone.</param>
+		/// <returns>The local transformation matrix of the bone.</returns>
 		public Matrix GetBoneLocalTransform(int boneIndex) => _localTransforms[boneIndex];
 
+		/// <summary>
+		/// Sets the local transformation matrix of a bone.
+		/// </summary>
+		/// <param name="boneIndex">The index of the bone.</param>
+		/// <param name="transform">The local transformation matrix to set.</param>
 		public void SetBoneLocalTransform(int boneIndex, Matrix transform)
 		{
 			_localTransforms[boneIndex] = transform;
 			_transformsDirty = true;
 		}
 
+		/// <summary>
+		/// Gets the global (world-space) transformation matrix of a bone.
+		/// </summary>
+		/// <param name="boneIndex">The index of the bone.</param>
+		/// <returns>The global transformation matrix of the bone.</returns>
 		public Matrix GetBoneGlobalTransform(int boneIndex)
 		{
 			UpdateTransforms();
@@ -180,6 +217,11 @@ namespace DigitalRiseModel
 			return _worldTransforms[boneIndex];
 		}
 
+		/// <summary>
+		/// Gets the skin transformation matrices for the specified skin.
+		/// </summary>
+		/// <param name="skinIndex">The index of the skin.</param>
+		/// <returns>An array of transformation matrices for the skin's joints.</returns>
 		public Matrix[] GetSkinTransforms(int skinIndex)
 		{
 			UpdateTransforms();
@@ -187,6 +229,10 @@ namespace DigitalRiseModel
 			return _skinInfos[skinIndex].Transforms;
 		}
 
+		/// <summary>
+		/// Creates a copy of this model instance.
+		/// </summary>
+		/// <returns>A new <see cref="DrModelInstance"/> with the same model.</returns>
 		public DrModelInstance Clone()
 		{
 			var result = new DrModelInstance
@@ -197,10 +243,25 @@ namespace DigitalRiseModel
 			return result;
 		}
 
+		/// <summary>
+		/// Gets an animation clip by name.
+		/// </summary>
+		/// <param name="name">The name of the animation clip.</param>
+		/// <returns>The animation clip with the specified name, or null if not found.</returns>
 		public AnimationClip GetClip(string name) => Model.Animations[name];
 
+		/// <summary>
+		/// Gets the default pose of a bone.
+		/// </summary>
+		/// <param name="boneIndex">The index of the bone.</param>
+		/// <returns>The default pose of the bone.</returns>
 		public SrtTransform GetDefaultPose(int boneIndex) => Model.Bones[boneIndex].DefaultPose;
 
+		/// <summary>
+		/// Sets the transformation pose of a bone.
+		/// </summary>
+		/// <param name="boneIndex">The index of the bone.</param>
+		/// <param name="pose">The transformation pose to set.</param>
 		public void SetPose(int boneIndex, SrtTransform pose) => SetBoneLocalTransform(boneIndex, pose.ToMatrix());
 	}
 }

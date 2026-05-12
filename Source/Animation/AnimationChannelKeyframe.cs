@@ -16,12 +16,26 @@ using System;
 
 namespace DigitalRiseModel.Animation
 {
+	/// <summary>
+	/// Represents a single keyframe in an animation channel.
+	/// </summary>
 	public struct AnimationChannelKeyframe
 	{
+		/// <summary>
+		/// Gets the time of this keyframe in the animation clip.
+		/// </summary>
 		public TimeSpan Time { get; }
 
+		/// <summary>
+		/// Gets the transformation pose at this keyframe.
+		/// </summary>
 		public SrtTransform Pose { get; }
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnimationChannelKeyframe"/> struct.
+		/// </summary>
+		/// <param name="time">The time of this keyframe in the animation clip.</param>
+		/// <param name="pose">The transformation pose at this keyframe.</param>
 		public AnimationChannelKeyframe(TimeSpan time, SrtTransform pose)
 		{
 			Time = time;

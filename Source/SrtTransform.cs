@@ -45,13 +45,30 @@ namespace DigitalRiseModel
 		Spherical
 	};
 
+	/// <summary>
+	/// Represents a scale, rotation, and translation transformation.
+	/// </summary>
 	[Serializable]
 	public struct SrtTransform : IEquatable<SrtTransform>
 	{
+		/// <summary>
+		/// Gets or sets the translation component of this transformation.
+		/// </summary>
 		public Vector3 Translation;
+
+		/// <summary>
+		/// Gets or sets the rotation component of this transformation.
+		/// </summary>
 		public Quaternion Rotation;
+
+		/// <summary>
+		/// Gets or sets the scale component of this transformation.
+		/// </summary>
 		public Vector3 Scale;
 
+		/// <summary>
+		/// Gets the identity transformation (no translation, no rotation, unit scale).
+		/// </summary>
 		public static readonly SrtTransform Identity;
 
 		static SrtTransform()
@@ -59,6 +76,12 @@ namespace DigitalRiseModel
 			Identity = new SrtTransform(Vector3.Zero, Quaternion.Identity, Vector3.One);
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SrtTransform"/> struct with the specified translation, rotation, and scale.
+		/// </summary>
+		/// <param name="translation">The translation component.</param>
+		/// <param name="rotation">The rotation component.</param>
+		/// <param name="scale">The scale component.</param>
 		public SrtTransform(Vector3 translation, Quaternion rotation, Vector3 scale)
 		{
 			Translation = translation;
@@ -66,6 +89,10 @@ namespace DigitalRiseModel
 			Scale = scale;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SrtTransform"/> struct from a transformation matrix.
+		/// </summary>
+		/// <param name="m">The transformation matrix to decompose.</param>
 		public SrtTransform(Matrix m)
 		{
 			m.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
@@ -74,19 +101,23 @@ namespace DigitalRiseModel
 			Scale = scale;
 		}
 
+		/// <summary>
+		/// Converts this transformation to a transformation matrix.
+		/// </summary>
+		/// <returns>The transformation matrix.</returns>
 		public Matrix ToMatrix() => CreateMatrix(Translation, Scale, Rotation);
 
-		///<summary>	
-		/// Interpolates between 2 poses using the specified algorithm
-		///</summary>	
-		///<param name="pose1">First pose</param>
-		///<param name="pose2">Second pose</param>	
-		///<param name="amount">Amount of blendign between pose 1 and pose 2</param>	
-		///<param name="translationInterpolation">How to blend the translation</param>	
-		///<param name="orientationInterpolation">How to blend the orientation</param>
-		///<param name="scaleInterpolation">How to blend the scale</param>
-		///<returns>The interpolated pose</returns>
-		///<exception cref="ArgumentException">If any of the Blend types are not supported</exception>
+		/// <summary>
+		/// Interpolates between two transformations using the specified interpolation modes.
+		/// </summary>
+		/// <param name="pose1">The first transformation.</param>
+		/// <param name="pose2">The second transformation.</param>
+		/// <param name="amount">The blend amount between the two transformations. Must be between 0.0 and 1.0 inclusive.</param>
+		/// <param name="translationInterpolation">The interpolation mode to use for the translation component.</param>
+		/// <param name="orientationInterpolation">The interpolation mode to use for the rotation component.</param>
+		/// <param name="scaleInterpolation">The interpolation mode to use for the scale component.</param>
+		/// <returns>The interpolated transformation.</returns>
+		/// <exception cref="ArgumentException"><paramref name="amount"/> is not between 0.0 and 1.0, or an unsupported interpolation mode is specified.</exception>
 		public static SrtTransform Interpolate(SrtTransform pose1, SrtTransform pose2, float amount,
 			InterpolationMode translationInterpolation, InterpolationMode orientationInterpolation,
 			InterpolationMode scaleInterpolation)
@@ -159,6 +190,13 @@ namespace DigitalRiseModel
 			return resultPose;
 		}
 
+		/// <summary>
+		/// Creates a transformation matrix from the specified translation, scale, and rotation.
+		/// </summary>
+		/// <param name="translation">The translation component.</param>
+		/// <param name="scale">The scale component.</param>
+		/// <param name="rotation">The rotation component.</param>
+		/// <returns>The transformation matrix.</returns>
 		public static Matrix CreateMatrix(Vector3 translation, Vector3 scale, Quaternion rotation)
 		{
 			return Matrix.CreateScale(scale) * Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(translation);
@@ -166,11 +204,19 @@ namespace DigitalRiseModel
 
 		#region IEquatable<Pose> Members
 
+		/// <summary>
+		/// Returns the hash code of this transformation.
+		/// </summary>
+		/// <returns>The hash code.</returns>
 		public override int GetHashCode()
 		{
 			return (Translation.GetHashCode() + Rotation.GetHashCode() + Scale.GetHashCode());
 		}
 
+		/// <summary>
+		/// Returns a string representation of this transformation.
+		/// </summary>
+		/// <returns>A string representation of this transformation.</returns>
 		public override string ToString()
 		{
 			CultureInfo currentCulture = CultureInfo.CurrentCulture;
@@ -179,6 +225,11 @@ namespace DigitalRiseModel
 				{ Translation.ToString(), Rotation.ToString(), Scale.ToString() });
 		}
 
+		/// <summary>
+		/// Indicates whether the current transformation is equal to another transformation.
+		/// </summary>
+		/// <param name="other">Another transformation to compare to.</param>
+		/// <returns>true if the current transformation is equal to the other transformation; otherwise, false.</returns>
 		public bool Equals(SrtTransform other)
 		{
 			return (Translation == other.Translation &&
@@ -186,6 +237,11 @@ namespace DigitalRiseModel
 				Scale == other.Scale);
 		}
 
+		/// <summary>
+		/// Indicates whether the current transformation is equal to another object.
+		/// </summary>
+		/// <param name="obj">An object to compare to.</param>
+		/// <returns>true if the current transformation is equal to the object; otherwise, false.</returns>
 		public override bool Equals(object obj)
 		{
 			bool result = false;
@@ -198,6 +254,12 @@ namespace DigitalRiseModel
 			return result;
 		}
 
+		/// <summary>
+		/// Determines whether two transformations are equal.
+		/// </summary>
+		/// <param name="pose1">The first transformation.</param>
+		/// <param name="pose2">The second transformation.</param>
+		/// <returns>true if the transformations are equal; otherwise, false.</returns>
 		public static bool operator ==(SrtTransform pose1, SrtTransform pose2)
 		{
 			return (pose1.Translation == pose2.Translation &&
@@ -205,6 +267,12 @@ namespace DigitalRiseModel
 				pose1.Scale == pose2.Scale);
 		}
 
+		/// <summary>
+		/// Determines whether two transformations are not equal.
+		/// </summary>
+		/// <param name="pose1">The first transformation.</param>
+		/// <param name="pose2">The second transformation.</param>
+		/// <returns>true if the transformations are not equal; otherwise, false.</returns>
 		public static bool operator !=(SrtTransform pose1, SrtTransform pose2)
 		{
 			return (pose1.Translation != pose2.Translation ||

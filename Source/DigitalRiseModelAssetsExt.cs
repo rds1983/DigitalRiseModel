@@ -4,6 +4,9 @@ using System;
 
 namespace DigitalRiseModel
 {
+	/// <summary>
+	/// Extension methods for the AssetManager to load DigitalRiseModel assets.
+	/// </summary>
 	public static class DigitalRiseModelAssetsExt
 	{
 		private static readonly AssetLoader<DrModel> _gltfLoader = (manager, assetName, settings, tag) =>
@@ -14,12 +17,13 @@ namespace DigitalRiseModel
 		};
 
 		/// <summary>
-		/// Loads a model determining its type on the extension
+		/// Loads a 3D model from a file, automatically determining the format from the file extension.
 		/// </summary>
-		/// <param name="assetManager"></param>
-		/// <param name="device"></param>
-		/// <param name="path"></param>
-		/// <returns></returns>
+		/// <param name="assetManager">The asset manager to use for loading.</param>
+		/// <param name="device">The graphics device to use for creating GPU resources.</param>
+		/// <param name="path">The path to the model file (typically .gltf or .glb).</param>
+		/// <param name="flags">Flags that control how the model is loaded. Default is None.</param>
+		/// <returns>The loaded model.</returns>
 		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path,
 			ModelLoadFlags flags = ModelLoadFlags.None)
 		{
