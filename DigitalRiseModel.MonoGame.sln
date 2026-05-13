@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Tests", "Tests\DigitalRiseModel.Tests\DigitalRiseModel.Tests.csproj", "{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.MonoGame", "Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.MonoGame.csproj", "{815C4AA5-A784-5EC0-52DD-605A711D1F07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,12 +31,17 @@ Global
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9876750C-9A62-09EA-3954-309DF950F1AD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{815C4AA5-A784-5EC0-52DD-605A711D1F07} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}

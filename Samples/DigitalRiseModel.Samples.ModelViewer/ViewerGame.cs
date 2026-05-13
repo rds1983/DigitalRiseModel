@@ -198,12 +198,12 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_player = new AnimationController(ModelInstance);
 			_player.TimeChanged += (s, a) =>
 			{
-				if (_player.AnimationClip == null)
+				if (_player.RootNode == null)
 				{
 					return;
 				}
 
-				var k = (float)(_player.Time / _player.AnimationClip.Duration);
+				var k = (float)(_player.Time / _player.RootNode.Duration);
 
 				var slider = _mainPanel._sliderTime;
 				slider.Value = slider.Minimum + k * (slider.Maximum - slider.Minimum);
@@ -231,7 +231,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			}
 
 			var k = (e.NewValue - _mainPanel._sliderTime.Minimum) / (_mainPanel._sliderTime.Maximum - _mainPanel._sliderTime.Minimum);
-			var passed = _player.AnimationClip.Duration * k;
+			var passed = _player.RootNode.Duration * k;
 			_player.Time = passed;
 		}
 
@@ -313,11 +313,11 @@ namespace DigitalRiseModel.Samples.ModelViewer
 				var clip = (AnimationClip)((Label)_mainPanel._comboAnimations.SelectedItem).Tag;
 				if (_mainPanel._checkCrossfade.IsChecked)
 				{
-					_player.CrossfadeToClip(clip, TimeSpan.FromSeconds(0.5f));
+					_player.CrossfadeToClip(clip, TimeSpan.FromSeconds(0.5f), true);
 				}
 				else
 				{
-					_player.StartClip(clip);
+					_player.StartClip(clip, true);
 				}
 			}
 

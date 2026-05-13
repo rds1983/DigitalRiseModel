@@ -105,5 +105,104 @@ namespace DigitalRiseModel.Tests
 
 			Assert.Equal(500000, result);
 		}
+
+		[Fact]
+		public void GetEffectiveTime_InvalidDuration_ReturnsZero()
+		{
+			var duration = TimeSpan.FromSeconds(0);
+			var time = TimeSpan.FromSeconds(5);
+
+			var result = time.GetEffectiveTime(duration, isLooped: false);
+
+			Assert.Equal(TimeSpan.Zero, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_TimeWithinDuration_ReturnsTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(5);
+
+			var result = time.GetEffectiveTime(duration, isLooped: false);
+
+			Assert.Equal(time, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_TimeEqualsDuration_ReturnsTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(10);
+
+			var result = time.GetEffectiveTime(duration, isLooped: false);
+
+			Assert.Equal(time, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_TimeExceedsDuration_NotLooped_ReturnsDuration()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(15);
+
+			var result = time.GetEffectiveTime(duration, isLooped: false);
+
+			Assert.Equal(duration, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_TimeExceedsDuration_Looped_ReturnsWrappedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(25);
+
+			var result = time.GetEffectiveTime(duration, isLooped: true);
+
+			Assert.Equal(TimeSpan.FromSeconds(5), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_NegativeTime_NotLooped_ReturnsZero()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(-5);
+
+			var result = time.GetEffectiveTime(duration, isLooped: false);
+
+			Assert.Equal(TimeSpan.Zero, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_NegativeTime_Looped_ReturnsWrappedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(-2);
+
+			var result = time.GetEffectiveTime(duration, isLooped: true);
+
+			Assert.Equal(TimeSpan.FromSeconds(8), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_NegativeTimeJustBeforeZero_Looped_ReturnsAlmostFullDuration()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(-0.5);
+
+			var result = time.GetEffectiveTime(duration, isLooped: true);
+
+			Assert.Equal(TimeSpan.FromSeconds(9.5), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_ZeroTime_Looped_ReturnsZero()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.Zero;
+
+			var result = time.GetEffectiveTime(duration, isLooped: true);
+
+			Assert.Equal(TimeSpan.Zero, result);
+		}
 	}
 }
