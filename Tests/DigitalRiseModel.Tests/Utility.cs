@@ -1,5 +1,5 @@
 ﻿using AssetManagementBase;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -212,21 +212,21 @@ namespace DigitalRiseModel.Tests
 
 		public static void CompareData(object[][] data1, object[][] data2)
 		{
-			Assert.AreEqual(data1.Length, data2.Length);
+			Assert.Equal(data1.Length, data2.Length);
 
 			for (var i = 0; i < data1.Length; ++i)
 			{
 				var row1 = data1[i];
 				var row2 = data2[i];
 
-				Assert.AreEqual(row1.Length, row2.Length);
+				Assert.Equal(row1.Length, row2.Length);
 
 				for (var j = 0; j < row1.Length; ++j)
 				{
 					var v1 = (float)row1[j];
-					var v2 = (float)row1[j];
+					var v2 = (float)row2[j];
 
-					Assert.AreEqual(v1, v2, ZeroTolerance);
+					Assert.True(v1.EpsilonEquals(v2, ZeroTolerance));
 				}
 			}
 		}
