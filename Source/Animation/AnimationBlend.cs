@@ -9,6 +9,9 @@ namespace DigitalRiseModel.Animation
 	/// </summary>
 	public class AnimationBlend : IAnimationClip
 	{
+		/// <summary>
+		/// Represents a single clip within a blend with its weight and playback time.
+		/// </summary>
 		private class BlendedClip
 		{
 			public IAnimationClip Clip { get; set; }
@@ -20,12 +23,19 @@ namespace DigitalRiseModel.Animation
 		private List<BlendedClip> _clips = new List<BlendedClip>();
 		private float _totalWeight;
 		private readonly Dictionary<int, SrtTransform> _transforms = new Dictionary<int, SrtTransform>();
+		// Cache of bone indices affected by any clip; repopulated when blend composition changes
+		private readonly List<int> _bones = new List<int>();
 		private bool _transformsDirty = true;
 
 		/// <summary>
 		/// Gets the name of the animation blend.
 		/// </summary>
 		public string Name { get; }
+
+		/// <summary>
+		/// Gets the total duration of the blend (duration of the first clip).
+		/// </summary>
+		public TimeSpan Duration => _clips.Count > 0 ? _clips[0].Clip.Duration : TimeSpan.Zero;
 
 		/// <summary>
 		/// Gets the number of animation clips in this blend.
@@ -46,7 +56,7 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		/// <param name="clip">The animation clip to add.</param>
 		/// <param name="weight">The weight of the clip (default is 1.0).</param>
-		public void AddClip(AnimationClip clip, float weight = 1.0f)
+		public void AddClip(IAnimationClip clip, float weight = 1.0f)
 		{
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
@@ -120,26 +130,31 @@ namespace DigitalRiseModel.Animation
 			InvalidateTransforms();
 		}
 
+		/// <summary>
+		/// Marks cached transforms and bone indices as stale.
+		/// Invalidation occurs when clips are added, weights change, or clip times change.
+		/// </summary>
 		private void InvalidateTransforms()
 		{
-			// Mark cached transforms as stale; GetTransforms will recompute on next call
 			_transforms.Clear();
+			_bones.Clear();
 			_transformsDirty = true;
 		}
 
-		#region IAnimationClip Implementation (Extensions)
-
-		TimeSpan IAnimationClip.Duration => _clips.Count > 0 ? _clips[0].Clip.Duration : TimeSpan.Zero;
-
-		public Dictionary<int, SrtTransform> GetTransforms(TimeSpan time2)
+		/// <summary>
+		/// Computes blended bone transforms for the specified playback time.
+		/// Caches bone indices to avoid repeated dictionary enumeration.
+		/// </summary>
+		/// <param name="time">The playback time for all clips in the blend.</param>
+		/// <returns>Dictionary mapping bone indices to their weighted blended poses.</returns>
+		public Dictionary<int, SrtTransform> GetTransforms(TimeSpan time)
 		{
-			// Get transforms from each clip at the requested time
 			foreach (var clip in _clips)
 			{
-				clip.Transforms = clip.Clip.GetTransforms(time2);
+				clip.Transforms = clip.Clip.GetTransforms(time);
 			}
 
-			// Collect all affected bone indices on first call or after weight/time changes
+			// Populate bone index cache when transforms change
 			if (_transformsDirty)
 			{
 				_transforms.Clear();
@@ -151,18 +166,20 @@ namespace DigitalRiseModel.Animation
 					}
 				}
 
+				_bones.AddRange(_transforms.Keys);
+
 				_transformsDirty = false;
 			}
 
-			// Blend poses for all bones using weighted interpolation
-			foreach (var pair in _transforms)
+			// Blend poses using cached bone indices (avoids repeated dictionary enumeration)
+			foreach (var boneIndex in _bones)
 			{
 				float totalWeight = 0;
 				SrtTransform blendedPose = SrtTransform.Identity;
 
 				foreach (var clip in _clips)
 				{
-					if (clip.Transforms.TryGetValue(pair.Key, out var pose))
+					if (clip.Transforms.TryGetValue(boneIndex, out var pose))
 					{
 						if (totalWeight == 0)
 						{
@@ -179,12 +196,10 @@ namespace DigitalRiseModel.Animation
 					}
 				}
 
-				_transforms[pair.Key] = blendedPose;
+				_transforms[boneIndex] = blendedPose;
 			}
 
 			return _transforms;
 		}
-
-		#endregion
 	}
 }

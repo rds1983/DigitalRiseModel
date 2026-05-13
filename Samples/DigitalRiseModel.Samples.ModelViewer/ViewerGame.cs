@@ -198,12 +198,12 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_player = new AnimationController(ModelInstance);
 			_player.TimeChanged += (s, a) =>
 			{
-				if (_player.AnimationSource == null)
+				if (_player.AnimationClip == null)
 				{
 					return;
 				}
 
-				var k = (float)(_player.Time / _player.AnimationSource.Duration);
+				var k = (float)(_player.Time / _player.AnimationClip.Duration);
 
 				var slider = _mainPanel._sliderTime;
 				slider.Value = slider.Minimum + k * (slider.Maximum - slider.Minimum);
@@ -231,7 +231,7 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			}
 
 			var k = (e.NewValue - _mainPanel._sliderTime.Minimum) / (_mainPanel._sliderTime.Maximum - _mainPanel._sliderTime.Minimum);
-			var passed = _player.AnimationSource.Duration * k;
+			var passed = _player.AnimationClip.Duration * k;
 			_player.Time = passed;
 		}
 

@@ -70,9 +70,12 @@ namespace DigitalRiseModel.Animation
 			}
 		}
 
-		#region IAnimationClip Implementation
-
-		Dictionary<int, SrtTransform> IAnimationClip.GetTransforms(TimeSpan time)
+		/// <summary>
+		/// Computes bone transforms for the specified playback time.
+		/// </summary>
+		/// <param name="time">The playback time within the animation.</param>
+		/// <returns>Dictionary mapping bone indices to their interpolated poses.</returns>
+		public Dictionary<int, SrtTransform> GetTransforms(TimeSpan time)
 		{
 			// Interpolate poses for all channels at the given time
 			foreach (var channel in Channels)
@@ -83,7 +86,5 @@ namespace DigitalRiseModel.Animation
 
 			return _transforms;
 		}
-
-		#endregion
 	}
 }

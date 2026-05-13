@@ -11,6 +11,11 @@ namespace DigitalRiseModel.Animation
 	public interface IAnimationClip
 	{
 		/// <summary>
+		/// Gets the name of the animation source (clip or blend).
+		/// </summary>
+		string Name { get; }
+
+		/// <summary>
 		/// Gets the total duration of the animation.
 		/// </summary>
 		TimeSpan Duration { get; }

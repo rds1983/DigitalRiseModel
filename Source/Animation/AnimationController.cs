@@ -42,7 +42,6 @@ namespace DigitalRiseModel.Animation
 		private TimeSpan _time;
 		private float _speed;
 		private bool _loopEnabled;
-		private IAnimationClip _animationSource;
 
 		/// <summary>
 		/// Model Node
@@ -52,7 +51,7 @@ namespace DigitalRiseModel.Animation
 		/// <summary>
 		/// Gets the animation source being played (either a single clip or a blend).
 		/// </summary>
-		public IAnimationClip AnimationSource => _animationSource;
+		public IAnimationClip AnimationClip { get; private set; }
 
 		/// <summary>
 		/// Gets os sets the current animation playback time.
@@ -142,7 +141,7 @@ namespace DigitalRiseModel.Animation
 			_loopEnabled = true;
 			PlaybackMode = PlaybackMode.Forward;
 
-			_animationSource = null;
+			AnimationClip = null;
 			HasFinished = false;
 			IsPlaying = false;
 		}
@@ -157,7 +156,7 @@ namespace DigitalRiseModel.Animation
 			if (clip == null)
 				throw new ArgumentException($"Clip '{name}' not found", nameof(name));
 
-			_animationSource = clip;
+			AnimationClip = clip;
 
 			HasFinished = false;
 			IsPlaying = true;
@@ -171,7 +170,7 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public void StopClip()
 		{
-			_animationSource = null;
+			AnimationClip = null;
 			HasFinished = false;
 			IsPlaying = false;
 
@@ -189,7 +188,7 @@ namespace DigitalRiseModel.Animation
 			if (clip == null)
 				throw new ArgumentException($"Clip '{name}' not found", nameof(name));
 
-			_animationSource = clip;
+			AnimationClip = clip;
 
 			if (_time < clip.Duration)
 			{
@@ -221,7 +220,7 @@ namespace DigitalRiseModel.Animation
 				blend.AddClip(clip, weight);
 			}
 
-			_animationSource = blend;
+			AnimationClip = blend;
 			HasFinished = false;
 			IsPlaying = true;
 
@@ -236,10 +235,10 @@ namespace DigitalRiseModel.Animation
 		/// <param name="weight">New weight value.</param>
 		public void SetBlendWeight(int clipIndex, float weight)
 		{
-			if (_animationSource == null)
+			if (AnimationClip == null)
 				throw new InvalidOperationException("No animation source is currently active");
 
-			var blend = _animationSource as AnimationBlend;
+			var blend = AnimationClip as AnimationBlend;
 			if (blend == null)
 				throw new InvalidOperationException("Current animation source is not a blend");
 
@@ -252,7 +251,7 @@ namespace DigitalRiseModel.Animation
 		/// <param name="elapsedTime">Time elapsed since the last update.</param>
 		public void Update(TimeSpan elapsedTime)
 		{
-			if (!IsPlaying || _animationSource == null)
+			if (!IsPlaying || AnimationClip == null)
 			{
 				return;
 			}
@@ -274,13 +273,13 @@ namespace DigitalRiseModel.Animation
 
 		private void UpdateAll()
 		{
-			if (_animationSource == null)
+			if (AnimationClip == null)
 			{
 				return;
 			}
 
 			// Check if animation has finished
-			var duration = _animationSource.Duration;
+			var duration = AnimationClip.Duration;
 			var fDuration = (float)duration.TotalSeconds;
 
 			if (!fDuration.IsZero() && _time > duration)
@@ -302,8 +301,8 @@ namespace DigitalRiseModel.Animation
 			}
 
 			// Let the animation source update all skeleton poses
-			var loopedTime = AnimationInterpolationUtility.HandleLooping(_time, _animationSource.Duration, LoopEnabled);
-			var transforms = AnimationSource.GetTransforms(loopedTime);
+			var loopedTime = AnimationInterpolationUtility.HandleLooping(_time, AnimationClip.Duration, LoopEnabled);
+			var transforms = AnimationClip.GetTransforms(loopedTime);
 
 			foreach (var pair in transforms)
 			{
