@@ -1,5 +1,4 @@
 ﻿using DigitalRiseModel.Animation;
-using DigitalRiseModel.Utility;
 using glTFLoader.Schema;
 using Microsoft.Xna.Framework;
 using System;
@@ -25,16 +24,41 @@ namespace DigitalRiseModel
 
 		private class AnimationRecord
 		{
-			public TimeSpan Time;
+			/// <summary>
+			/// Stores optional pose components for a single keyframe.
+			/// Only components that are explicitly keyed in the glTF file are set; others remain null.
+			/// Missing components are filled in during pose accumulation using previous values.
+			/// </summary>
 			public Vector3? Translation;
 			public Quaternion? Rotation;
 			public Vector3? Scale;
 		}
 
+		/// <summary>
+		/// Merges multiple animation samplers (translation, rotation, scale) into unified keyframes.
+		/// Uses SortedDictionary with float keys. Floating-point precision issues are resolved in CreateKeyframes
+		/// by merging any keyframes whose times are EpsilonEquals before building the final result.
+		/// </summary>
 		private class AnimationBuilder
 		{
-			private List<AnimationRecord> Keyframes { get; } = new List<AnimationRecord>();
+			/// <summary>
+			/// Epsilon tolerance for comparing floating-point keyframe times.
+			/// Times within this tolerance are considered equal and will be merged in CreateKeyframes.
+			/// </summary>
+			private const float TimeEpsilon = 1e-6f;
 
+			/// <summary>
+			/// Keyframes sorted by time (in seconds). When multiple animation paths have keyframes at the same time,
+			/// they are merged into a single AnimationRecord.
+			/// Near-identical times due to floating-point precision are merged in CreateKeyframes.
+			/// </summary>
+			private SortedDictionary<float, AnimationRecord> Keyframes { get; } = new SortedDictionary<float, AnimationRecord>();
+
+			/// <summary>
+			/// Adds keyframe data from a single animation sampler (translation, rotation, or scale) to the merged keyframes.
+			/// If a keyframe already exists at a time (from another sampler), the data is added to it.
+			/// If not, a new keyframe is created and automatically inserted in sorted order.
+			/// </summary>
 			public void AddPathInfo<T>(GltfLoader loader, AnimationSampler sampler, Action<AnimationRecord, T> poseSetter)
 			{
 				// Extract keyframe times and data from the glTF sampler
@@ -46,43 +70,16 @@ namespace DigitalRiseModel
 					throw new NotSupportedException("Translation length is different from times length");
 				}
 
-				// Merge this animation path's data with existing keyframes, creating new keyframes where needed
+				// Merge this animation path's data with existing keyframes
 				for (var i = 0; i < times.Length; ++i)
 				{
-					var time = TimeSpan.FromSeconds(times[i]);
+					var time = times[i];
 
-					// Find the keyframe at or before this time, or null if this is the earliest time seen
-					var frameIndex = Keyframes.GetKeyframeIndexByTime(r => r.Time, time);
-
-					AnimationRecord record = null;
-					if (frameIndex == null)
+					// Get or create keyframe at this time
+					if (!Keyframes.TryGetValue(time, out AnimationRecord record))
 					{
-						// No earlier keyframe exists; create a new one at the beginning
-						record = new AnimationRecord
-						{
-							Time = time
-						};
-						Keyframes.Insert(0, record);
-					}
-					else
-					{
-						var frame = Keyframes[frameIndex.Value];
-						var ftime = (float)frame.Time.TotalSeconds;
-
-						if (times[i].EpsilonEquals(ftime))
-						{
-							// Keyframe exists at this exact time; reuse it
-							record = frame;
-						}
-						else
-						{
-							// Keyframe exists before this time but not at it; create a new one after the nearest frame
-							record = new AnimationRecord
-							{
-								Time = time
-							};
-							Keyframes.Insert(frameIndex.Value + 1, record);
-						}
+						record = new AnimationRecord();
+						Keyframes[time] = record;  // SortedDictionary auto-inserts in sorted order
 					}
 
 					// Set this animation path's data (translation, rotation, or scale) on the record
@@ -90,14 +87,24 @@ namespace DigitalRiseModel
 				}
 			}
 
+			/// <summary>
+			/// Converts merged AnimationRecords into final animation keyframes.
+			/// First merges any keyframes with times that are EpsilonEquals to handle floating-point precision issues.
+			/// Then accumulates pose state as we iterate through sorted keyframes, so each output keyframe has
+			/// a complete pose (translation, rotation, scale) even if only some components were keyed at that time.
+			/// </summary>
 			public AnimationChannelKeyframe[] CreateKeyframes(SrtTransform currentPose)
 			{
-				// Convert merged AnimationRecords into final keyframes, accumulating pose state
+				// First pass: merge keyframes with EpsilonEquals times to handle floating-point precision issues
+				var mergedKeyframes = MergeNearIdenticalTimes();
+
 				var result = new List<AnimationChannelKeyframe>();
 
-				for (var i = 0; i < Keyframes.Count; ++i)
+				// Second pass: accumulate pose and build final keyframes
+				foreach (var pair in mergedKeyframes)
 				{
-					var frameSource = Keyframes[i];
+					var frameSource = pair.Value;
+					var time = pair.Key;
 
 					// Update pose with any animation data present in this keyframe
 					// (each animation path may have different keyframe times, so we only update the components that were keyed)
@@ -117,10 +124,58 @@ namespace DigitalRiseModel
 					}
 
 					// Create a keyframe with the accumulated pose at this time
-					result.Add(new AnimationChannelKeyframe(frameSource.Time, currentPose));
+					// Unkeyed components carry forward from previous keyframes or use the default pose
+					result.Add(new AnimationChannelKeyframe(TimeSpan.FromSeconds(time), currentPose));
 				}
 
 				return result.ToArray();
+			}
+
+			/// <summary>
+			/// Merges keyframes whose times are within TimeEpsilon of each other.
+			/// This handles floating-point precision issues where different samplers might have times like
+			/// 0.333333f and 0.333334f that should be treated as the same keyframe time.
+			/// </summary>
+			private SortedDictionary<float, AnimationRecord> MergeNearIdenticalTimes()
+			{
+				if (Keyframes.Count == 0)
+					return new SortedDictionary<float, AnimationRecord>();
+
+				var merged = new SortedDictionary<float, AnimationRecord>();
+				AnimationRecord currentMergedRecord = null;
+				float currentTime = float.NegativeInfinity;
+
+				foreach (var pair in Keyframes)
+				{
+					var time = pair.Key;
+					var record = pair.Value;
+
+					// Check if this time is close enough to the previous time to merge
+					if (currentMergedRecord != null && Math.Abs(time - currentTime) < TimeEpsilon)
+					{
+						// Merge this record into the current merged record
+						if (record.Translation.HasValue)
+							currentMergedRecord.Translation = record.Translation;
+						if (record.Rotation.HasValue)
+							currentMergedRecord.Rotation = record.Rotation;
+						if (record.Scale.HasValue)
+							currentMergedRecord.Scale = record.Scale;
+					}
+					else
+					{
+						// Start a new merged entry
+						currentTime = time;
+						currentMergedRecord = new AnimationRecord
+						{
+							Translation = record.Translation,
+							Rotation = record.Rotation,
+							Scale = record.Scale
+						};
+						merged[time] = currentMergedRecord;
+					}
+				}
+
+				return merged;
 			}
 		}
 

@@ -5,9 +5,6 @@ namespace DigitalRiseModel.Animation
 {
 	internal static class AnimationUtility
 	{
-		// Cached delegate to avoid allocating a new lambda on every GetKeyframeIndexByTime call
-		private static readonly Func<AnimationChannelKeyframe, TimeSpan> s_getKeyframeTime = k => k.Time;
-
 		/// <summary>
 		/// Gets the index of the keyframe at or just before the specified time using binary search.
 		/// </summary>
@@ -21,14 +18,14 @@ namespace DigitalRiseModel.Animation
 		/// If the time falls between keyframes, it returns the index of the keyframe before it.
 		/// If the time is after the last keyframe, it returns the index of the last keyframe.
 		/// </remarks>
-		public static int? GetKeyframeIndexByTime<T>(this IReadOnlyList<T> keyframes, Func<T, TimeSpan> timeGetter, TimeSpan time)
+		public static int? GetKeyframeIndexByTime(this IReadOnlyList<AnimationChannelKeyframe> keyframes, TimeSpan time)
 		{
 			// Handle empty collection
 			if (keyframes.Count == 0)
 				return null;
 
 			// Handle time before first keyframe - return null instead of clamping to 0
-			if (time < timeGetter(keyframes[0]))
+			if (time < keyframes[0].Time)
 				return null;
 
 			// Binary search: find the keyframe at or just before the specified time
@@ -38,7 +35,7 @@ namespace DigitalRiseModel.Animation
 			while (startIndex <= endIndex)
 			{
 				int middleIndex = (startIndex + endIndex) / 2;
-				TimeSpan middleTime = timeGetter(keyframes[middleIndex]);
+				TimeSpan middleTime = keyframes[middleIndex].Time;
 
 				if (middleTime == time)
 					// Exact match found
@@ -54,7 +51,5 @@ namespace DigitalRiseModel.Animation
 			// When loop exits, endIndex points to the keyframe at or just before the time
 			return endIndex;
 		}
-
-		public static int? GetKeyframeIndexByTime(this IReadOnlyList<AnimationChannelKeyframe> keyframes, TimeSpan time) => keyframes.GetKeyframeIndexByTime(s_getKeyframeTime, time);
 	}
 }
