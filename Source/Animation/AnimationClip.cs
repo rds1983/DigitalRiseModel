@@ -18,11 +18,12 @@ using System.Collections.Generic;
 namespace DigitalRiseModel.Animation
 {
 	/// <summary>
-	/// Represents an animation clip containing animation channels for bones.
+	/// Represents a single animation clip containing channels for individual bones.
+	/// Computes transforms on-demand for any given playback time without maintaining state.
 	/// </summary>
-	public class AnimationClip
+	public class AnimationClip : IAnimationClip
 	{
-		private Dictionary<int, AnimationChannel> _channelsByBones = new Dictionary<int, AnimationChannel>();
+		private readonly Dictionary<int, SrtTransform> _transforms = new Dictionary<int, SrtTransform>();
 
 		/// <summary>
 		/// Gets the name of this animation clip.
@@ -65,19 +66,24 @@ namespace DigitalRiseModel.Animation
 
 			foreach (var channel in channels)
 			{
-				_channelsByBones[channel.BoneIndex] = channel;
+				_transforms[channel.BoneIndex] = new SrtTransform();
 			}
 		}
 
-		/// <summary>
-		/// Attempts to get the animation channel for the specified bone.
-		/// </summary>
-		/// <param name="boneIndex">The index of the bone.</param>
-		/// <param name="result">When this method returns, contains the animation channel for the specified bone, or null if no channel exists.</param>
-		/// <returns>true if a channel exists for the specified bone; otherwise, false.</returns>
-		public bool TryGetChannelByBoneIndex(int boneIndex, out AnimationChannel result)
+		#region IAnimationClip Implementation
+
+		Dictionary<int, SrtTransform> IAnimationClip.GetTransforms(TimeSpan time)
 		{
-			return _channelsByBones.TryGetValue(boneIndex, out result);
+			// Interpolate poses for all channels at the given time
+			foreach (var channel in Channels)
+			{
+				var pose = AnimationInterpolationUtility.InterpolateChannelPose(channel, time, Duration);
+				_transforms[channel.BoneIndex] = pose;
+			}
+
+			return _transforms;
 		}
+
+		#endregion
 	}
 }
