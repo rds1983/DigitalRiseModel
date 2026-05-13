@@ -27,7 +27,7 @@ namespace DigitalRiseModel.Animation
 		private readonly ISkeleton _skeleton;
 		private AnimationTreeNode _rootNode;
 		private AnimationClipNode _currentClipNode;
-		private BlendNode _transitionBlend;
+		private AnimationBlendNode _transitionBlend;
 		private TimeSpan _currentTime;
 		private float _speed = 1.0f;
 		private PlaybackMode _playbackMode = PlaybackMode.Forward;
@@ -160,7 +160,7 @@ namespace DigitalRiseModel.Animation
 			}
 
 			// Create transition blend
-			_transitionBlend = new BlendNode(isLooped: isLooped);
+			_transitionBlend = new AnimationBlendNode(isLooped: isLooped);
 			_transitionBlend.AddChild(_currentClipNode, weight: 1.0f);
 			_transitionBlend.AddChild(newClipNode, weight: 0.0f);
 

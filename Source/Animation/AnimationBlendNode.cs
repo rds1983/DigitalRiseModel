@@ -8,7 +8,7 @@ namespace DigitalRiseModel.Animation
 	/// Animation tree node that blends multiple child animation nodes.
 	/// Supports recursive animation tree structures.
 	/// </summary>
-	public class BlendNode : AnimationTreeNode
+	public class AnimationBlendNode : AnimationTreeNode
 	{
 		private readonly List<(AnimationTreeNode Node, float Weight)> _children;
 
@@ -32,10 +32,10 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="BlendNode"/> class.
+		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class.
 		/// </summary>
 		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
-		public BlendNode(bool isLooped = false)
+		public AnimationBlendNode(bool isLooped = false)
 		{
 			_children = new List<(AnimationTreeNode, float)>();
 			IsLooped = isLooped;
