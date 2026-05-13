@@ -21,7 +21,7 @@ namespace DigitalRiseModel.Animation
 	/// Represents a single animation clip containing channels for individual bones.
 	/// Computes transforms on-demand for any given playback time without maintaining state.
 	/// </summary>
-	public class AnimationClip : IAnimationClip
+	public class AnimationClip
 	{
 		private readonly Dictionary<int, SrtTransform> _transforms = new Dictionary<int, SrtTransform>();
 
@@ -68,23 +68,6 @@ namespace DigitalRiseModel.Animation
 			{
 				_transforms[channel.BoneIndex] = new SrtTransform();
 			}
-		}
-
-		/// <summary>
-		/// Computes bone transforms for the specified playback time.
-		/// </summary>
-		/// <param name="time">The playback time within the animation.</param>
-		/// <returns>Dictionary mapping bone indices to their interpolated poses.</returns>
-		public Dictionary<int, SrtTransform> GetTransforms(TimeSpan time)
-		{
-			// Interpolate poses for all channels at the given time
-			foreach (var channel in Channels)
-			{
-				var pose = AnimationInterpolationUtility.InterpolateChannelPose(channel, time, Duration);
-				_transforms[channel.BoneIndex] = pose;
-			}
-
-			return _transforms;
 		}
 	}
 }
