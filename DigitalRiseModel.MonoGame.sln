@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.6.33829.357
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame", "Source\DigitalRiseModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Tests", "Tests\DigitalRiseModel.Tests\DigitalRiseModel.Tests.csproj", "{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.Character.MonoGame", "Samples\DigitalRiseModel.Samples.Character\DigitalRiseModel.Samples.Character.MonoGame.csproj", "{FCF12402-FAC7-423B-07A4-808D3BDC1D97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +55,7 @@ Global
 		{F4FD209A-164C-11FF-E4D8-1FD576675E7B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9876750C-9A62-09EA-3954-309DF950F1AD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{DB0A213A-DAB3-FEFF-EF06-E17FB08D6987} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FCF12402-FAC7-423B-07A4-808D3BDC1D97} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}

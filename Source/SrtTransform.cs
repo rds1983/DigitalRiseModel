@@ -199,7 +199,7 @@ namespace DigitalRiseModel
 		/// <returns>The transformation matrix.</returns>
 		public static Matrix CreateMatrix(Vector3 translation, Vector3 scale, Quaternion rotation)
 		{
-			return Matrix.CreateScale(scale) * Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(translation);
+			return Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(translation) * Matrix.CreateScale(scale);
 		}
 
 		#region IEquatable<Pose> Members

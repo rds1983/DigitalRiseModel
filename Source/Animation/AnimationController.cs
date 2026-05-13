@@ -42,10 +42,8 @@ namespace DigitalRiseModel.Animation
 		private TimeSpan _time;
 		private float _speed;
 		private bool _loopEnabled;
-		private AnimationClip _crossFadeAnimationClip;
-		private float _crossFadeInterpolationAmount;
-		private TimeSpan _crossFadeTime;
-		private TimeSpan _crossFadeElapsedTime;
+		private AnimationBlend _blendAnimation;
+		private bool _isBlending;
 
 		/// <summary>
 		/// Model Node
@@ -56,6 +54,11 @@ namespace DigitalRiseModel.Animation
 		/// Gets the animation clip being played.
 		/// </summary>
 		public AnimationClip AnimationClip { get; private set; }
+
+		/// <summary>
+		/// Gets the animation blend being played.
+		/// </summary>
+		public AnimationBlend BlendAnimation => _blendAnimation;
 
 		/// <summary>
 		/// Gets os sets the current animation playback time.
@@ -126,8 +129,6 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public bool IsPlaying { get; private set; }
 
-		public bool CrossFading { get; private set; }
-
 		public int CurrentKeyFrame { get; private set; }
 
 		public event EventHandler TimeChanged;
@@ -147,11 +148,6 @@ namespace DigitalRiseModel.Animation
 			_loopEnabled = true;
 			PlaybackMode = PlaybackMode.Forward;
 
-			CrossFading = false;
-			_crossFadeInterpolationAmount = 0.0f;
-			_crossFadeTime = TimeSpan.Zero;
-			_crossFadeElapsedTime = TimeSpan.Zero;
-
 			HasFinished = false;
 			IsPlaying = false;
 		}
@@ -162,6 +158,12 @@ namespace DigitalRiseModel.Animation
 		/// <param name="name">Name of the clip</param>
 		public void StartClip(string name)
 		{
+			// Stop any active blend when starting a single clip
+			if (_isBlending)
+			{
+				StopBlend();
+			}
+
 			AnimationClip = Skeleton.GetClip(name);
 			HasFinished = false;
 			IsPlaying = true;
@@ -178,6 +180,8 @@ namespace DigitalRiseModel.Animation
 			AnimationClip = null;
 			HasFinished = false;
 			IsPlaying = false;
+			_isBlending = false;
+			_blendAnimation = null;
 
 			Skeleton.ResetTransforms();
 			Time = TimeSpan.Zero;
@@ -199,29 +203,58 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Interpolates linearly between two animation clips, fading out the current 
-		/// animation clip and fading in a new one.
+		/// Starts a blended animation with multiple clips.
 		/// </summary>
-		/// <param name="name">Name of the clip</param>
-		/// <param name="fadeTime">Time used to fade in and out the animation clips.</param>
-		public void CrossFade(string name, TimeSpan fadeTime)
+		/// <param name="blendName">Name of the blend.</param>
+		/// <param name="clipNames">Names of the animation clips to blend.</param>
+		/// <param name="weights">Weights for each clip (optional, defaults to 1.0 for each).</param>
+		public void StartBlend(string blendName, string[] clipNames, float[] weights = null)
 		{
-			if (AnimationClip == null)
+			if (clipNames == null || clipNames.Length == 0)
+				throw new ArgumentException("Must provide at least one clip", nameof(clipNames));
+
+			var blend = new AnimationBlend(blendName);
+
+			for (int i = 0; i < clipNames.Length; i++)
 			{
-				StartClip(name);
-				return;
+				var clip = Skeleton.GetClip(clipNames[i]);
+				if (clip == null)
+					throw new ArgumentException($"Clip '{clipNames[i]}' not found", nameof(clipNames));
+
+				float weight = weights != null && i < weights.Length ? weights[i] : 1.0f;
+				blend.AddClip(clip, weight);
 			}
 
-			if (CrossFading)
-			{
-				StartClip(_crossFadeAnimationClip.Name);
-			}
+			_blendAnimation = blend;
+			AnimationClip = blend.GetClip(0);
+			_isBlending = true;
+			HasFinished = false;
+			IsPlaying = true;
 
-			_crossFadeAnimationClip = Skeleton.GetClip(name);
-			_crossFadeTime = fadeTime;
-			_crossFadeElapsedTime = TimeSpan.Zero;
+			Skeleton.ResetTransforms();
+			Time = TimeSpan.Zero;
+		}
 
-			CrossFading = true;
+		/// <summary>
+		/// Sets the weight of a clip in the current blend.
+		/// </summary>
+		/// <param name="clipIndex">Index of the clip in the blend.</param>
+		/// <param name="weight">New weight value.</param>
+		public void SetBlendWeight(int clipIndex, float weight)
+		{
+			if (_blendAnimation == null)
+				throw new InvalidOperationException("No blend is currently active");
+
+			_blendAnimation.SetClipWeight(clipIndex, weight);
+		}
+
+		/// <summary>
+		/// Stops the blended animation playback.
+		/// </summary>
+		public void StopBlend()
+		{
+			_blendAnimation = null;
+			_isBlending = false;
 		}
 
 		/// <summary>
@@ -235,7 +268,7 @@ namespace DigitalRiseModel.Animation
 				return;
 			}
 
-			if (HasFinished && !CrossFading)
+			if (HasFinished && !_isBlending)
 			{
 				return;
 			}
@@ -247,10 +280,10 @@ namespace DigitalRiseModel.Animation
 				scaledElapsedTime = -scaledElapsedTime;
 			}
 
-			// Adjust controller time
-			if (CrossFading)
+			// Update blend animation times
+			if (_isBlending && _blendAnimation != null)
 			{
-				_crossFadeElapsedTime += scaledElapsedTime;
+				_blendAnimation.UpdateTime(scaledElapsedTime);
 			}
 
 			Time += scaledElapsedTime;
@@ -264,33 +297,7 @@ namespace DigitalRiseModel.Animation
 			}
 
 			UpdateAnimationTime();
-
-			if (CrossFading)
-			{
-				UpdateCrossFadeTime();
-			}
-
 			UpdateChannelPoses();
-
-		}
-
-		/// <summary>
-		/// Updates the CrossFade time
-		/// </summary>
-		/// <param name="elapsedTime">Time elapsed since the last update.</param>
-		private void UpdateCrossFadeTime()
-		{
-			if (_crossFadeElapsedTime > _crossFadeTime)
-			{
-				CrossFading = false;
-				_crossFadeInterpolationAmount = 0;
-				_crossFadeTime = TimeSpan.Zero;
-				_crossFadeElapsedTime = TimeSpan.Zero;
-
-				StartClip(_crossFadeAnimationClip.Name);
-			}
-			else
-				_crossFadeInterpolationAmount = MathHelper.Clamp(_crossFadeElapsedTime.Ticks / (float)_crossFadeTime.Ticks, 0, 1);
 		}
 
 		/// <summary>
@@ -298,6 +305,17 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		private void UpdateAnimationTime()
 		{
+			// Skip looping logic when blending - each clip handles its own looping
+			if (_isBlending)
+			{
+				return;
+			}
+
+			if (AnimationClip == null)
+			{
+				return;
+			}
+
 			var fDuration = (float)AnimationClip.Duration.TotalSeconds;
 			if (fDuration.IsZero())
 			{
@@ -338,37 +356,119 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		private void UpdateChannelPoses()
 		{
+			// Handle blended animations
+			if (_isBlending && _blendAnimation != null)
+			{
+				UpdateBlendedPoses();
+				return;
+			}
+
+			// Handle single animation clip
 			for (int i = 0; i < AnimationClip.Channels.Length; i++)
 			{
-				// Search for the current channel in the current animation clip
 				var animationChannel = AnimationClip.Channels[i];
 
 				SrtTransform pose;
 				InterpolateChannelPose(animationChannel, _time, out pose);
 				Skeleton.SetPose(animationChannel.BoneIndex, pose);
+			}
+		}
 
-				// If CrossFade is enabled blend this channel in two animation clips
-				if (CrossFading)
+		/// <summary>
+		/// Updates the pose of all skeleton's bones using blended animations.
+		/// </summary>
+		private void UpdateBlendedPoses()
+		{
+			// Collect all unique bone indices from all clips in the blend
+			var boneIndices = new System.Collections.Generic.HashSet<int>();
+			for (int i = 0; i < _blendAnimation.ClipCount; i++)
+			{
+				var clip = _blendAnimation.GetClip(i);
+				foreach (var channel in clip.Channels)
 				{
-					SrtTransform channelPose;
-
-					// Search for the current channel in the cross fade clip
-					AnimationChannel animationChannel2;
-					if (_crossFadeAnimationClip.TryGetChannelByBoneIndex(animationChannel.BoneIndex, out animationChannel2))
-					{
-						InterpolateChannelPose(animationChannel2, TimeSpan.Zero, out channelPose);
-					}
-					else
-					{
-						channelPose = Skeleton.GetDefaultPose(animationChannel.BoneIndex);
-					}
-
-					// Interpolate each channel with the cross fade animation
-					pose = SrtTransform.Interpolate(pose, channelPose, _crossFadeInterpolationAmount,
-							animationChannel.TranslationMode, animationChannel.RotationMode, animationChannel.ScaleMode);
-
-					Skeleton.SetPose(animationChannel.BoneIndex, pose);
+					boneIndices.Add(channel.BoneIndex);
 				}
+			}
+
+			// Update poses for all bones affected by any clip in the blend
+			foreach (var boneIndex in boneIndices)
+			{
+				SrtTransform blendedPose = Skeleton.GetDefaultPose(boneIndex);
+				float totalWeight = 0;
+
+				// Blend all clips that have a channel for this bone
+				for (int i = 0; i < _blendAnimation.ClipCount; i++)
+				{
+					var clip = _blendAnimation.GetClip(i);
+					var time = _blendAnimation.GetClipTime(i);
+					var weight = _blendAnimation.GetClipWeight(i);
+
+					// Handle looping for each clip independently
+					var loopedTime = HandleClipLooping(clip, time);
+
+					if (clip.TryGetChannelByBoneIndex(boneIndex, out var animationChannel))
+					{
+						SrtTransform pose;
+						InterpolateChannelPose(animationChannel, loopedTime, out pose);
+
+						if (totalWeight == 0)
+						{
+							blendedPose = pose;
+						}
+						else
+						{
+							// Blend with accumulated pose
+							float normalizedWeight = weight / (totalWeight + weight);
+							blendedPose = SrtTransform.Interpolate(blendedPose, pose, normalizedWeight,
+								animationChannel.TranslationMode, animationChannel.RotationMode, animationChannel.ScaleMode);
+						}
+
+						totalWeight += weight;
+					}
+				}
+
+				Skeleton.SetPose(boneIndex, blendedPose);
+			}
+		}
+
+		/// <summary>
+		/// Handles looping for a single animation clip time.
+		/// </summary>
+		private TimeSpan HandleClipLooping(AnimationClip clip, TimeSpan time)
+		{
+			var duration = clip.Duration;
+			var fDuration = (float)duration.TotalSeconds;
+
+			if (fDuration.IsZero())
+			{
+				return time;
+			}
+
+			// If time is within bounds, return as-is
+			if (time >= TimeSpan.Zero && time <= duration)
+			{
+				return time;
+			}
+
+			// Handle looping
+			if (_loopEnabled)
+			{
+				if (time > duration)
+				{
+					while (time > duration)
+						time -= duration;
+				}
+				else if (time < TimeSpan.Zero)
+				{
+					while (time < TimeSpan.Zero)
+						time += duration;
+				}
+				return time;
+			}
+			else
+			{
+				// Clamp to duration if not looping
+				return time > duration ? duration : TimeSpan.Zero;
 			}
 		}
 
