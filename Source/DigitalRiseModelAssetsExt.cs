@@ -1,6 +1,5 @@
 ﻿using AssetManagementBase;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace DigitalRiseModel
 {
@@ -24,8 +23,7 @@ namespace DigitalRiseModel
 		/// <param name="path">The path to the model file (typically .gltf or .glb).</param>
 		/// <param name="flags">Flags that control how the model is loaded. Default is None.</param>
 		/// <returns>The loaded model.</returns>
-		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path,
-			ModelLoadFlags flags = ModelLoadFlags.None)
+		public static DrModel LoadModel(this AssetManager assetManager, GraphicsDevice device, string path, ModelLoadFlags flags = ModelLoadFlags.None)
 		{
 			ModelLoadSettings settings = null;
 			if (flags == ModelLoadFlags.None)
