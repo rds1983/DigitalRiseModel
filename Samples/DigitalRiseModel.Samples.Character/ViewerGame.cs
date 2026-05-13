@@ -129,7 +129,7 @@ namespace DigitalRiseModel.Samples.Character
 
 			// Start animation
 			_player = new AnimationController(_modelNode.ModelInstance);
-			var idleBlend = new AnimationBlendNode("Idle");
+			var idleBlend = new AnimationBlendNode("Idle", true);
 			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
 			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 			_player.StartClip(idleBlend);
@@ -200,7 +200,7 @@ namespace DigitalRiseModel.Samples.Character
 				_jumpVelocity = JumpForce;
 				_animationState = AnimationState.Jumping;
 				_jumpState = JumpState.Start;
-				_player.CrossfadeToClip(_modelNode.ModelInstance.GetClip("JumpStart"), TimeSpan.FromSeconds(0.2), false);
+				_player.CrossfadeToClip("JumpStart", TimeSpan.FromSeconds(0.2), false);
 			}
 
 			// Handle jump physics and animation state transitions
@@ -221,7 +221,7 @@ namespace DigitalRiseModel.Samples.Character
 						if (_player.HasFinished)
 						{
 							_jumpState = JumpState.Loop;
-							_player.CrossfadeToClip(_modelNode.ModelInstance.GetClip("JumpLoop"), TimeSpan.FromSeconds(0.1), true);
+							_player.CrossfadeToClip("JumpLoop", TimeSpan.FromSeconds(0.1), true);
 						}
 						break;
 
@@ -231,7 +231,7 @@ namespace DigitalRiseModel.Samples.Character
 						{
 							_modelNode.Translation = new Vector3(_modelNode.Translation.X, DefaultY, _modelNode.Translation.Z);
 							_jumpState = JumpState.Land;
-							_player.CrossfadeToClip(_modelNode.ModelInstance.GetClip("JumpEnd"), TimeSpan.FromSeconds(0.1), false);
+							_player.CrossfadeToClip("JumpEnd", TimeSpan.FromSeconds(0.1), false);
 						}
 						break;
 
@@ -242,7 +242,7 @@ namespace DigitalRiseModel.Samples.Character
 							if (isMoving)
 							{
 								_animationState = AnimationState.Running;
-								var runBlend = new AnimationBlendNode("Run");
+								var runBlend = new AnimationBlendNode("Run", true);
 								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
 								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
 								_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
@@ -250,7 +250,7 @@ namespace DigitalRiseModel.Samples.Character
 							else
 							{
 								_animationState = AnimationState.Idle;
-								var idleBlend = new AnimationBlendNode("Idle");
+								var idleBlend = new AnimationBlendNode("Idle", true);
 								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
 								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 								_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
@@ -270,7 +270,7 @@ namespace DigitalRiseModel.Samples.Character
 					if (_animationState != AnimationState.Running)
 					{
 						_animationState = AnimationState.Running;
-						var runBlend = new AnimationBlendNode("Run");
+						var runBlend = new AnimationBlendNode("Run", true);
 						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
 						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
 						_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
@@ -282,7 +282,7 @@ namespace DigitalRiseModel.Samples.Character
 					if (_animationState != AnimationState.Idle)
 					{
 						_animationState = AnimationState.Idle;
-						var idleBlend = new AnimationBlendNode("Idle");
+						var idleBlend = new AnimationBlendNode("Idle", true);
 						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
 						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 						_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
