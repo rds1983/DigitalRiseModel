@@ -17,6 +17,7 @@ namespace DigitalRiseModel.Animation
 			public IAnimationClip Clip { get; set; }
 			public float Weight { get; set; }
 			public TimeSpan Time { get; set; }
+			public bool LoopEnabled { get; set; }
 			public Dictionary<int, SrtTransform> Transforms { get; set; }
 		}
 
@@ -56,7 +57,8 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		/// <param name="clip">The animation clip to add.</param>
 		/// <param name="weight">The weight of the clip (default is 1.0).</param>
-		public void AddClip(IAnimationClip clip, float weight = 1.0f)
+		/// <param name="loopEnabled">Whether the clip should loop (default is true).</param>
+		public void AddClip(IAnimationClip clip, float weight = 1.0f, bool loopEnabled = true)
 		{
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
@@ -64,7 +66,7 @@ namespace DigitalRiseModel.Animation
 			if (weight < 0)
 				throw new ArgumentException("Weight must be non-negative", nameof(weight));
 
-			_clips.Add(new BlendedClip { Clip = clip, Weight = weight, Time = TimeSpan.Zero });
+			_clips.Add(new BlendedClip { Clip = clip, Weight = weight, Time = TimeSpan.Zero, LoopEnabled = loopEnabled });
 			_totalWeight += weight;
 			InvalidateTransforms();
 		}
@@ -116,6 +118,28 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
+		/// Gets whether the clip at the specified index is looped.
+		/// </summary>
+		public bool GetClipLoopEnabled(int index)
+		{
+			if (index < 0 || index >= _clips.Count)
+				throw new ArgumentOutOfRangeException(nameof(index));
+
+			return _clips[index].LoopEnabled;
+		}
+
+		/// <summary>
+		/// Sets whether the clip at the specified index should loop.
+		/// </summary>
+		public void SetClipLoopEnabled(int index, bool loopEnabled)
+		{
+			if (index < 0 || index >= _clips.Count)
+				throw new ArgumentOutOfRangeException(nameof(index));
+
+			_clips[index].LoopEnabled = loopEnabled;
+		}
+
+		/// <summary>
 		/// Gets the normalized weight for a clip (dividing by total weight).
 		/// </summary>
 		public float GetNormalizedWeight(int index) => _totalWeight > 0 ? _clips[index].Weight / _totalWeight : 0;
@@ -151,7 +175,8 @@ namespace DigitalRiseModel.Animation
 		{
 			foreach (var clip in _clips)
 			{
-				clip.Transforms = clip.Clip.GetTransforms(time);
+				var loopedTime = AnimationInterpolationUtility.HandleLooping(time, Duration, clip.LoopEnabled);
+				clip.Transforms = clip.Clip.GetTransforms(loopedTime);
 			}
 
 			// Populate bone index cache when transforms change

@@ -13,8 +13,8 @@
  * 
  */
 using DigitalRiseModel.Utility;
-using Microsoft.Xna.Framework;
 using System;
+using System.Diagnostics;
 
 namespace DigitalRiseModel.Animation
 {
@@ -42,6 +42,11 @@ namespace DigitalRiseModel.Animation
 		private TimeSpan _time;
 		private float _speed;
 		private bool _loopEnabled;
+		private IAnimationClip _crossfadeTarget;
+		private TimeSpan _crossfadeDuration;
+		private TimeSpan _crossfadeElapsedTime;
+		private AnimationBlend _crossfadeBlend;
+		private bool _crossfadeTargetLoop;
 
 		/// <summary>
 		/// Model Node
@@ -99,11 +104,6 @@ namespace DigitalRiseModel.Animation
 			set
 			{
 				_loopEnabled = value;
-
-				if (HasFinished && _loopEnabled)
-				{
-					HasFinished = false;
-				}
 			}
 		}
 
@@ -114,8 +114,18 @@ namespace DigitalRiseModel.Animation
 
 		/// <summary>
 		/// Returns whether the animation has finished.
+		/// Determined by looping setting, current time, and animation duration.
 		/// </summary>
-		public bool HasFinished { get; private set; }
+		public bool HasFinished
+		{
+			get
+			{
+				if (_loopEnabled || AnimationClip == null)
+					return false;
+
+				return _time >= AnimationClip.Duration;
+			}
+		}
 
 		/// <summary>
 		/// Returns whether the animation is playing.
@@ -142,26 +152,23 @@ namespace DigitalRiseModel.Animation
 			PlaybackMode = PlaybackMode.Forward;
 
 			AnimationClip = null;
-			HasFinished = false;
 			IsPlaying = false;
 		}
 
 		/// <summary>
 		/// Starts the playback of an animation clip from the beginning.
 		/// </summary>
-		/// <param name="name">Name of the clip</param>
-		public void StartClip(string name)
+		/// <param name="clip">The animation clip to play.</param>
+		/// <param name="loop">Whether the animation should loop.</param>
+		public void StartClip(IAnimationClip clip, bool loop = true)
 		{
-			var clip = Skeleton.GetClip(name);
 			if (clip == null)
-				throw new ArgumentException($"Clip '{name}' not found", nameof(name));
+				throw new ArgumentNullException(nameof(clip));
 
 			AnimationClip = clip;
+			_loopEnabled = loop;
 
-			HasFinished = false;
 			IsPlaying = true;
-
-			Skeleton.ResetTransforms();
 			Time = TimeSpan.Zero;
 		}
 
@@ -171,7 +178,6 @@ namespace DigitalRiseModel.Animation
 		public void StopClip()
 		{
 			AnimationClip = null;
-			HasFinished = false;
 			IsPlaying = false;
 
 			Skeleton.ResetTransforms();
@@ -179,74 +185,41 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Plays an animation clip.
+		/// Smoothly transitions from the current animation to another animation over a specified duration.
 		/// </summary>
-		/// <param name="name">Name of the clip</param>
-		public void PlayClip(string name)
+		/// <param name="clip">The target animation clip or blend.</param>
+		/// <param name="duration">Duration of the crossfade transition.</param>
+		/// <param name="loop">Whether the target animation should loop.</param>
+		public void CrossfadeToClip(IAnimationClip clip, TimeSpan duration, bool loop = true)
 		{
-			var clip = Skeleton.GetClip(name);
 			if (clip == null)
-				throw new ArgumentException($"Clip '{name}' not found", nameof(name));
+				throw new ArgumentNullException(nameof(clip));
 
-			AnimationClip = clip;
-
-			if (_time < clip.Duration)
+			if (AnimationClip == null)
 			{
-				HasFinished = false;
-				IsPlaying = true;
-			}
-		}
-
-		/// <summary>
-		/// Starts a blended animation with multiple clips.
-		/// </summary>
-		/// <param name="blendName">Name of the blend.</param>
-		/// <param name="clipNames">Names of the animation clips to blend.</param>
-		/// <param name="weights">Weights for each clip (optional, defaults to 1.0 for each).</param>
-		public void StartBlend(string blendName, string[] clipNames, float[] weights = null)
-		{
-			if (clipNames == null || clipNames.Length == 0)
-				throw new ArgumentException("Must provide at least one clip", nameof(clipNames));
-
-			var blend = new AnimationBlend(blendName);
-
-			for (int i = 0; i < clipNames.Length; i++)
-			{
-				var clip = Skeleton.GetClip(clipNames[i]);
-				if (clip == null)
-					throw new ArgumentException($"Clip '{clipNames[i]}' not found", nameof(clipNames));
-
-				float weight = weights != null && i < weights.Length ? weights[i] : 1.0f;
-				blend.AddClip(clip, weight);
+				StartClip(clip, loop);
+				return;
 			}
 
-			AnimationClip = blend;
-			HasFinished = false;
+			_crossfadeTarget = clip;
+			_crossfadeDuration = duration;
+			_crossfadeElapsedTime = TimeSpan.Zero;
+			_crossfadeTargetLoop = loop;
+
+			_crossfadeBlend = new AnimationBlend("Crossfade");
+			_crossfadeBlend.AddClip(AnimationClip, 1.0f, _loopEnabled);
+			_crossfadeBlend.AddClip(_crossfadeTarget, 0.0f, loop);
+
+			AnimationClip = _crossfadeBlend;
+
 			IsPlaying = true;
-
-			Skeleton.ResetTransforms();
 			Time = TimeSpan.Zero;
 		}
 
-		/// <summary>
-		/// Sets the weight of a clip in the current blend.
-		/// </summary>
-		/// <param name="clipIndex">Index of the clip in the blend.</param>
-		/// <param name="weight">New weight value.</param>
-		public void SetBlendWeight(int clipIndex, float weight)
-		{
-			if (AnimationClip == null)
-				throw new InvalidOperationException("No animation source is currently active");
-
-			var blend = AnimationClip as AnimationBlend;
-			if (blend == null)
-				throw new InvalidOperationException("Current animation source is not a blend");
-
-			blend.SetClipWeight(clipIndex, weight);
-		}
 
 		/// <summary>
 		/// Updates the animation clip time and calculates the new skeleton's bone pose.
+		/// Handles crossfade transitions automatically.
 		/// </summary>
 		/// <param name="elapsedTime">Time elapsed since the last update.</param>
 		public void Update(TimeSpan elapsedTime)
@@ -269,6 +242,25 @@ namespace DigitalRiseModel.Animation
 			}
 
 			Time += scaledElapsedTime;
+
+			// Handle crossfade weight updates
+			if (_crossfadeBlend != null && _crossfadeTarget != null)
+			{
+				_crossfadeElapsedTime += scaledElapsedTime;
+				float crossfadeProgress = Math.Min(1.0f, (float)(_crossfadeElapsedTime.TotalSeconds / _crossfadeDuration.TotalSeconds));
+				Debug.WriteLine($"{_crossfadeTarget.Name}:{_crossfadeElapsedTime}:{scaledElapsedTime}:{crossfadeProgress}");
+
+				_crossfadeBlend.SetClipWeight(0, 1.0f - crossfadeProgress);
+				_crossfadeBlend.SetClipWeight(1, crossfadeProgress);
+
+				if (crossfadeProgress >= 1.0f)
+				{
+					AnimationClip = _crossfadeTarget;
+					_loopEnabled = _crossfadeTargetLoop;
+					_crossfadeTarget = null;
+					_crossfadeBlend = null;
+				}
+			}
 		}
 
 		private void UpdateAll()
@@ -296,7 +288,6 @@ namespace DigitalRiseModel.Animation
 				{
 					_time = duration;
 					IsPlaying = false;
-					HasFinished = true;
 				}
 			}
 
