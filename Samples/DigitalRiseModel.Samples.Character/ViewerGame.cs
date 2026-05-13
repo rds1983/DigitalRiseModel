@@ -129,9 +129,9 @@ namespace DigitalRiseModel.Samples.Character
 
 			// Start animation
 			_player = new AnimationController(_modelNode.ModelInstance);
-			var idleBlend = new AnimationBlend("Idle");
-			idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleBase"));
-			idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleTop"));
+			var idleBlend = new AnimationBlendNode("Idle");
+			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
+			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 			_player.StartClip(idleBlend);
 
 			// Init input service
@@ -242,17 +242,17 @@ namespace DigitalRiseModel.Samples.Character
 							if (isMoving)
 							{
 								_animationState = AnimationState.Running;
-								var runBlend = new AnimationBlend("Run");
-								runBlend.AddClip(_modelNode.ModelInstance.GetClip("RunBase"));
-								runBlend.AddClip(_modelNode.ModelInstance.GetClip("RunTop"));
+								var runBlend = new AnimationBlendNode("Run");
+								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
+								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
 								_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
 							}
 							else
 							{
 								_animationState = AnimationState.Idle;
-								var idleBlend = new AnimationBlend("Idle");
-								idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleBase"));
-								idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleTop"));
+								var idleBlend = new AnimationBlendNode("Idle");
+								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
+								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 								_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
 							}
 						}
@@ -270,9 +270,9 @@ namespace DigitalRiseModel.Samples.Character
 					if (_animationState != AnimationState.Running)
 					{
 						_animationState = AnimationState.Running;
-						var runBlend = new AnimationBlend("Run");
-						runBlend.AddClip(_modelNode.ModelInstance.GetClip("RunBase"));
-						runBlend.AddClip(_modelNode.ModelInstance.GetClip("RunTop"));
+						var runBlend = new AnimationBlendNode("Run");
+						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
+						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
 						_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
 					}
 					_modelNode.Translation += velocity;
@@ -282,9 +282,9 @@ namespace DigitalRiseModel.Samples.Character
 					if (_animationState != AnimationState.Idle)
 					{
 						_animationState = AnimationState.Idle;
-						var idleBlend = new AnimationBlend("Idle");
-						idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleBase"));
-						idleBlend.AddClip(_modelNode.ModelInstance.GetClip("IdleTop"));
+						var idleBlend = new AnimationBlendNode("Idle");
+						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
+						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
 						_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
 					}
 				}

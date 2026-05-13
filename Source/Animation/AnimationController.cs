@@ -28,7 +28,10 @@ namespace DigitalRiseModel.Animation
 		private AnimationTreeNode _rootNode;
 		private AnimationClipNode _currentClipNode;
 		private AnimationBlendNode _transitionBlend;
+		private AnimationClipNode _transitionOldClip;
 		private TimeSpan _currentTime;
+		private TimeSpan _transitionTime;
+		private TimeSpan _transitionDuration;
 		private float _speed = 1.0f;
 		private PlaybackMode _playbackMode = PlaybackMode.Forward;
 		private bool _isPlaying;
@@ -76,6 +79,21 @@ namespace DigitalRiseModel.Animation
 		public bool IsPlaying => _isPlaying;
 
 		/// <summary>
+		/// Gets whether the current animation has finished playing.
+		/// Returns false if the animation is looped or if no animation is playing.
+		/// </summary>
+		public bool HasFinished
+		{
+			get
+			{
+				if (_rootNode == null || _rootNode.IsLooped)
+					return false;
+
+				return _currentTime >= _rootNode.Duration;
+			}
+		}
+
+		/// <summary>
 		/// Gets the root animation tree node.
 		/// </summary>
 		public AnimationTreeNode RootNode => _rootNode;
@@ -93,12 +111,21 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Sets the root animation tree node.
+		/// Starts playing an animation tree node directly.
 		/// </summary>
-		/// <param name="node">The root animation node.</param>
-		public void SetAnimationTree(AnimationTreeNode node)
+		/// <param name="node">The animation tree node to play.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
+		public void StartClip(AnimationTreeNode node)
 		{
+			if (node == null)
+				throw new ArgumentNullException(nameof(node));
+
 			_rootNode = node;
+			_currentClipNode = node as AnimationClipNode;
+			_currentTime = TimeSpan.Zero;
+			_isPlaying = true;
+
+			OnTimeChanged();
 		}
 
 		/// <summary>
@@ -112,12 +139,26 @@ namespace DigitalRiseModel.Animation
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
 
-			_currentClipNode = new AnimationClipNode(clip, isLooped: isLooped);
-			_rootNode = _currentClipNode;
-			_currentTime = TimeSpan.Zero;
-			_isPlaying = true;
+			StartClip(new AnimationClipNode(clip, isLooped: isLooped));
+		}
 
-			OnTimeChanged();
+		/// <summary>
+		/// Starts playing an animation clip by name.
+		/// </summary>
+		/// <param name="name">The name of the animation clip to play.</param>
+		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+		/// <exception cref="ArgumentException">No clip found with the specified name.</exception>
+		public void StartClip(string name, bool isLooped = false)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			var clip = _skeleton.GetClip(name);
+			if (clip == null)
+				throw new ArgumentException($"Animation clip '{name}' not found.", nameof(name));
+
+			StartClip(clip, isLooped);
 		}
 
 		/// <summary>
@@ -135,6 +176,40 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
+		/// Smoothly transitions from the current animation to a new animation tree node using crossfading.
+		/// </summary>
+		/// <param name="node">The animation tree node to transition to.</param>
+		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
+		/// <exception cref="ArgumentException"><paramref name="fadeDuration"/> is negative.</exception>
+		public void CrossfadeToClip(AnimationTreeNode node, TimeSpan fadeDuration)
+		{
+			if (node == null)
+				throw new ArgumentNullException(nameof(node));
+
+			if (fadeDuration.TotalSeconds < 0)
+				throw new ArgumentException("Fade duration cannot be negative.", nameof(fadeDuration));
+
+			if (_currentClipNode == null)
+			{
+				// No current clip, just start the new one
+				StartClip(node);
+				return;
+			}
+
+			// Create transition blend
+			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: node.IsLooped);
+			_transitionOldClip = _currentClipNode;
+			_transitionBlend.AddChild(_transitionOldClip, weight: 1.0f);
+			_transitionBlend.AddChild(node, weight: 0.0f);
+
+			_rootNode = _transitionBlend;
+			_currentClipNode = node as AnimationClipNode;
+			_transitionTime = TimeSpan.Zero;
+			_transitionDuration = fadeDuration;
+		}
+
+		/// <summary>
 		/// Smoothly transitions from the current clip to a new clip using crossfading.
 		/// </summary>
 		/// <param name="clip">The animation clip to transition to.</param>
@@ -147,42 +222,28 @@ namespace DigitalRiseModel.Animation
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
 
-			if (fadeDuration.TotalSeconds < 0)
-				throw new ArgumentException("Fade duration cannot be negative.", nameof(fadeDuration));
-
 			var newClipNode = new AnimationClipNode(clip, isLooped: isLooped);
+			CrossfadeToClip(newClipNode, fadeDuration);
+		}
 
-			if (_currentClipNode == null)
-			{
-				// No current clip, just start the new one
-				StartClip(clip, isLooped);
-				return;
-			}
+		/// <summary>
+		/// Smoothly transitions to an animation clip by name using crossfading.
+		/// </summary>
+		/// <param name="clipName">The name of the animation clip to transition to.</param>
+		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
+		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="clipName"/> is null.</exception>
+		/// <exception cref="ArgumentException">No clip found with the specified name, or fade duration is negative.</exception>
+		public void CrossfadeToClip(string clipName, TimeSpan fadeDuration, bool isLooped = false)
+		{
+			if (clipName == null)
+				throw new ArgumentNullException(nameof(clipName));
 
-			// Create transition blend
-			_transitionBlend = new AnimationBlendNode(isLooped: isLooped);
-			_transitionBlend.AddChild(_currentClipNode, weight: 1.0f);
-			_transitionBlend.AddChild(newClipNode, weight: 0.0f);
+			var clip = _skeleton.GetClip(clipName);
+			if (clip == null)
+				throw new ArgumentException($"Animation clip '{clipName}' not found.", nameof(clipName));
 
-			_rootNode = _transitionBlend;
-			_currentClipNode = newClipNode;
-
-			// Animate the blend over the fade duration
-			if (fadeDuration.TotalSeconds > 0)
-			{
-				var transitionTime = TimeSpan.Zero;
-				var transitionUpdate = new Action<TimeSpan>(deltaTime =>
-				{
-					transitionTime += deltaTime;
-					float progress = Math.Min(1.0f, (float)(transitionTime.TotalSeconds / fadeDuration.TotalSeconds));
-
-					_transitionBlend.SetChildWeight(_currentClipNode, progress);
-					_transitionBlend.SetChildWeight(_currentClipNode, 1.0f - progress);
-				});
-
-				// For now, we'll complete the transition immediately in the next Update call
-				// A more sophisticated system would use a separate animation for the transition
-			}
+			CrossfadeToClip(clip, fadeDuration, isLooped);
 		}
 
 		/// <summary>
@@ -238,15 +299,37 @@ namespace DigitalRiseModel.Animation
 
 			_currentTime += TimeSpan.FromSeconds(deltaSeconds);
 
-			_currentTime = _currentTime.GetEffectiveTime(_currentClipNode.Duration, _currentClipNode.IsLooped);
+			// Update transition blend if active
+			if (_transitionBlend != null)
+			{
+				_transitionTime += elapsedTime;
+				float progress = Math.Min(1.0f, (float)(_transitionTime.TotalSeconds / _transitionDuration.TotalSeconds));
+
+				_transitionBlend.SetChildWeight(_transitionOldClip, 1.0f - progress);
+				_transitionBlend.SetChildWeight(_currentClipNode, progress);
+
+				// Complete transition when fade duration is reached
+				if (progress >= 1.0f)
+				{
+					_rootNode = _currentClipNode;
+					_transitionBlend = null;
+					_transitionOldClip = null;
+					_transitionTime = TimeSpan.Zero;
+					_transitionDuration = TimeSpan.Zero;
+				}
+			}
+
+			// Use current clip node if available, otherwise use root node
+			var activeNode = _currentClipNode ?? _rootNode;
+			_currentTime = _currentTime.GetEffectiveTime(activeNode.Duration, activeNode.IsLooped);
 
 			// Clamp time for non-looping animations
-			if (_currentClipNode != null && !_currentClipNode.IsLooped)
+			if (!activeNode.IsLooped)
 			{
 				if (_currentTime.TotalSeconds < 0)
 					_currentTime = TimeSpan.Zero;
-				else if (_currentTime > _currentClipNode.Duration)
-					_currentTime = _currentClipNode.Duration;
+				else if (_currentTime > activeNode.Duration)
+					_currentTime = activeNode.Duration;
 			}
 
 			Sample();

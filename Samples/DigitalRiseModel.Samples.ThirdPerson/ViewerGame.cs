@@ -34,7 +34,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 		private ForwardRenderer _renderer;
 		private Desktop _desktop;
 		private MainPanel _mainPanel;
-		
+
 		public ViewerGame()
 		{
 			_graphics = new GraphicsDeviceManager(this)
@@ -97,7 +97,7 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 
 			// Start animation
 			_player = new AnimationController(_modelNode.ModelInstance);
-			_player.StartClip("idle");
+			_player.StartClip("idle", true);
 
 			// Init input service
 			_inputService = new InputService();
@@ -161,28 +161,28 @@ namespace DigitalRiseModel.Samples.ThirdPerson
 			}
 
 			// Set animation
-			switch(speed)
+			switch (speed)
 			{
 				case 0:
-					if (_player.AnimationClip.Name != "idle")
+					if (_player.RootNode.Name != "idle")
 					{
-						_player.StartClip("idle");
+						_player.StartClip("idle", true);
 					}
 					break;
 
 				case 1:
 				case -1:
-					if (_player.AnimationClip.Name != "walking")
+					if (_player.RootNode.Name != "walking")
 					{
-						_player.StartClip("walking");
+						_player.StartClip("walking", true);
 					}
 					break;
 
 				case 2:
 				case -2:
-					if (_player.AnimationClip.Name != "running")
+					if (_player.RootNode.Name != "running")
 					{
-						_player.StartClip("running");
+						_player.StartClip("running", true);
 					}
 					break;
 			}

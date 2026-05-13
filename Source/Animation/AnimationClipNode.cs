@@ -15,6 +15,11 @@ namespace DigitalRiseModel.Animation
 		public AnimationClip Clip => _clip;
 
 		/// <summary>
+		/// Gets the name of the animation clip.
+		/// </summary>
+		public override string Name => _clip.Name;
+
+		/// <summary>
 		/// Gets the duration of this animation node.
 		/// </summary>
 		public override TimeSpan Duration => _clip.Duration;
