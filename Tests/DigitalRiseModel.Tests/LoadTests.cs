@@ -123,12 +123,12 @@ namespace DigitalRiseModel.Tests
 		}
 
 		[TestMethod]
-		public void LoadSinbadModel()
+		public void LoadSinbad3RootsModel()
 		{
 			var manager = Utility.CreateAssetManager();
 
 			// Load Sinbad model with multiple roots
-			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "Sinbad.glb", ModelLoadFlags.IgnoreMaterials);
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "Sinbad3Roots.glb", ModelLoadFlags.IgnoreMaterials);
 
 			// Verify model loaded successfully
 			Assert.IsNotNull(model, "Model should load successfully");
@@ -255,7 +255,7 @@ namespace DigitalRiseModel.Tests
 			}
 
 			// Load with readable buffers flag and verify data can be read
-			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "Sinbad.glb",
+			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "Sinbad3Roots.glb",
 				ModelLoadFlags.IgnoreMaterials | ModelLoadFlags.ReadableBuffers);
 
 			foreach (var mesh in model.Meshes)
