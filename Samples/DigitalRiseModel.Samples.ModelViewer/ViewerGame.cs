@@ -311,14 +311,15 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			else
 			{
 				var clip = (AnimationClip)((Label)_mainPanel._comboAnimations.SelectedItem).Tag;
-				if (_mainPanel._checkCrossfade.IsChecked)
-				{
-					_player.CrossFade(clip.Name, TimeSpan.FromSeconds(0.5f));
-				}
-				else
-				{
-					_player.StartClip(clip.Name);
-				}
+				/*				if (_mainPanel._checkCrossfade.IsChecked)
+								{
+									_player.CrossFade(clip.Name, TimeSpan.FromSeconds(0.5f));
+								}
+								else
+								{
+									_player.StartClip(clip.Name);
+								}*/
+				_player.StartClip(clip.Name);
 			}
 
 			ResetAnimation();
