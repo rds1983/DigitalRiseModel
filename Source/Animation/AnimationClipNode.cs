@@ -36,6 +36,7 @@ namespace DigitalRiseModel.Animation
 			IsLooped = isLooped;
 		}
 
+		/// Samples the clip at the given time and contributes bone transforms to the context.
 		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
 			if (weight < 0 || weight > 1)
@@ -87,21 +88,6 @@ namespace DigitalRiseModel.Animation
 				channel.TranslationMode,
 				channel.RotationMode,
 				channel.ScaleMode
-			);
-		}
-
-		/// <summary>
-		/// Blends between two poses using the specified weight.
-		/// </summary>
-		private static SrtTransform BlendPoses(SrtTransform pose1, SrtTransform pose2, float weight)
-		{
-			return SrtTransform.Interpolate(
-				pose1,
-				pose2,
-				weight,
-				InterpolationMode.Linear,
-				InterpolationMode.Linear,
-				InterpolationMode.Linear
 			);
 		}
 	}

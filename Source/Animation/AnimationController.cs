@@ -19,16 +19,16 @@ namespace DigitalRiseModel.Animation
 	}
 
 	/// <summary>
-	/// Main animation controller for managing skeletal animations with support for
-	/// hierarchical blending, clip management, and playback control.
+	/// Manages skeletal animation playback with hierarchical blending and crossfading.
+	/// Uses a recursive "Process" pipeline: tree → AnimationContext → blended poses → skeleton.
 	/// </summary>
 	public class AnimationController : IDisposable
 	{
 		private readonly AnimationContext _context;
 		private AnimationTreeNode _rootNode;
-		private AnimationClipNode _currentClipNode;
+		private AnimationTreeNode _currentClipNode;
 		private AnimationBlendNode _transitionBlend;
-		private AnimationClipNode _transitionOldClip;
+		private AnimationTreeNode _transitionOldClip;
 		private TimeSpan _currentTime;
 		private TimeSpan _transitionTime;
 		private TimeSpan _transitionDuration;
@@ -123,7 +123,7 @@ namespace DigitalRiseModel.Animation
 				throw new ArgumentNullException(nameof(node));
 
 			_rootNode = node;
-			_currentClipNode = node as AnimationClipNode;
+			_currentClipNode = node;
 			_currentTime = TimeSpan.Zero;
 			_isPlaying = true;
 
@@ -206,7 +206,7 @@ namespace DigitalRiseModel.Animation
 			_transitionBlend.AddChild(node, weight: 0.0f);
 
 			_rootNode = _transitionBlend;
-			_currentClipNode = node as AnimationClipNode;
+			_currentClipNode = node;
 			_transitionTime = TimeSpan.Zero;
 			_transitionDuration = fadeDuration;
 		}
@@ -284,9 +284,10 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Updates the animation for the specified elapsed time and samples the skeleton.
+		/// Main update function: advances time, updates transitions, and applies skeleton poses.
+		/// Call once per frame. Pipeline: advance time → update crossfade → evaluate tree → apply poses.
 		/// </summary>
-		/// <param name="elapsedTime">The elapsed time since the last update.</param>
+		/// <param name="elapsedTime">Elapsed time since last update.</param>
 		public void Update(TimeSpan elapsedTime)
 		{
 			ThrowIfDisposed();
@@ -294,14 +295,13 @@ namespace DigitalRiseModel.Animation
 			if (!_isPlaying || _rootNode == null)
 				return;
 
+			// Advance time with speed and direction
 			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
-
 			if (_playbackMode == PlaybackMode.Backward)
 				deltaSeconds = -deltaSeconds;
-
 			_currentTime += TimeSpan.FromSeconds(deltaSeconds);
 
-			// Update transition blend if active
+			// Update crossfade: fade out old clip, fade in new clip
 			if (_transitionBlend != null)
 			{
 				_transitionTime += elapsedTime;
@@ -310,7 +310,7 @@ namespace DigitalRiseModel.Animation
 				_transitionBlend.SetChildWeight(_transitionOldClip, 1.0f - progress);
 				_transitionBlend.SetChildWeight(_currentClipNode, progress);
 
-				// Complete transition when fade duration is reached
+				// Complete transition when done
 				if (progress >= 1.0f)
 				{
 					_rootNode = _currentClipNode;
@@ -321,11 +321,10 @@ namespace DigitalRiseModel.Animation
 				}
 			}
 
-			// Use current clip node if available, otherwise use root node
+			// Handle looping and clamping
 			var activeNode = _currentClipNode ?? _rootNode;
 			_currentTime = _currentTime.GetEffectiveTime(activeNode.Duration, activeNode.IsLooped);
 
-			// Clamp time for non-looping animations
 			if (!activeNode.IsLooped)
 			{
 				if (_currentTime.TotalSeconds < 0)
@@ -334,25 +333,29 @@ namespace DigitalRiseModel.Animation
 					_currentTime = activeNode.Duration;
 			}
 
-			Sample();
+			Process();
 			OnTimeChanged();
 		}
 
 		/// <summary>
-		/// Samples the animation tree and applies the resulting pose to the skeleton.
-		/// Uses weight 1.0 for the root node.
+		/// Evaluates the animation tree and applies poses to skeleton.
+		/// Pipeline: reset skeleton → reset context → process tree → apply transforms.
 		/// </summary>
-		public void Sample()
+		private void Process()
 		{
 			ThrowIfDisposed();
 
 			if (_rootNode == null)
 				return;
 
+			// Reset skeleton to default pose
 			Skeleton.ResetTransforms();
 
+			// Clear context and evaluate animation tree
 			_context.Reset();
 			_rootNode.Process(_context, _currentTime, 1.0f);
+
+			// Apply accumulated transforms
 			_context.SetPoses();
 		}
 

@@ -22,6 +22,13 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public abstract TimeSpan Duration { get; }
 
+		/// <summary>
+		/// Evaluates this node and contributes its transforms to the animation context.
+		/// Each node type implements this to add its animation data with proper weighting.
+		/// </summary>
+		/// <param name="context">The context accumulating transforms from the entire tree.</param>
+		/// <param name="time">Current playback time.</param>
+		/// <param name="weight">Blend weight [0.0, 1.0] for this node's contribution.</param>
 		internal abstract void Process(AnimationContext context, TimeSpan time, float weight);
 
 		/// <summary>

@@ -138,6 +138,7 @@ namespace DigitalRiseModel.Animation
 			_children[index] = (node, weight);
 		}
 
+		/// Recursively processes children and blends their results with weighted mixing.
 		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
 			if (_children.Count == 0)
@@ -148,6 +149,7 @@ namespace DigitalRiseModel.Animation
 
 			TimeSpan effectiveTime = GetEffectiveTime(time);
 
+			// Process each child with its weight
 			foreach (var (child, childWeight) in _children)
 			{
 				child.Process(context, effectiveTime, childWeight);

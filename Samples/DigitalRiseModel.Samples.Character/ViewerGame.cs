@@ -45,7 +45,7 @@ namespace DigitalRiseModel.Samples.Character
 		private const float MovementSpeed = 2.0f;
 		private const float JumpForce = 0.75f;
 		private const float Gravity = 0.015f;
-		private const float DefaultY = 5.5f;
+		private const float DefaultY = 5.3f;
 
 		private readonly GraphicsDeviceManager _graphics;
 		private AnimationController _player;
