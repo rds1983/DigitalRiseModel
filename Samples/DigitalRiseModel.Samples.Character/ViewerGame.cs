@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Graphics2D.UI;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace DigitalRiseModel.Samples.Character
@@ -66,16 +65,23 @@ namespace DigitalRiseModel.Samples.Character
 		private Desktop _desktop;
 		private MainPanel _mainPanel;
 
+		/// <summary>Singleton instance of the ViewerGame for global access.</summary>
+		public static ViewerGame Instance { get; private set; }
+
 		public ViewerGame()
 		{
+			// Register singleton instance
+			Instance = this;
+
 			_graphics = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = 1200,
 				PreferredBackBufferHeight = 800
 			};
 
+			// Mouse confinement and visibility is managed by InputService
+			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
-			IsMouseVisible = false;
 
 			if (Configuration.NoFixedStep)
 			{
@@ -131,9 +137,12 @@ namespace DigitalRiseModel.Samples.Character
 			_player = new AnimationController(_modelNode.ModelInstance);
 			_player.StartClip("Idle", true);
 
-			// Init input service
+			// Init input service with mouse confinement enabled
+			// Mouse is initially locked to window bounds and hidden
 			_inputService = new InputService();
 			_inputService.MouseMoved += _inputService_MouseMoved;
+			_inputService.KeyDown += _inputService_KeyDown;
+			_inputService.MouseLocked = true;
 
 			// Init forward renderer
 			_renderer = new ForwardRenderer(GraphicsDevice);
@@ -149,12 +158,31 @@ namespace DigitalRiseModel.Samples.Character
 			_desktop.Root = _mainPanel;
 		}
 
+		/// <summary>Handles keyboard input events. Press Escape to toggle mouse lock.</summary>
+		private void _inputService_KeyDown(object sender, KeyEventsArgs e)
+		{
+			// Escape key toggles mouse confinement and visibility
+			if (e.Key == Keys.Escape)
+			{
+				_inputService.MouseLocked = !_inputService.MouseLocked;
+			}
+		}
+
+		/// <summary>Handles mouse movement events to rotate player and camera.</summary>
 		private void _inputService_MouseMoved(object sender, InputEventArgs<Point> e)
 		{
+			// Only process mouse input when mouse is locked/confined to window
+			if (!_inputService.MouseLocked)
+			{
+				return;
+			}
+
+			// Rotate player based on horizontal mouse movement
 			var playerRotation = _modelNode.Rotation;
 			playerRotation.Y += -(int)((e.NewValue.X - e.OldValue.X) * MouseSensitivity);
 			_modelNode.Rotation = playerRotation;
 
+			// Rotate camera based on vertical mouse movement
 			var cameraRotation = _cameraMount.Rotation;
 			cameraRotation.X += (int)((e.NewValue.Y - e.OldValue.Y) * MouseSensitivity);
 			_cameraMount.Rotation = cameraRotation;
