@@ -36,17 +36,8 @@ namespace DigitalRiseModel.Animation
 			IsLooped = isLooped;
 		}
 
-		/// <summary>
-		/// Samples the animation clip at the specified time and blends it into the skeleton.
-		/// </summary>
-		/// <param name="skeleton">The skeleton to apply the animation to.</param>
-		/// <param name="time">The current playback time.</param>
-		/// <param name="weight">The blend weight for this animation (0.0 to 1.0).</param>
-		public override void Sample(ISkeleton skeleton, TimeSpan time, float weight)
+		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
-			if (skeleton == null)
-				throw new ArgumentNullException(nameof(skeleton));
-
 			if (weight < 0 || weight > 1)
 				throw new ArgumentException("Weight must be between 0.0 and 1.0 inclusive.", nameof(weight));
 
@@ -55,14 +46,7 @@ namespace DigitalRiseModel.Animation
 			foreach (var channel in _clip.Channels)
 			{
 				SrtTransform pose = SampleChannel(channel, effectiveTime);
-
-				if (weight < 1.0f)
-				{
-					SrtTransform defaultPose = skeleton.GetDefaultPose(channel.BoneIndex);
-					pose = BlendPoses(defaultPose, pose, weight);
-				}
-
-				skeleton.SetPose(channel.BoneIndex, pose);
+				context.SetTransform(channel.BoneIndex, pose, weight);
 			}
 		}
 

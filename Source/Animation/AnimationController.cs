@@ -24,7 +24,7 @@ namespace DigitalRiseModel.Animation
 	/// </summary>
 	public class AnimationController : IDisposable
 	{
-		private readonly ISkeleton _skeleton;
+		private readonly AnimationContext _context;
 		private AnimationTreeNode _rootNode;
 		private AnimationClipNode _currentClipNode;
 		private AnimationBlendNode _transitionBlend;
@@ -98,6 +98,8 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public AnimationTreeNode RootNode => _rootNode;
 
+		private ISkeleton Skeleton => _context.Skeleton;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnimationController"/> class.
 		/// </summary>
@@ -105,7 +107,7 @@ namespace DigitalRiseModel.Animation
 		/// <exception cref="ArgumentNullException"><paramref name="skeleton"/> is null.</exception>
 		public AnimationController(ISkeleton skeleton)
 		{
-			_skeleton = skeleton ?? throw new ArgumentNullException(nameof(skeleton));
+			_context = new AnimationContext(skeleton);
 			_currentTime = TimeSpan.Zero;
 			_isPlaying = false;
 		}
@@ -154,7 +156,7 @@ namespace DigitalRiseModel.Animation
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));
 
-			var clip = _skeleton.GetClip(name);
+			var clip = Skeleton.GetClip(name);
 			if (clip == null)
 				throw new ArgumentException($"Animation clip '{name}' not found.", nameof(name));
 
@@ -170,7 +172,7 @@ namespace DigitalRiseModel.Animation
 			_rootNode = null;
 			_currentTime = TimeSpan.Zero;
 			_isPlaying = false;
-			_skeleton.ResetTransforms();
+			Skeleton.ResetTransforms();
 
 			OnTimeChanged();
 		}
@@ -239,7 +241,7 @@ namespace DigitalRiseModel.Animation
 			if (clipName == null)
 				throw new ArgumentNullException(nameof(clipName));
 
-			var clip = _skeleton.GetClip(clipName);
+			var clip = Skeleton.GetClip(clipName);
 			if (clip == null)
 				throw new ArgumentException($"Animation clip '{clipName}' not found.", nameof(clipName));
 
@@ -278,7 +280,7 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public void ResetPose()
 		{
-			_skeleton.ResetTransforms();
+			Skeleton.ResetTransforms();
 		}
 
 		/// <summary>
@@ -347,8 +349,11 @@ namespace DigitalRiseModel.Animation
 			if (_rootNode == null)
 				return;
 
-			_skeleton.ResetTransforms();
-			_rootNode.Sample(_skeleton, _currentTime, 1.0f);
+			Skeleton.ResetTransforms();
+
+			_context.Reset();
+			_rootNode.Process(_context, _currentTime, 1.0f);
+			_context.SetPoses();
 		}
 
 		/// <summary>

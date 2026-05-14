@@ -138,17 +138,8 @@ namespace DigitalRiseModel.Animation
 			_children[index] = (node, weight);
 		}
 
-		/// <summary>
-		/// Samples all child animation nodes and blends them together.
-		/// </summary>
-		/// <param name="skeleton">The skeleton to apply the animation to.</param>
-		/// <param name="time">The current playback time.</param>
-		/// <param name="weight">The blend weight for this blend node (0.0 to 1.0).</param>
-		public override void Sample(ISkeleton skeleton, TimeSpan time, float weight)
+		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
-			if (skeleton == null)
-				throw new ArgumentNullException(nameof(skeleton));
-
 			if (_children.Count == 0)
 				return;
 
@@ -157,17 +148,12 @@ namespace DigitalRiseModel.Animation
 
 			TimeSpan effectiveTime = GetEffectiveTime(time);
 
-			float totalWeight = _children.Sum(c => c.Weight);
-			if (totalWeight <= 0)
-				return;
-
-			float normalizedWeight = weight / totalWeight;
-
 			foreach (var (child, childWeight) in _children)
 			{
-				float blendWeight = childWeight * normalizedWeight;
-				child.Sample(skeleton, effectiveTime, blendWeight);
+				child.Process(context, effectiveTime, childWeight);
 			}
+
+			context.SetWeights(weight);
 		}
 	}
 }

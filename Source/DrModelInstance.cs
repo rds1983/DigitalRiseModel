@@ -89,6 +89,19 @@ namespace DigitalRiseModel
 			}
 		}
 
+		int ISkeleton.BonesCount
+		{
+			get
+			{
+				if (_model == null)
+				{
+					return 0;
+				}
+
+				return _model.Bones.Length;
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets an arbitrary object associated with this model instance.
 		/// </summary>

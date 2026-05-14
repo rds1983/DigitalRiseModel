@@ -22,13 +22,7 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		public abstract TimeSpan Duration { get; }
 
-		/// <summary>
-		/// Samples the animation at the specified time and applies the resulting pose to the skeleton.
-		/// </summary>
-		/// <param name="skeleton">The skeleton to apply the animation to.</param>
-		/// <param name="time">The current playback time.</param>
-		/// <param name="weight">The blend weight for this node (0.0 to 1.0).</param>
-		public abstract void Sample(ISkeleton skeleton, TimeSpan time, float weight);
+		internal abstract void Process(AnimationContext context, TimeSpan time, float weight);
 
 		/// <summary>
 		/// Gets the effective time, handling looping behavior.

@@ -5,6 +5,8 @@
 	/// </summary>
 	public interface ISkeleton
 	{
+		int BonesCount { get; }
+
 		/// <summary>
 		/// Resets all bone transforms to their default poses.
 		/// </summary>
