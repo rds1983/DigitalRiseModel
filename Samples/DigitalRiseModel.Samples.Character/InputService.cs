@@ -75,7 +75,9 @@ namespace DigitalRiseModel.Samples.Character
 
 				// Toggle mouse visibility based on lock state
 				ViewerGame.Instance.IsMouseVisible = !value;
-				CenterMouse();
+
+				MousePosition = null;
+				UpdateLockedMouse();
 			}
 		}
 
@@ -113,6 +115,14 @@ namespace DigitalRiseModel.Samples.Character
 		/// </summary>
 		public void Update()
 		{
+			///  Input event processed is skipped when window is inactive (e.g., during alt-tab)
+			if (!ViewerGame.Instance.IsActive)
+			{
+				// Set MousePosition to null, so when the window becomes active again, first run wont fire any events
+				MousePosition = null;
+				return;
+			}
+
 			// Update mouse input
 			var mouseState = Mouse.GetState();
 			var newPosition = new Point(mouseState.X, mouseState.Y);
@@ -135,7 +145,6 @@ namespace DigitalRiseModel.Samples.Character
 						MouseMoved?.Invoke(this, new InputEventArgs<Point>(oldPosition, newPosition));
 					}
 				}
-				// Handle locked (confined) mouse movement
 				else
 				{
 					var cb = ViewerGame.Instance.Window.ClientBounds;
@@ -146,12 +155,10 @@ namespace DigitalRiseModel.Samples.Character
 					{
 						MouseMoved?.Invoke(this, new InputEventArgs<Point>(center, newPosition));
 					}
-
-					// Reset mouse to center for next frame (continuous relative tracking)
-					CenterMouse();
 				}
 			}
 
+			UpdateLockedMouse();
 
 			// Update keyboard input - detect state transitions
 			var keyboardState = Keyboard.GetState();
@@ -180,8 +187,13 @@ namespace DigitalRiseModel.Samples.Character
 		/// Centers the mouse cursor at the window center.
 		/// Used when mouse is locked to enable relative motion tracking for camera rotation.
 		/// </summary>
-		private void CenterMouse()
+		private void UpdateLockedMouse()
 		{
+			if (!MouseLocked)
+			{
+				return;
+			}
+
 			var cb = ViewerGame.Instance.Window.ClientBounds;
 			var center = new Point(cb.Width / 2, cb.Height / 2);
 			Mouse.SetPosition(center.X, center.Y);
