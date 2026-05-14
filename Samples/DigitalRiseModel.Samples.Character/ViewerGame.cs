@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Graphics2D.UI;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace DigitalRiseModel.Samples.Character
@@ -42,10 +43,10 @@ namespace DigitalRiseModel.Samples.Character
 		}
 
 		private const float MouseSensitivity = 0.2f;
-		private const float MovementSpeed = 2.0f;
-		private const float JumpForce = 0.75f;
+		private const float MovementSpeed = 0.1f;
+		private const float JumpForce = 0.5f;
 		private const float Gravity = 0.015f;
-		private const float DefaultY = 5.3f;
+		private const float DefaultY = 0.0f;
 
 		private readonly GraphicsDeviceManager _graphics;
 		private AnimationController _player;
@@ -102,10 +103,9 @@ namespace DigitalRiseModel.Samples.Character
 			_rootNode.Children.Add(planeNode);
 
 			// Model - Load Sinbad model
-			var model = assetManager.LoadModel(GraphicsDevice, "Models/Sinbad.gltf");
+			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.glb");
 			_modelNode.ModelInstance.Model = model;
 			_modelNode.Translation = new Vector3(0, DefaultY, 0);
-			_modelNode.Scale = new Vector3(0.25f);
 
 			_rootNode.Children.Add(_modelNode);
 
@@ -113,7 +113,7 @@ namespace DigitalRiseModel.Samples.Character
 			_cameraMount.Translation = new Vector3(0, 1.3f, 0);
 			_modelNode.Children.Add(_cameraMount);
 
-			_mainCamera.Translation = new Vector3(0, 0, -12);
+			_mainCamera.Translation = new Vector3(0, 0, -2);
 			_cameraMount.Children.Add(_mainCamera);
 
 			// Capsule
@@ -129,10 +129,7 @@ namespace DigitalRiseModel.Samples.Character
 
 			// Start animation
 			_player = new AnimationController(_modelNode.ModelInstance);
-			var idleBlend = new AnimationBlendNode("Idle", true);
-			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
-			idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
-			_player.StartClip(idleBlend);
+			_player.StartClip("Idle", true);
 
 			// Init input service
 			_inputService = new InputService();
@@ -161,6 +158,20 @@ namespace DigitalRiseModel.Samples.Character
 			var cameraRotation = _cameraMount.Rotation;
 			cameraRotation.X += (int)((e.NewValue.Y - e.OldValue.Y) * MouseSensitivity);
 			_cameraMount.Rotation = cameraRotation;
+		}
+
+		private void SetLandAnimation(bool isMoving)
+		{
+			if (isMoving && _animationState != AnimationState.Running)
+			{
+				_animationState = AnimationState.Running;
+				_player.CrossfadeToClip("Running", TimeSpan.FromSeconds(0.1), true);
+			}
+			else if (!isMoving && _animationState != AnimationState.Idle)
+			{
+				_animationState = AnimationState.Idle;
+				_player.CrossfadeToClip("Idle", TimeSpan.FromSeconds(0.1), true);
+			}
 		}
 
 		protected override void Update(GameTime gameTime)
@@ -200,7 +211,7 @@ namespace DigitalRiseModel.Samples.Character
 				_jumpVelocity = JumpForce;
 				_animationState = AnimationState.Jumping;
 				_jumpState = JumpState.Start;
-				_player.CrossfadeToClip("JumpStart", TimeSpan.FromSeconds(0.2), false);
+				_player.CrossfadeToClip("JumpingStart", TimeSpan.FromSeconds(0.2), false);
 			}
 
 			// Handle jump physics and animation state transitions
@@ -221,7 +232,7 @@ namespace DigitalRiseModel.Samples.Character
 						if (_player.HasFinished)
 						{
 							_jumpState = JumpState.Loop;
-							_player.CrossfadeToClip("JumpLoop", TimeSpan.FromSeconds(0.1), true);
+							_player.CrossfadeToClip("JumpingLoop", TimeSpan.FromSeconds(0.1), true);
 						}
 						break;
 
@@ -231,7 +242,7 @@ namespace DigitalRiseModel.Samples.Character
 						{
 							_modelNode.Translation = new Vector3(_modelNode.Translation.X, DefaultY, _modelNode.Translation.Z);
 							_jumpState = JumpState.Land;
-							_player.CrossfadeToClip("JumpEnd", TimeSpan.FromSeconds(0.1), false);
+							_player.CrossfadeToClip("JumpingEnd", TimeSpan.FromSeconds(0.1), false);
 						}
 						break;
 
@@ -239,56 +250,22 @@ namespace DigitalRiseModel.Samples.Character
 						// Transition back to idle or running after landing animation completes
 						if (_player.HasFinished)
 						{
-							if (isMoving)
-							{
-								_animationState = AnimationState.Running;
-								var runBlend = new AnimationBlendNode("Run", true);
-								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
-								runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
-								_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
-							}
-							else
-							{
-								_animationState = AnimationState.Idle;
-								var idleBlend = new AnimationBlendNode("Idle", true);
-								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
-								idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
-								_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
-							}
+							SetLandAnimation(isMoving);
 						}
 						break;
 				}
-
-				// Allow horizontal movement while jumping
-				_modelNode.Translation += velocity;
 			}
 			else
 			{
 				// Handle idle and running animation transitions with smooth crossfading
-				if (isMoving)
-				{
-					if (_animationState != AnimationState.Running)
-					{
-						_animationState = AnimationState.Running;
-						var runBlend = new AnimationBlendNode("Run", true);
-						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunBase"));
-						runBlend.AddChild(_modelNode.ModelInstance.GetClip("RunTop"));
-						_player.CrossfadeToClip(runBlend, TimeSpan.FromSeconds(0.3));
-					}
-					_modelNode.Translation += velocity;
-				}
-				else
-				{
-					if (_animationState != AnimationState.Idle)
-					{
-						_animationState = AnimationState.Idle;
-						var idleBlend = new AnimationBlendNode("Idle", true);
-						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleBase"));
-						idleBlend.AddChild(_modelNode.ModelInstance.GetClip("IdleTop"));
-						_player.CrossfadeToClip(idleBlend, TimeSpan.FromSeconds(0.3));
-					}
-				}
+				SetLandAnimation(isMoving);
 			}
+
+			if (isMoving)
+			{
+				_modelNode.Translation += velocity;
+			}
+
 
 			_fpsCounter.Update(gameTime);
 			_player.Update(gameTime.ElapsedGameTime);
