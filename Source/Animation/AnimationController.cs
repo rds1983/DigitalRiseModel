@@ -325,14 +325,6 @@ namespace DigitalRiseModel.Animation
 			var activeNode = _currentClipNode ?? _rootNode;
 			_currentTime = _currentTime.GetEffectiveTime(activeNode.Duration, activeNode.IsLooped);
 
-			if (!activeNode.IsLooped)
-			{
-				if (_currentTime.TotalSeconds < 0)
-					_currentTime = TimeSpan.Zero;
-				else if (_currentTime > activeNode.Duration)
-					_currentTime = activeNode.Duration;
-			}
-
 			Process();
 			OnTimeChanged();
 		}
