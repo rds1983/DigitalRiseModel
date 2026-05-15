@@ -3,6 +3,7 @@ using DigitalRiseModel.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Diagnostics;
 
 namespace DigitalRiseModel
 {
@@ -23,13 +24,14 @@ namespace DigitalRiseModel
 		/// Run: Moving horizontally with run animation.
 		/// Jump: In mid-air, either ascending, at peak, or descending.
 		/// </summary>
-		private enum LocomotionState
+		private enum MainState
 		{
 			Idle,
 			Run,
 			Jump,
-			DrawingWeapon,
-			SheathingWeapon
+			Draw,
+			Sheath,
+			Slash
 		}
 
 		/// <summary>
@@ -61,7 +63,7 @@ namespace DigitalRiseModel
 		public ModelInstanceNode ModelNode => _modelNode;
 
 		// Current movement state (idle, running, or jumping)
-		private LocomotionState _locomotionState = LocomotionState.Idle;
+		private MainState _mainState = MainState.Idle;
 
 		// Current jump phase (start, loop, land, finished)
 		private JumpState _jumpState = JumpState.Start;
@@ -84,13 +86,18 @@ namespace DigitalRiseModel
 			get
 			{
 				// For non-jump states: check if animation is looping or finished (can be interrupted)
-				if (_locomotionState != LocomotionState.Jump && (_player.RootNode.IsLooped || _player.HasFinished))
+				if (_mainState != MainState.Jump && _mainState != MainState.Sheath && (_player.RootNode.IsLooped || _player.HasFinished))
+				{
+					return false;
+				}
+
+				if (_mainState == MainState.Sheath && !WeaponDrawn)
 				{
 					return false;
 				}
 
 				// For jump state: only not busy when jump is completely finished
-				if (_locomotionState == LocomotionState.Jump && _jumpState == JumpState.Finished)
+				if (_mainState == MainState.Jump && _jumpState == JumpState.Finished)
 				{
 					return false;
 				}
@@ -118,7 +125,7 @@ namespace DigitalRiseModel
 			var swordModel = assetManager.LoadModel(graphicsDevice, "Models/sword.gltf");
 			_weaponAttachment.Model = new DrModelInstance(swordModel);
 			_modelNode.BonesAttachments.Add(_weaponAttachment);
-			SetSheathedState();
+			SetSheathedTransform();
 
 			// Create animation controller for this character model
 			_player = new AnimationController(_modelNode.ModelInstance);
@@ -130,7 +137,7 @@ namespace DigitalRiseModel
 			_modelNode.Translation = new Vector3(0, DefaultY, 0);
 		}
 
-		private void SetSheathedState()
+		private void SetSheathedTransform()
 		{
 			_weaponAttachment.Bone = _modelNode.ModelInstance.Model.FindBoneByName("mixamorig:Spine");
 
@@ -143,7 +150,7 @@ namespace DigitalRiseModel
 			_weaponAttachment.Transform = transform.ToMatrix();
 		}
 
-		private void SetDrawnState()
+		private void SetDrawnTransform()
 		{
 			_weaponAttachment.Bone = _modelNode.ModelInstance.Model.FindBoneByName("mixamorig:RightHand");
 
@@ -163,7 +170,7 @@ namespace DigitalRiseModel
 		private void InternalIdle(bool weaponDrawn)
 		{
 			// Skip if character is busy with another animation or already in the desired idle state
-			if (IsBusy || (_locomotionState == LocomotionState.Idle && WeaponDrawn == weaponDrawn))
+			if (IsBusy || (_mainState == MainState.Idle && WeaponDrawn == weaponDrawn))
 			{
 				return;
 			}
@@ -178,7 +185,7 @@ namespace DigitalRiseModel
 				_player.CrossfadeToClip("Idle", TimeSpan.FromSeconds(0.1), true);
 			}
 
-			_locomotionState = LocomotionState.Idle;
+			_mainState = MainState.Idle;
 			WeaponDrawn = weaponDrawn;
 		}
 
@@ -192,7 +199,7 @@ namespace DigitalRiseModel
 			_modelNode.Translation += velocity;
 
 			// Skip if character is busy or already running with same weapon state
-			if (IsBusy || (_locomotionState == LocomotionState.Run && WeaponDrawn == weaponDrawn))
+			if (IsBusy || (_mainState == MainState.Run && WeaponDrawn == weaponDrawn))
 			{
 				return;
 			}
@@ -207,7 +214,7 @@ namespace DigitalRiseModel
 				_player.CrossfadeToClip("Run", TimeSpan.FromSeconds(0.1), true);
 			}
 
-			_locomotionState = LocomotionState.Run;
+			_mainState = MainState.Run;
 			WeaponDrawn = weaponDrawn;
 		}
 
@@ -229,15 +236,16 @@ namespace DigitalRiseModel
 		public void DrawWeapon()
 		{
 			// Skip if character is busy or weapon is already drawn
-			if (IsBusy || WeaponDrawn)
+			if (IsBusy || _mainState == MainState.Draw || WeaponDrawn)
 			{
 				return;
 			}
 
 			// Play weapon draw animation (0.1s blend-in, non-looping)
 			_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), false);
+			_mainState = MainState.Draw;
+			SetDrawnTransform();
 			WeaponDrawn = true;
-			SetDrawnState();
 		}
 
 		/// <summary>
@@ -247,25 +255,27 @@ namespace DigitalRiseModel
 		public void SheathWeapon()
 		{
 			// Skip if character is busy or weapon is already sheathed
-			if (IsBusy || !WeaponDrawn)
+			if (IsBusy || _mainState == MainState.Sheath || !WeaponDrawn)
 			{
 				return;
 			}
 
 			// Play weapon sheathe animation (0.1s blend-in, non-looping)
-			_player.CrossfadeToClip("SheathGreatSword", TimeSpan.FromSeconds(0.1), false);
-			WeaponDrawn = false;
-			SetSheathedState();
+			_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), false);
+			_player.PlaybackMode = PlaybackMode.Backward;
+			_player.Time = _modelNode.ModelInstance.Model.Animations["DrawGreatSword"].Duration;
+			_mainState = MainState.Sheath;
 		}
 
 		public void Slash()
 		{
-			if (IsBusy || !WeaponDrawn)
+			if (IsBusy || _mainState == MainState.Slash || !WeaponDrawn)
 			{
 				return;
 			}
 
 			_player.CrossfadeToClip("SlashGreatSword", TimeSpan.FromSeconds(0.1), false);
+			_mainState = MainState.Slash;
 		}
 
 		/// <summary>
@@ -275,7 +285,7 @@ namespace DigitalRiseModel
 		public void Jump(Vector3 velocity)
 		{
 			// Skip if character is busy or already in mid-jump
-			if (IsBusy || _locomotionState == LocomotionState.Jump)
+			if (IsBusy || _mainState == MainState.Jump)
 			{
 				return;
 			}
@@ -284,7 +294,7 @@ namespace DigitalRiseModel
 			_jumpVelocity = JumpForce;
 
 			// Set up jump state machine
-			_locomotionState = LocomotionState.Jump;
+			_mainState = MainState.Jump;
 			_jumpState = JumpState.Start;
 
 			// Play jump start animation (0.2s blend-in, non-looping one-shot)
@@ -299,7 +309,7 @@ namespace DigitalRiseModel
 		public void Update(TimeSpan elapsed)
 		{
 			// Process jump physics and animation states
-			if (_locomotionState == LocomotionState.Jump)
+			if (_mainState == MainState.Jump)
 			{
 				switch (_jumpState)
 				{
@@ -341,6 +351,13 @@ namespace DigitalRiseModel
 					_modelNode.Translation = new Vector3(_modelNode.Translation.X, DefaultY, _modelNode.Translation.Z);
 					_jumpState = JumpState.Finished;
 				}
+			}
+
+			if (_mainState == MainState.Sheath && _player.HasFinished)
+			{
+				_player.PlaybackMode = PlaybackMode.Forward;
+				SetSheathedTransform();
+				WeaponDrawn = false;
 			}
 
 			// Update animation controller (handles animation blending, frame advancement, etc.)

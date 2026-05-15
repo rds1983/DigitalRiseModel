@@ -97,7 +97,8 @@ namespace DigitalRiseModel.Animation
 				if (_rootNode == null || _rootNode.IsLooped)
 					return false;
 
-				return _currentTime >= _rootNode.Duration;
+				return (PlaybackMode == PlaybackMode.Forward && _currentTime >= _rootNode.Duration) ||
+					(PlaybackMode == PlaybackMode.Backward && _currentTime <= TimeSpan.FromSeconds(0));
 			}
 		}
 
@@ -213,6 +214,7 @@ namespace DigitalRiseModel.Animation
 			_transitionDuration = fadeDuration;
 
 			Time = TimeSpan.Zero;
+			_isPlaying = true;
 		}
 
 		/// <summary>
