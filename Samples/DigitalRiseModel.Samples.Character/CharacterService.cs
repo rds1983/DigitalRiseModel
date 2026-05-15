@@ -99,7 +99,7 @@ namespace DigitalRiseModel
 
 			_runSheathAnimation = new AnimationBlendNode();
 			_runSheathAnimation.AddLayer(characterModel.Animations["RunGreatSword"], isLooped: true).BoneFilter = bottomFilter;
-			_runSheathAnimation.AddLayer(characterModel.Animations["DrawGreatSword"], 1.0f, AnimationFlags.PlayBackwards).BoneFilter = topFilter;
+			_runSheathAnimation.AddLayer(characterModel.Animations["DrawGreatSword"], AnimationFlags.PlayBackwards).BoneFilter = topFilter;
 
 			_runSlashAnimation = new AnimationBlendNode();
 			_runSlashAnimation.AddLayer(characterModel.Animations["RunGreatSword"], isLooped: true).BoneFilter = bottomFilter;

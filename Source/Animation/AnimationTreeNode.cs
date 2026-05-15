@@ -35,11 +35,6 @@ namespace DigitalRiseModel.Animation
 		public AnimationFlags Flags { get; set; }
 
 		/// <summary>
-		/// Gets the name of this animation tree node.
-		/// </summary>
-		public abstract string Name { get; }
-
-		/// <summary>
 		/// Gets the duration of this animation tree node.
 		/// </summary>
 		public abstract TimeSpan Duration { get; }

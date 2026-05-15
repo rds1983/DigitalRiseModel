@@ -10,13 +10,6 @@ namespace DigitalRiseModel.Animation
 	/// </summary>
 	public class AnimationBlendNode : AnimationTreeNode
 	{
-		private string _name;
-
-		/// <summary>
-		/// Gets or sets the name of this blend node.
-		/// </summary>
-		public override string Name => _name;
-
 		/// <summary>
 		/// Gets the list of animation blend layers.
 		/// </summary>
@@ -40,18 +33,8 @@ namespace DigitalRiseModel.Animation
 		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class.
 		/// </summary>
 		/// <param name="flags">Animation playback flags.</param>
-		public AnimationBlendNode(AnimationFlags flags = AnimationFlags.None) : this(null, flags)
+		public AnimationBlendNode(AnimationFlags flags = AnimationFlags.None)
 		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class with a name.
-		/// </summary>
-		/// <param name="name">The name of this blend node.</param>
-		/// <param name="flags">Animation playback flags.</param>
-		public AnimationBlendNode(string name, AnimationFlags flags = AnimationFlags.None)
-		{
-			_name = name;
 			Flags = flags;
 		}
 
@@ -60,15 +43,6 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
 		public AnimationBlendNode(bool isLooped) : this(isLooped ? AnimationFlags.Looped : AnimationFlags.None)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class with a name.
-		/// </summary>
-		/// <param name="name">The name of this blend node.</param>
-		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
-		public AnimationBlendNode(string name, bool isLooped) : this(name, isLooped ? AnimationFlags.Looped : AnimationFlags.None)
 		{
 		}
 
@@ -97,9 +71,20 @@ namespace DigitalRiseModel.Animation
 		/// Adds an animation layer with a clip.
 		/// </summary>
 		/// <param name="clip">The animation clip to add.</param>
+		/// <param name="weight">The blend weight for this layer (0.0 to 1.0). Weights are normalized.</param>
 		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		public AnimationBlendLayer AddLayer(AnimationClip clip) => AddLayer(clip, 1.0f, AnimationFlags.None);
+		public AnimationBlendLayer AddLayer(AnimationClip clip, float weight = 1.0f) => AddLayer(clip, weight, AnimationFlags.None);
+
+		/// <summary>
+		/// Adds an animation layer with a clip and animation flags.
+		/// </summary>
+		/// <param name="clip">The animation clip to add.</param>
+		/// <param name="flags">Animation playback flags.</param>
+		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
+		public AnimationBlendLayer AddLayer(AnimationClip clip, AnimationFlags flags)
+			=> AddLayer(clip, 1.0f, flags);
 
 		/// <summary>
 		/// Adds an animation layer with a clip and loop flag.
@@ -162,6 +147,8 @@ namespace DigitalRiseModel.Animation
 
 			if (weight < 0 || weight > 1)
 				throw new ArgumentException("Weight must be between 0.0 and 1.0 inclusive.", nameof(weight));
+
+			time = GetEffectiveTime(time);
 
 			// Process each child with its weight, applying any bone filter from the layer
 			foreach (var layer in Layers)

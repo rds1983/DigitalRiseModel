@@ -196,7 +196,7 @@ namespace DigitalRiseModel.Animation
 
 			// Create transition blend
 			var isLooped = (node.Flags & AnimationFlags.Looped) != 0;
-			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: isLooped);
+			_transitionBlend = new AnimationBlendNode(isLooped);
 			_transitionOldClip = _currentClipNode;
 			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f).TimeOffset = Time;
 			_transitionBlend.AddLayer(node, weight: 0.0f);
