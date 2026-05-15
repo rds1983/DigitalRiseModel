@@ -1,5 +1,4 @@
 using AssetManagementBase;
-using DigitalRiseModel.Animation;
 using DigitalRiseModel.Primitives;
 using DigitalRiseModel.Samples.BasicEngine;
 using DigitalRiseModel.Samples.Character.UI;
@@ -18,44 +17,11 @@ namespace DigitalRiseModel.Samples.Character
 	{
 		private const float MouseSensitivity = 0.2f;
 		private const float MovementSpeed = 0.1f;
-		private const float JumpForce = 0.5f;
-		private const float Gravity = 0.015f;
-		private const float DefaultY = 0.0f;
-
-		/// <summary>
-		/// Represents the main character animation state.
-		/// </summary>
-		private enum AnimationState
-		{
-			/// <summary>Character is standing still (IdleBase + IdleTop).</summary>
-			Idle,
-			/// <summary>Character is moving (RunBase + RunTop).</summary>
-			Running,
-			/// <summary>Character is jumping (JumpStart → JumpLoop → JumpEnd).</summary>
-			Jumping,
-		}
-
-		/// <summary>
-		/// Represents the phase within the jumping animation sequence.
-		/// </summary>
-		private enum JumpState
-		{
-			/// <summary>Playing the initial jump animation.</summary>
-			Start,
-			/// <summary>Looping while in the air.</summary>
-			Loop,
-			/// <summary>Playing the landing animation.</summary>
-			Land
-		}
 
 		private readonly GraphicsDeviceManager _graphics;
-		private AnimationController _player;
-		private AnimationState _animationState = AnimationState.Idle;
-		private JumpState _jumpState = JumpState.Start;
-		private Vector3 _jumpForwardVelocity = Vector3.Zero;
-		private float _jumpVerticalVelocity = 0.0f;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
 		private InputService _inputService;
+		private ControllerService _controllerService;
 		private readonly SceneNode _rootNode = new SceneNode();
 		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
 		{
@@ -70,21 +36,28 @@ namespace DigitalRiseModel.Samples.Character
 		/// <summary>Singleton instance of the ViewerGame for global access.</summary>
 		public static ViewerGame Instance { get; private set; }
 
+		/// <summary>
+		/// Initializes the game with graphics settings and input configuration.
+		/// </summary>
 		public ViewerGame()
 		{
-			// Register singleton instance
+			// Register singleton instance for global access throughout the application
 			Instance = this;
 
+			// Configure graphics: 1200x800 resolution with vsync enabled by default
 			_graphics = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = 1200,
 				PreferredBackBufferHeight = 800
 			};
 
-			// Mouse confinement and visibility is managed by InputService
+			// Allow user to resize the game window and show the mouse cursor initially
+			// Note: Mouse confinement and visibility is dynamically managed by InputService during gameplay
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 
+			// When /nf flag is used, disable fixed timestep to run at maximum performance
+			// (useful for performance profiling and benchmarking)
 			if (Configuration.NoFixedStep)
 			{
 				IsFixedTimeStep = false;
@@ -92,14 +65,20 @@ namespace DigitalRiseModel.Samples.Character
 			}
 		}
 
+		/// <summary>
+		/// Loads all game content including assets, scene nodes, and UI elements.
+		/// This is called once at game startup after the graphics device is initialized.
+		/// </summary>
 		protected override void LoadContent()
 		{
 			base.LoadContent();
 
+			// Initialize the asset manager to load textures, models, and other resources from the Assets folder
 			var assetManager = AssetManager.CreateFileAssetManager(Path.Combine(AppContext.BaseDirectory, "Assets"));
 
-			// Build up the scene
-			// Plane
+			// === Build scene hierarchy ===
+
+			// Create a textured ground plane (checkerboard pattern, 200x200 units)
 			var planeTexture = assetManager.LoadTexture2D(GraphicsDevice, "Textures/checker.dds");
 			var planeMesh = MeshPrimitives.CreatePlaneMesh(GraphicsDevice, uScale: 50, vScale: 50, normalDirection: NormalDirection.UpY);
 			var planeNode = new MeshNode
@@ -110,21 +89,22 @@ namespace DigitalRiseModel.Samples.Character
 			};
 			_rootNode.Children.Add(planeNode);
 
-			// Model - Load Sinbad model
+			// Load and add the animated character model (mixamo format)
 			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.gltf");
 			_modelNode.ModelInstance.Model = model;
-			_modelNode.Translation = new Vector3(0, DefaultY, 0);
-
 			_rootNode.Children.Add(_modelNode);
 
-			// Camera
+			// === Camera setup ===
+			// Position camera mount on the model's head (1.3 units up from model origin)
+			// This allows the camera to follow the character's head position as the model moves
 			_cameraMount.Translation = new Vector3(0, 1.3f, 0);
 			_modelNode.Children.Add(_cameraMount);
 
+			// Position camera 2 units behind the camera mount (first-person view)
 			_mainCamera.Translation = new Vector3(0, 0, -2);
 			_cameraMount.Children.Add(_mainCamera);
 
-			// Capsule
+			// Add a white capsule mesh as a debug/demo object in the scene
 			var capsule = MeshPrimitives.CreateCapsuleMesh(GraphicsDevice);
 			var capsuleNode = new MeshNode
 			{
@@ -132,187 +112,171 @@ namespace DigitalRiseModel.Samples.Character
 				Color = Color.White,
 				Translation = new Vector3(8, 2, 10)
 			};
-
 			_rootNode.Children.Add(capsuleNode);
 
-			// Start animation
-			_player = new AnimationController(_modelNode.ModelInstance);
-			_player.StartClip("Idle", true);
+			// === Initialize animation controller ===
+			// The controller manages character animations (idle, run, jump, weapon draw/sheathe)
+			_controllerService = new ControllerService(_modelNode);
 
-			// Init input service with mouse confinement enabled
-			// Mouse is initially locked to window bounds and hidden
+			// === Initialize input system ===
+			// Handles keyboard and mouse input with event-based feedback
+			// Mouse is initially locked (confined to window and hidden) for first-person camera control
 			_inputService = new InputService();
 			_inputService.MouseMoved += _inputService_MouseMoved;
 			_inputService.KeyDown += _inputService_KeyDown;
 			_inputService.MouseLocked = true;
 
-			// Init forward renderer
+			// === Initialize rendering ===
+			// Create the forward renderer and configure directional lighting
 			_renderer = new ForwardRenderer(GraphicsDevice);
 			_renderer.DirectionalLight0.Enabled = true;
-			_renderer.DirectionalLight0.Direction = new Vector3(1, -1, 0);
+			_renderer.DirectionalLight0.Direction = new Vector3(1, -1, 0); // Light from top-right
 			_renderer.DirectionalLight0.DiffuseColor = Color.White;
 
-			// Init ui
+			// === Initialize UI ===
+			// Create the UI panel that displays FPS and rendering statistics
 			MyraEnvironment.Game = this;
-
 			_desktop = new Desktop();
 			_mainPanel = new MainPanel();
 			_desktop.Root = _mainPanel;
 		}
 
-		/// <summary>Handles keyboard input events. Press Escape to toggle mouse lock.</summary>
+		/// <summary>
+		/// Handles keyboard input events.
+		/// Escape key toggles mouse lock to allow switching between first-person camera control and free mouse.
+		/// </summary>
 		private void _inputService_KeyDown(object sender, KeyEventsArgs e)
 		{
-			// Escape key toggles mouse confinement and visibility
+			// Escape toggles between locked mouse (FPS camera control) and free mouse (UI interaction)
 			if (e.Key == Keys.Escape)
 			{
 				_inputService.MouseLocked = !_inputService.MouseLocked;
 			}
 		}
 
-		/// <summary>Handles mouse movement events to rotate player and camera.</summary>
+		/// <summary>
+		/// Handles mouse movement events to rotate the character and camera.
+		/// Only processes input when mouse is locked for first-person camera control.
+		/// </summary>
 		private void _inputService_MouseMoved(object sender, InputEventArgs<Point> e)
 		{
-			// Only process mouse input when mouse is locked/confined to window
+			// Only apply rotation when mouse is locked (confined to window for FPS-style control)
 			if (!_inputService.MouseLocked)
 			{
 				return;
 			}
 
-			// Rotate player based on horizontal mouse movement
+			// Horizontal mouse movement rotates the character around the Y axis (look left/right)
 			var playerRotation = _modelNode.Rotation;
 			playerRotation.Y += -(int)((e.NewValue.X - e.OldValue.X) * MouseSensitivity);
 			_modelNode.Rotation = playerRotation;
 
-			// Rotate camera based on vertical mouse movement
+			// Vertical mouse movement rotates the camera mount around the X axis (look up/down)
+			// This creates a standard first-person camera that pitches while the character yaws
 			var cameraRotation = _cameraMount.Rotation;
 			cameraRotation.X += (int)((e.NewValue.Y - e.OldValue.Y) * MouseSensitivity);
 			_cameraMount.Rotation = cameraRotation;
 		}
 
-		private void SetLandAnimation(bool isMoving)
-		{
-			if (isMoving && _animationState != AnimationState.Running)
-			{
-				Debug.WriteLine("Run");
-				_animationState = AnimationState.Running;
-				_player.CrossfadeToClip("Run", TimeSpan.FromSeconds(0.1), true);
-			}
-			else if (!isMoving && _animationState != AnimationState.Idle)
-			{
-				_animationState = AnimationState.Idle;
-				_player.CrossfadeToClip("Idle", TimeSpan.FromSeconds(0.1), true);
-			}
-		}
-
+		/// <summary>
+		/// Updates game logic each frame.
+		/// Processes input, updates character animations and position, and updates the FPS counter.
+		/// </summary>
 		protected override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
 
+			// Update the input service to process current keyboard and mouse states
 			_inputService.Update();
 
-			// Determine movement direction and velocity based on input (WASD keys)
-			var isMoving = false;
+			// === Process WASD movement input ===
+			// Calculate movement direction relative to character's current facing direction
+			var isRunning = false;
 			var velocity = Vector3.Zero;
 
 			if (_inputService.IsKeyDown(Keys.W))
 			{
+				// W moves forward in the direction the character is facing
 				velocity = _modelNode.GlobalTransform.Forward * -MovementSpeed;
-				isMoving = true;
+				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.S))
 			{
+				// S moves backward
 				velocity = _modelNode.GlobalTransform.Forward * MovementSpeed;
-				isMoving = true;
+				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.A))
 			{
+				// A strafes left
 				velocity = _modelNode.GlobalTransform.Right * MovementSpeed;
-				isMoving = true;
+				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.D))
 			{
+				// D strafes right
 				velocity = _modelNode.GlobalTransform.Right * -MovementSpeed;
-				isMoving = true;
+				isRunning = true;
 			}
 
-			// Initiate jump sequence when Space is pressed and not already jumping
-			if (_inputService.IsKeyDown(Keys.Space) && _animationState != AnimationState.Jumping)
+			// === Process Space for jumping ===
+			if (_inputService.IsKeyDown(Keys.Space))
 			{
-				_jumpVerticalVelocity = JumpForce;
-				_animationState = AnimationState.Jumping;
-				_jumpState = JumpState.Start;
-				_jumpForwardVelocity = velocity;
-				_player.CrossfadeToClip("JumpStart", TimeSpan.FromSeconds(0.2), false);
+				_controllerService.Jump(velocity);
 			}
 
-			// Handle jump physics and animation state transitions
-			if (_animationState == AnimationState.Jumping)
+			// === Process R key to toggle weapon draw/sheathe ===
+			if (_inputService.IsKeyDown(Keys.R))
 			{
-				// Apply gravity during jump phases (not during landing)
-				if (_jumpState != JumpState.Land)
+				if (_controllerService.WeaponDrawn)
 				{
-					_jumpVerticalVelocity -= Gravity;
-					_modelNode.Translation += Vector3.Up * _jumpVerticalVelocity;
+					_controllerService.SheathWeapon();
 				}
-
-				// State machine for jump animation phases
-				switch (_jumpState)
+				else
 				{
-					case JumpState.Start:
-						// Transition to loop animation after start animation finishes
-						if (_player.HasFinished)
-						{
-							_jumpState = JumpState.Loop;
-							_player.CrossfadeToClip("JumpLoop", TimeSpan.FromSeconds(0.2), true);
-						}
-						break;
-
-					case JumpState.Loop:
-						// Detect landing and transition to land animation
-						if (_modelNode.Translation.Y <= DefaultY)
-						{
-							_modelNode.Translation = new Vector3(_modelNode.Translation.X, DefaultY, _modelNode.Translation.Z);
-							_jumpState = JumpState.Land;
-							_player.CrossfadeToClip("JumpEnd", TimeSpan.FromSeconds(0.2), false);
-						}
-						break;
-
-					case JumpState.Land:
-						// Transition back to idle or running after landing animation completes
-						if (_player.HasFinished)
-						{
-							SetLandAnimation(isMoving);
-						}
-						break;
+					_controllerService.DrawWeapon();
 				}
+			}
 
-				_modelNode.Translation += _jumpForwardVelocity;
+			// === Update character animation state ===
+			// Pass movement velocity and running state to the animation controller
+			if (isRunning)
+			{
+				_controllerService.Run(velocity);
 			}
 			else
 			{
-				// Handle idle and running animation transitions with smooth crossfading
-				SetLandAnimation(isMoving);
-
-				_modelNode.Translation += velocity;
+				_controllerService.Idle();
 			}
 
+			// Update the animation controller (handles animation blending and transitions)
+			_controllerService.Update(gameTime.ElapsedGameTime);
+
+			// Update the FPS counter for display
 			_fpsCounter.Update(gameTime);
-			_player.Update(gameTime.ElapsedGameTime);
 		}
 
+		/// <summary>
+		/// Renders the frame using forward rendering with lighting and UI overlay.
+		/// </summary>
 		protected override void Draw(GameTime gameTime)
 		{
 			base.Draw(gameTime);
 
+			// Clear the backbuffer to black
 			GraphicsDevice.Clear(Color.Black);
 
+			// Render the 3D scene from the main camera perspective
 			_renderer.Render(_mainCamera, _rootNode);
 
+			// Update and draw the FPS counter
 			_fpsCounter.Draw(gameTime);
 
+			// === Update UI with runtime statistics ===
+			// Display FPS (frames per second)
 			_mainPanel._labelFPS.Text = $"FPS: {_fpsCounter.FramesPerSecond}";
 
+			// Display rendering statistics for performance monitoring
 			var stats = _renderer.Statistics;
 			_mainPanel._labelDrawCalls.Text = stats.DrawCalls.ToString();
 			_mainPanel._labelEffectsSwitches.Text = stats.EffectsSwitches.ToString();
@@ -320,6 +284,7 @@ namespace DigitalRiseModel.Samples.Character
 			_mainPanel._labelPrimitivesDrawn.Text = stats.PrimitivesDrawn.ToString();
 			_mainPanel._labelVerticesDrawn.Text = stats.VerticesDrawn.ToString();
 
+			// Render the UI on top of the 3D scene
 			_desktop.Render();
 		}
 	}

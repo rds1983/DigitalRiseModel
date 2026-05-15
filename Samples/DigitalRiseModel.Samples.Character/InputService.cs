@@ -109,27 +109,32 @@ namespace DigitalRiseModel.Samples.Character
 		/// Should be called once per frame in the game update loop.
 		///
 		/// Mouse behavior:
-		/// - When unlocked: Reports absolute movement from old to new position
+		/// - When unlocked: Reports absolute movement from old to new position (free mouse)
 		/// - When locked: Reports relative movement from window center to current position,
-		///   then recenters the mouse for next frame (enables smooth continuous rotation)
+		///   then recenters the mouse for next frame (enables smooth continuous FPS-style rotation)
+		///
+		/// Keyboard behavior:
+		/// - Detects transitions: KeyDown event when key is pressed, KeyUp event when released
+		/// - IsKeyDown() can be used to check if a key is currently held
 		/// </summary>
 		public void Update()
 		{
-			///  Input event processed is skipped when window is inactive (e.g., during alt-tab)
+			// Skip input processing when window is inactive (e.g., alt-tab, minimized, losing focus)
+			// This prevents unwanted input from being processed while the game is not in focus
 			if (!ViewerGame.Instance.IsActive)
 			{
-				// Set MousePosition to null, so when the window becomes active again, first run wont fire any events
+				// Reset mouse position so transitions don't fire when window regains focus
 				MousePosition = null;
 				return;
 			}
 
-			// Update mouse input
+			// === Update mouse input ===
 			var mouseState = Mouse.GetState();
 			var newPosition = new Point(mouseState.X, mouseState.Y);
 
 			if (MousePosition == null)
 			{
-				// Initialize mouse position on first update
+				// First update: initialize mouse position without firing events
 				MousePosition = newPosition;
 			}
 			else
@@ -137,7 +142,7 @@ namespace DigitalRiseModel.Samples.Character
 				var oldPosition = MousePosition.Value;
 				MousePosition = newPosition;
 
-				// Handle unlocked (free) mouse movement
+				// When mouse is unlocked (free mode): report absolute position changes
 				if (!MouseLocked)
 				{
 					if (newPosition != oldPosition)
@@ -147,10 +152,12 @@ namespace DigitalRiseModel.Samples.Character
 				}
 				else
 				{
+					// When mouse is locked (FPS mode): calculate relative motion from window center
+					// This enables continuous camera rotation without the cursor reaching screen edges
 					var cb = ViewerGame.Instance.Window.ClientBounds;
 					var center = new Point(cb.Width / 2, cb.Height / 2);
 
-					// Report movement as delta from window center for relative motion
+					// Report movement delta from center to current position (for relative camera rotation)
 					if (newPosition != center)
 					{
 						MouseMoved?.Invoke(this, new InputEventArgs<Point>(center, newPosition));
@@ -158,42 +165,47 @@ namespace DigitalRiseModel.Samples.Character
 				}
 			}
 
+			// Recenter the mouse if locked (prepares for next frame's relative motion calculation)
 			UpdateLockedMouse();
 
-			// Update keyboard input - detect state transitions
+			// === Update keyboard input ===
+			// Track state transitions (key down/up events) by comparing current frame state with previous frame
 			var keyboardState = Keyboard.GetState();
 			for (var i = 0; i < _keysDown.Length; ++i)
 			{
 				var key = (Keys)i;
 				var isDown = keyboardState.IsKeyDown(key);
 
-				// Detect key press (transition from up to down)
+				// Detect key press: transition from not-pressed to pressed
 				if (!_keysDown[i] && isDown)
 				{
 					KeyDown?.Invoke(this, new KeyEventsArgs(key));
 				}
-				// Detect key release (transition from down to up)
+				// Detect key release: transition from pressed to not-pressed
 				else if (_keysDown[i] && !isDown)
 				{
 					KeyUp?.Invoke(this, new KeyEventsArgs(key));
 				}
 
-				// Update key state for next frame
+				// Store current state for next frame comparison
 				_keysDown[i] = isDown;
 			}
 		}
 
 		/// <summary>
-		/// Centers the mouse cursor at the window center.
-		/// Used when mouse is locked to enable relative motion tracking for camera rotation.
+		/// Centers the mouse cursor at the window center when in locked mode.
+		/// This is called after mouse movement is processed, recentering the cursor for the next frame.
+		/// This technique allows continuous FPS-style rotation without the cursor ever reaching screen edges.
 		/// </summary>
 		private void UpdateLockedMouse()
 		{
+			// Only recenter when mouse is locked
 			if (!MouseLocked)
 			{
 				return;
 			}
 
+			// Calculate window center and recenter the mouse for next frame
 			var cb = ViewerGame.Instance.Window.ClientBounds;
 			var center = new Point(cb.Width / 2, cb.Height / 2);
 			Mouse.SetPosition(center.X, center.Y);
