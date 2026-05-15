@@ -4,11 +4,26 @@ using System.Collections.Generic;
 
 namespace DigitalRiseModel
 {
+	/// <summary>
+	/// Represents an attachment of a model instance to a bone of a parent model.
+	/// Used to attach accessories or child models that follow bone animations.
+	/// </summary>
 	public class ModelBoneAttachment
 	{
+		/// <summary>
+		/// Gets or sets the model instance to attach.
+		/// </summary>
 		public DrModelInstance Model { get; set; }
+
+		/// <summary>
+		/// Gets or sets the target bone on the parent model to attach to.
+		/// </summary>
 		public DrModelBone Bone { get; set; }
 
+		/// <summary>
+		/// Gets or sets the local transform applied to the attached model relative to the bone.
+		/// Default is identity (no additional transform).
+		/// </summary>
 		public Matrix Transform { get; set; } = Matrix.Identity;
 	}
 
@@ -25,8 +40,18 @@ namespace DigitalRiseModel
 		/// </summary>
 		public DrModelInstance ModelInstance { get; set; }
 
+		/// <summary>
+		/// Gets the collection of models attached to bones of this model instance.
+		/// </summary>
 		public List<ModelBoneAttachment> BonesAttachments { get; } = new List<ModelBoneAttachment>();
 
+		/// <summary>
+		/// Renders a model instance with the specified transform.
+		/// Determines for each mesh part whether to use skeletal animation or basic rendering.
+		/// </summary>
+		/// <param name="context">The render context used for rendering.</param>
+		/// <param name="model">The model instance to render.</param>
+		/// <param name="transform">The world transformation matrix for the model.</param>
 		private void RenderModel(RenderContext context, DrModelInstance model, Matrix transform)
 		{
 			// Return early if there's nothing to render
