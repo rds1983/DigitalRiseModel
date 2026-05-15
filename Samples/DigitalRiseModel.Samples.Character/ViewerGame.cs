@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Graphics2D.UI;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace DigitalRiseModel.Samples.Character
@@ -51,7 +52,8 @@ namespace DigitalRiseModel.Samples.Character
 		private AnimationController _player;
 		private AnimationState _animationState = AnimationState.Idle;
 		private JumpState _jumpState = JumpState.Start;
-		private float _jumpVelocity = 0.0f;
+		private Vector3 _jumpForwardVelocity = Vector3.Zero;
+		private float _jumpVerticalVelocity = 0.0f;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
 		private InputService _inputService;
 		private readonly SceneNode _rootNode = new SceneNode();
@@ -236,9 +238,10 @@ namespace DigitalRiseModel.Samples.Character
 			// Initiate jump sequence when Space is pressed and not already jumping
 			if (_inputService.IsKeyDown(Keys.Space) && _animationState != AnimationState.Jumping)
 			{
-				_jumpVelocity = JumpForce;
+				_jumpVerticalVelocity = JumpForce;
 				_animationState = AnimationState.Jumping;
 				_jumpState = JumpState.Start;
+				_jumpForwardVelocity = velocity;
 				_player.CrossfadeToClip("JumpingStart", TimeSpan.FromSeconds(0.2), false);
 			}
 
@@ -248,8 +251,8 @@ namespace DigitalRiseModel.Samples.Character
 				// Apply gravity during jump phases (not during landing)
 				if (_jumpState != JumpState.Land)
 				{
-					_jumpVelocity -= Gravity;
-					_modelNode.Translation += Vector3.Up * _jumpVelocity;
+					_jumpVerticalVelocity -= Gravity;
+					_modelNode.Translation += Vector3.Up * _jumpVerticalVelocity;
 				}
 
 				// State machine for jump animation phases
@@ -282,15 +285,14 @@ namespace DigitalRiseModel.Samples.Character
 						}
 						break;
 				}
+
+				_modelNode.Translation += _jumpForwardVelocity;
 			}
 			else
 			{
 				// Handle idle and running animation transitions with smooth crossfading
 				SetLandAnimation(isMoving);
-			}
 
-			if (isMoving)
-			{
 				_modelNode.Translation += velocity;
 			}
 
