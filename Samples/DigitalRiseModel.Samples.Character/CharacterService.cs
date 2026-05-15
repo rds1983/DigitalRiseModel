@@ -47,6 +47,9 @@ namespace DigitalRiseModel
 		private MainState _mainState = MainState.Idle;
 		private JumpState _jumpState = JumpState.Start;
 		private float _jumpVelocity = 0.0f;
+		private readonly AnimationBlendNode _runDrawAnimation;
+		private readonly AnimationBlendNode _runSheathAnimation;
+		private readonly AnimationBlendNode _runSlashAnimation;
 
 		/// <summary>Indicates whether the character is currently holding a weapon (armed state).</summary>
 		public bool WeaponDrawn { get; private set; }
@@ -56,7 +59,7 @@ namespace DigitalRiseModel
 		{
 			get
 			{
-				if (_mainState != MainState.Jump && _mainState != MainState.Sheath && (_player.RootNode.IsLooped || _player.HasFinished))
+				if (_mainState != MainState.Jump && _mainState != MainState.Sheath && ((_player.RootNode.Flags & AnimationFlags.Looped) != 0 || _player.HasFinished))
 					return false;
 
 				if (_mainState == MainState.Sheath && !WeaponDrawn)
@@ -86,6 +89,21 @@ namespace DigitalRiseModel
 			_player = new AnimationController(_modelNode.ModelInstance);
 			_player.StartClip("Idle", true);
 			_modelNode.Translation = new Vector3(0, DefaultY, 0);
+
+			var topFilter = characterModel.CreateBoneFilter("mixamorig:Spine");
+			var bottomFilter = characterModel.CreateInverseBoneFilter(topFilter);
+
+			_runDrawAnimation = new AnimationBlendNode();
+			_runDrawAnimation.AddLayer(characterModel.Animations["Run"], isLooped: true).BoneFilter = bottomFilter;
+			_runDrawAnimation.AddLayer(characterModel.Animations["DrawGreatSword"]).BoneFilter = topFilter;
+
+			_runSheathAnimation = new AnimationBlendNode();
+			_runSheathAnimation.AddLayer(characterModel.Animations["RunGreatSword"], isLooped: true).BoneFilter = bottomFilter;
+			_runSheathAnimation.AddLayer(characterModel.Animations["DrawGreatSword"], 1.0f, AnimationFlags.PlayBackwards).BoneFilter = topFilter;
+
+			_runSlashAnimation = new AnimationBlendNode();
+			_runSlashAnimation.AddLayer(characterModel.Animations["RunGreatSword"], isLooped: true).BoneFilter = bottomFilter;
+			_runSlashAnimation.AddLayer(characterModel.Animations["SlashGreatSword"]).BoneFilter = topFilter;
 		}
 
 		private void SetSheathedTransform()
@@ -158,7 +176,15 @@ namespace DigitalRiseModel
 			if (IsBusy || _mainState == MainState.Draw || WeaponDrawn)
 				return;
 
-			_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), false);
+			if (_mainState == MainState.Idle)
+			{
+				_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), false);
+			}
+			else
+			{
+				_player.CrossfadeToClip(_runDrawAnimation, TimeSpan.FromSeconds(0.1));
+			}
+
 			_mainState = MainState.Draw;
 			SetDrawnTransform();
 			WeaponDrawn = true;
@@ -170,11 +196,15 @@ namespace DigitalRiseModel
 			if (IsBusy || _mainState == MainState.Sheath || !WeaponDrawn)
 				return;
 
-			var clip = _modelNode.ModelInstance.Model.Animations["DrawGreatSword"];
-			var clipNode = new AnimationClipNode(clip, false);
-			_player.CrossfadeToClip(clipNode, TimeSpan.FromSeconds(0.1));
-			_player.PlaybackMode = PlaybackMode.Backward;
-			_player.Time = clipNode.Duration;
+			if (_mainState == MainState.Idle)
+			{
+				_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), AnimationFlags.PlayBackwards);
+			}
+			else
+			{
+				_player.CrossfadeToClip(_runSheathAnimation, TimeSpan.FromSeconds(0.1));
+			}
+
 			_mainState = MainState.Sheath;
 		}
 
@@ -186,7 +216,14 @@ namespace DigitalRiseModel
 				return;
 			}
 
-			_player.CrossfadeToClip("SlashGreatSword", TimeSpan.FromSeconds(0.1), false);
+			if (_mainState == MainState.Idle)
+			{
+				_player.CrossfadeToClip("SlashGreatSword", TimeSpan.FromSeconds(0.1), false);
+			}
+			else
+			{
+				_player.CrossfadeToClip(_runSlashAnimation, TimeSpan.FromSeconds(0.1));
+			}
 			_mainState = MainState.Slash;
 		}
 
@@ -238,7 +275,6 @@ namespace DigitalRiseModel
 
 			if (_mainState == MainState.Sheath && _player.HasFinished)
 			{
-				_player.PlaybackMode = PlaybackMode.Forward;
 				SetSheathedTransform();
 				WeaponDrawn = false;
 			}

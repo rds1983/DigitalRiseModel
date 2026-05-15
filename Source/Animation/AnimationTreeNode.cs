@@ -3,14 +3,36 @@ using System;
 namespace DigitalRiseModel.Animation
 {
 	/// <summary>
+	/// Flags controlling animation playback behavior.
+	/// </summary>
+	[Flags]
+	public enum AnimationFlags
+	{
+		/// <summary>
+		/// No flags set; animation plays once forward.
+		/// </summary>
+		None = 0,
+
+		/// <summary>
+		/// Animation loops when time exceeds duration.
+		/// </summary>
+		Looped = 1,
+
+		/// <summary>
+		/// Animation plays backward instead of forward.
+		/// </summary>
+		PlayBackwards = 2
+	}
+
+	/// <summary>
 	/// Base class for animation tree nodes that support recursive blending of animation clips.
 	/// </summary>
 	public abstract class AnimationTreeNode
 	{
 		/// <summary>
-		/// Gets or sets whether this animation node loops when time exceeds duration.
+		/// Gets or sets the animation playback flags (looping, playback direction, etc.).
 		/// </summary>
-		public bool IsLooped { get; set; }
+		public AnimationFlags Flags { get; set; }
 
 		/// <summary>
 		/// Gets the name of this animation tree node.
@@ -32,10 +54,10 @@ namespace DigitalRiseModel.Animation
 		internal abstract void Process(AnimationContext context, TimeSpan time, float weight);
 
 		/// <summary>
-		/// Gets the effective time, handling looping behavior.
+		/// Gets the effective time, handling looping and backward playback.
 		/// </summary>
 		/// <param name="time">The requested time.</param>
-		/// <returns>The effective time, clamped or looped based on IsLooped setting.</returns>
-		protected TimeSpan GetEffectiveTime(TimeSpan time) => time.GetEffectiveTime(Duration, IsLooped);
+		/// <returns>The effective time, adjusted for looping and playback direction.</returns>
+		protected TimeSpan GetEffectiveTime(TimeSpan time) => time.GetEffectiveTime(Duration, Flags);
 	}
 }

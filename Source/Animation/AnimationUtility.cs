@@ -53,18 +53,27 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Gets the effective time within an animation cycle, handling looping and negative time.
+		/// Gets the effective time within an animation cycle, handling looping, backward playback, and negative time.
 		/// </summary>
 		/// <param name="time">The requested time (can be negative or exceed duration).</param>
 		/// <param name="duration">The duration of one animation cycle.</param>
-		/// <param name="isLooped">Whether the animation loops or clamps to duration.</param>
-		/// <returns>The effective time clamped or wrapped to [0, duration).</returns>
-		public static TimeSpan GetEffectiveTime(this TimeSpan time, TimeSpan duration, bool isLooped)
+		/// <param name="flags">Animation flags controlling looping and playback direction.</param>
+		/// <returns>The effective time adjusted for direction and clamped or wrapped to [0, duration).</returns>
+		public static TimeSpan GetEffectiveTime(this TimeSpan time, TimeSpan duration, AnimationFlags flags)
 		{
+			bool isLooped = (flags & AnimationFlags.Looped) != 0;
+			bool isBackwards = (flags & AnimationFlags.PlayBackwards) != 0;
+
 			// Invalid duration - clamp to zero
 			if (duration.TotalSeconds <= 0)
 			{
 				return TimeSpan.Zero;
+			}
+
+			// Reverse time for backward playback
+			if (isBackwards)
+			{
+				time = duration - time;
 			}
 
 			// Time is already within valid range - return as-is

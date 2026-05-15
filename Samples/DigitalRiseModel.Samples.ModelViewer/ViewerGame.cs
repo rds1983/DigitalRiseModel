@@ -148,7 +148,14 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_mainPanel._comboPlaybackMode.SelectedIndex = 0;
 			_mainPanel._comboPlaybackMode.SelectedIndexChanged += (s, a) =>
 			{
-				_player.PlaybackMode = (PlaybackMode)_mainPanel._comboPlaybackMode.SelectedIndex.Value;
+				if (_player.RootNode != null)
+				{
+					bool isBackward = _mainPanel._comboPlaybackMode.SelectedIndex.Value == 1;
+					if (isBackward)
+						_player.RootNode.Flags |= AnimationFlags.PlayBackwards;
+					else
+						_player.RootNode.Flags &= ~AnimationFlags.PlayBackwards;
+				}
 			};
 
 			_mainPanel._sliderSpeed.ValueChanged += (s, a) =>

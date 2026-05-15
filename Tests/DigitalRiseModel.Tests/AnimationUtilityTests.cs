@@ -112,7 +112,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(0);
 			var time = TimeSpan.FromSeconds(5);
 
-			var result = time.GetEffectiveTime(duration, isLooped: false);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
 
 			Assert.Equal(TimeSpan.Zero, result);
 		}
@@ -123,7 +123,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(5);
 
-			var result = time.GetEffectiveTime(duration, isLooped: false);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
 
 			Assert.Equal(time, result);
 		}
@@ -134,7 +134,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(10);
 
-			var result = time.GetEffectiveTime(duration, isLooped: false);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
 
 			Assert.Equal(time, result);
 		}
@@ -145,7 +145,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(15);
 
-			var result = time.GetEffectiveTime(duration, isLooped: false);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
 
 			Assert.Equal(duration, result);
 		}
@@ -156,7 +156,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(25);
 
-			var result = time.GetEffectiveTime(duration, isLooped: true);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped);
 
 			Assert.Equal(TimeSpan.FromSeconds(5), result);
 		}
@@ -167,7 +167,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(-5);
 
-			var result = time.GetEffectiveTime(duration, isLooped: false);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
 
 			Assert.Equal(TimeSpan.Zero, result);
 		}
@@ -178,7 +178,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(-2);
 
-			var result = time.GetEffectiveTime(duration, isLooped: true);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped);
 
 			Assert.Equal(TimeSpan.FromSeconds(8), result);
 		}
@@ -189,7 +189,7 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.FromSeconds(-0.5);
 
-			var result = time.GetEffectiveTime(duration, isLooped: true);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped);
 
 			Assert.Equal(TimeSpan.FromSeconds(9.5), result);
 		}
@@ -200,9 +200,97 @@ namespace DigitalRiseModel.Tests
 			var duration = TimeSpan.FromSeconds(10);
 			var time = TimeSpan.Zero;
 
-			var result = time.GetEffectiveTime(duration, isLooped: true);
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped);
 
 			Assert.Equal(TimeSpan.Zero, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_TimeWithinDuration_ReturnsTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(5);
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.None);
+
+			Assert.Equal(time, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_PlayBackwards_TimeWithinDuration_ReturnsReversedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(3);
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.PlayBackwards);
+
+			Assert.Equal(TimeSpan.FromSeconds(7), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_PlayBackwards_TimeAtStart_ReturnsEnd()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.Zero;
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.PlayBackwards);
+
+			Assert.Equal(duration, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_PlayBackwards_TimeAtEnd_ReturnsStart()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(10);
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.PlayBackwards);
+
+			Assert.Equal(TimeSpan.Zero, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_LoopedPlayBackwards_TimeExceedsDuration_ReturnsWrappedReversedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(25); // 2.5 cycles forward = 5 forward, reversed = 5
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped | AnimationFlags.PlayBackwards);
+
+			Assert.Equal(TimeSpan.FromSeconds(5), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_PlayBackwards_TimeExceedsDuration_NotLooped_ReturnsClamped()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(15); // Exceeds duration, clamped to 10, reversed = 0
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.PlayBackwards);
+
+			Assert.Equal(TimeSpan.Zero, result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_LoopedPlayBackwards_NegativeTime_ReturnsWrappedReversedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(-2); // Wraps to 8, reversed = 2
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped | AnimationFlags.PlayBackwards);
+
+			Assert.Equal(TimeSpan.FromSeconds(2), result);
+		}
+
+		[Fact]
+		public void GetEffectiveTime_WithFlags_Looped_TimeExceedsDuration_ReturnsWrappedTime()
+		{
+			var duration = TimeSpan.FromSeconds(10);
+			var time = TimeSpan.FromSeconds(25);
+
+			var result = time.GetEffectiveTime(duration, AnimationFlags.Looped);
+
+			Assert.Equal(TimeSpan.FromSeconds(5), result);
 		}
 	}
 }

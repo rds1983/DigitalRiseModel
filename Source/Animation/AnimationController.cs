@@ -4,22 +4,6 @@ using System;
 namespace DigitalRiseModel.Animation
 {
 	/// <summary>
-	/// Specifies how animations are played back.
-	/// </summary>
-	public enum PlaybackMode
-	{
-		/// <summary>
-		/// Play animation forward.
-		/// </summary>
-		Forward = 0,
-
-		/// <summary>
-		/// Play animation backward.
-		/// </summary>
-		Backward = 1
-	}
-
-	/// <summary>
 	/// Manages skeletal animation playback with hierarchical blending and crossfading.
 	/// Uses a recursive "Process" pipeline: tree → AnimationContext → blended poses → skeleton.
 	/// </summary>
@@ -33,7 +17,6 @@ namespace DigitalRiseModel.Animation
 		private TimeSpan _currentTime;
 		private TimeSpan _transitionDuration;
 		private float _speed = 1.0f;
-		private PlaybackMode _playbackMode = PlaybackMode.Forward;
 		private bool _isPlaying;
 
 		/// <summary>
@@ -73,15 +56,6 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
-		/// Gets or sets the playback mode (forward or backward).
-		/// </summary>
-		public PlaybackMode PlaybackMode
-		{
-			get => _playbackMode;
-			set => _playbackMode = value;
-		}
-
-		/// <summary>
 		/// Gets whether the controller is currently playing.
 		/// </summary>
 		public bool IsPlaying => _isPlaying;
@@ -94,11 +68,11 @@ namespace DigitalRiseModel.Animation
 		{
 			get
 			{
-				if (_rootNode == null || _rootNode.IsLooped)
+				if (_rootNode == null || (_rootNode.Flags & AnimationFlags.Looped) != 0)
 					return false;
 
-				return (PlaybackMode == PlaybackMode.Forward && _currentTime >= _rootNode.Duration) ||
-					(PlaybackMode == PlaybackMode.Backward && _currentTime <= TimeSpan.FromSeconds(0));
+				bool isPlayingBackward = (_rootNode.Flags & AnimationFlags.PlayBackwards) != 0;
+				return isPlayingBackward ? _currentTime <= TimeSpan.Zero : _currentTime >= _rootNode.Duration;
 			}
 		}
 
@@ -140,14 +114,41 @@ namespace DigitalRiseModel.Animation
 		/// Starts playing a single animation clip.
 		/// </summary>
 		/// <param name="clip">The animation clip to play.</param>
-		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
+		/// <param name="flags">Animation playback flags.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		public void StartClip(AnimationClip clip, bool isLooped = false)
+		public void StartClip(AnimationClip clip, AnimationFlags flags = AnimationFlags.None)
 		{
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
 
-			StartClip(new AnimationClipNode(clip, isLooped: isLooped));
+			StartClip(new AnimationClipNode(clip, flags));
+		}
+
+		/// <summary>
+		/// Starts playing a single animation clip.
+		/// </summary>
+		/// <param name="clip">The animation clip to play.</param>
+		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
+		public void StartClip(AnimationClip clip, bool isLooped) => StartClip(clip, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
+
+		/// <summary>
+		/// Starts playing an animation clip by name.
+		/// </summary>
+		/// <param name="name">The name of the animation clip to play.</param>
+		/// <param name="flags">Animation playback flags.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+		/// <exception cref="ArgumentException">No clip found with the specified name.</exception>
+		public void StartClip(string name, AnimationFlags flags = AnimationFlags.None)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			var clip = Skeleton.GetClip(name);
+			if (clip == null)
+				throw new ArgumentException($"Animation clip '{name}' not found.", nameof(name));
+
+			StartClip(clip, flags);
 		}
 
 		/// <summary>
@@ -157,17 +158,7 @@ namespace DigitalRiseModel.Animation
 		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
 		/// <exception cref="ArgumentException">No clip found with the specified name.</exception>
-		public void StartClip(string name, bool isLooped = false)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-
-			var clip = Skeleton.GetClip(name);
-			if (clip == null)
-				throw new ArgumentException($"Animation clip '{name}' not found.", nameof(name));
-
-			StartClip(clip, isLooped);
-		}
+		public void StartClip(string name, bool isLooped) => StartClip(name, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Stops the currently playing animation clip.
@@ -204,7 +195,8 @@ namespace DigitalRiseModel.Animation
 			}
 
 			// Create transition blend
-			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: node.IsLooped);
+			var isLooped = (node.Flags & AnimationFlags.Looped) != 0;
+			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: isLooped);
 			_transitionOldClip = _currentClipNode;
 			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f).TimeOffset = Time;
 			_transitionBlend.AddLayer(node, weight: 0.0f);
@@ -222,16 +214,47 @@ namespace DigitalRiseModel.Animation
 		/// </summary>
 		/// <param name="clip">The animation clip to transition to.</param>
 		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
-		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
+		/// <param name="flags">Animation playback flags.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
 		/// <exception cref="ArgumentException"><paramref name="fadeDuration"/> is negative.</exception>
-		public void CrossfadeToClip(AnimationClip clip, TimeSpan fadeDuration, bool isLooped = false)
+		public void CrossfadeToClip(AnimationClip clip, TimeSpan fadeDuration, AnimationFlags flags = AnimationFlags.None)
 		{
 			if (clip == null)
 				throw new ArgumentNullException(nameof(clip));
 
-			var newClipNode = new AnimationClipNode(clip, isLooped: isLooped);
+			var newClipNode = new AnimationClipNode(clip, flags);
 			CrossfadeToClip(newClipNode, fadeDuration);
+		}
+
+		/// <summary>
+		/// Smoothly transitions from the current clip to a new clip using crossfading.
+		/// </summary>
+		/// <param name="clip">The animation clip to transition to.</param>
+		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
+		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
+		/// <exception cref="ArgumentException"><paramref name="fadeDuration"/> is negative.</exception>
+		public void CrossfadeToClip(AnimationClip clip, TimeSpan fadeDuration, bool isLooped)
+			=> CrossfadeToClip(clip, fadeDuration, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
+
+		/// <summary>
+		/// Smoothly transitions to an animation clip by name using crossfading.
+		/// </summary>
+		/// <param name="clipName">The name of the animation clip to transition to.</param>
+		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
+		/// <param name="flags">Animation playback flags.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="clipName"/> is null.</exception>
+		/// <exception cref="ArgumentException">No clip found with the specified name, or fade duration is negative.</exception>
+		public void CrossfadeToClip(string clipName, TimeSpan fadeDuration, AnimationFlags flags = AnimationFlags.None)
+		{
+			if (clipName == null)
+				throw new ArgumentNullException(nameof(clipName));
+
+			var clip = Skeleton.GetClip(clipName);
+			if (clip == null)
+				throw new ArgumentException($"Animation clip '{clipName}' not found.", nameof(clipName));
+
+			CrossfadeToClip(clip, fadeDuration, flags);
 		}
 
 		/// <summary>
@@ -242,17 +265,8 @@ namespace DigitalRiseModel.Animation
 		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="clipName"/> is null.</exception>
 		/// <exception cref="ArgumentException">No clip found with the specified name, or fade duration is negative.</exception>
-		public void CrossfadeToClip(string clipName, TimeSpan fadeDuration, bool isLooped = false)
-		{
-			if (clipName == null)
-				throw new ArgumentNullException(nameof(clipName));
-
-			var clip = Skeleton.GetClip(clipName);
-			if (clip == null)
-				throw new ArgumentException($"Animation clip '{clipName}' not found.", nameof(clipName));
-
-			CrossfadeToClip(clip, fadeDuration, isLooped);
-		}
+		public void CrossfadeToClip(string clipName, TimeSpan fadeDuration, bool isLooped)
+			=> CrossfadeToClip(clipName, fadeDuration, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Plays the animation.
@@ -333,7 +347,7 @@ namespace DigitalRiseModel.Animation
 		{
 			// Advance time with speed and direction
 			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
-			if (_playbackMode == PlaybackMode.Backward)
+			if (_rootNode != null && (_rootNode.Flags & AnimationFlags.PlayBackwards) != 0)
 				deltaSeconds = -deltaSeconds;
 
 			Time += TimeSpan.FromSeconds(deltaSeconds);
