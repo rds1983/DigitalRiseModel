@@ -40,8 +40,7 @@ namespace DigitalRiseModel.Animation
 		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class.
 		/// </summary>
 		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
-		public AnimationBlendNode(bool isLooped = false)
-			: this(null, isLooped)
+		public AnimationBlendNode(bool isLooped = false) : this(null, isLooped)
 		{
 		}
 
@@ -107,6 +106,7 @@ namespace DigitalRiseModel.Animation
 		/// <summary>
 		/// Recursively processes layers and blends their results with weighted mixing.
 		/// Each layer's animation is offset by its <see cref="AnimationBlendLayer.TimeOffset"/> value.
+		/// Bone filters from layers are applied to restrict which bones each layer affects.
 		/// </summary>
 		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
@@ -116,10 +116,12 @@ namespace DigitalRiseModel.Animation
 			if (weight < 0 || weight > 1)
 				throw new ArgumentException("Weight must be between 0.0 and 1.0 inclusive.", nameof(weight));
 
-			// Process each child with its weight
+			// Process each child with its weight, applying any bone filter from the layer
 			foreach (var layer in Layers)
 			{
+				context.BoneFilter = layer.BoneFilter;
 				layer.Node.Process(context, time + layer.TimeOffset, layer.Weight);
+				context.BoneFilter = null;
 			}
 
 			context.SetWeights(weight);

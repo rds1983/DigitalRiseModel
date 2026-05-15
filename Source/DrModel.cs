@@ -190,6 +190,55 @@ namespace DigitalRiseModel
 		public DrModelBone FindBoneByName(string name) => (from bone in Bones where bone.Name == name select bone).FirstOrDefault();
 
 		/// <summary>
+		/// Creates a bone filter from bone names, including all descendants of matching bones.
+		/// </summary>
+		/// <param name="names">The names of bones to include in the filter.</param>
+		/// <returns>A set of bone indices corresponding to the specified bones and their descendants.</returns>
+		/// <exception cref="Exception">One of the specified bone names does not exist.</exception>
+		public HashSet<int> CreateBoneFilter(params string[] names)
+		{
+			var result = new HashSet<int>();
+			if (names == null || names.Length == 0)
+			{
+				return result;
+			}
+
+			foreach (var name in names)
+			{
+				var bone = FindBoneByName(name);
+
+				if (bone == null)
+				{
+					throw new Exception($"Could not find bone '{name}'");
+				}
+
+				bone.InternalCreateBoneFilterRecursive(result);
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Creates a bone filter containing all bones except those specified.
+		/// </summary>
+		/// <param name="excludedBones">The set of bone indices to exclude from the filter.</param>
+		/// <returns>A set of bone indices containing all bones not in the excluded set.</returns>
+		public HashSet<int> CreateInverseBoneFilter(HashSet<int> excludedBones)
+		{
+			var result = new HashSet<int>();
+
+			for (var i = 0; i < Bones.Length; i++)
+			{
+				if (excludedBones == null || !excludedBones.Contains(i))
+				{
+					result.Add(i);
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
 		/// Clears the tag property from all bones, meshes, and buffers in the model.
 		/// </summary>
 		public void ClearAllTags()

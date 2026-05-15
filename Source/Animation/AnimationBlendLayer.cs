@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DigitalRiseModel.Animation
 {
@@ -37,6 +38,12 @@ namespace DigitalRiseModel.Animation
 		/// Gets or sets the time offset applied when processing this layer's animation.
 		/// </summary>
 		public TimeSpan TimeOffset { get; set; } = TimeSpan.Zero;
+
+		/// <summary>
+		/// Gets or sets an optional filter to restrict which bones this layer affects.
+		/// If set, only bones in this filter will be modified by this layer's animation.
+		/// </summary>
+		public HashSet<int> BoneFilter { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AnimationBlendLayer"/> class.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DigitalRiseModel.Animation
 {
@@ -18,6 +19,12 @@ namespace DigitalRiseModel.Animation
 		private BoneData[] _bones;
 
 		public ISkeleton Skeleton { get; }
+
+		/// <summary>
+		/// Gets or sets an optional filter to restrict which bones can be modified.
+		/// If set, only bones in this filter will accept animation transforms.
+		/// </summary>
+		public HashSet<int> BoneFilter { get; set; }
 
 		public AnimationContext(ISkeleton skeleton)
 		{
@@ -55,10 +62,18 @@ namespace DigitalRiseModel.Animation
 			}
 		}
 
+		/// <summary>
 		/// Accumulates a bone transform, blending with existing transforms using normalized weights.
 		/// First call stores as-is; subsequent calls interpolate proportionally regardless of order.
+		/// Respects the active bone filter if set, ignoring transforms for filtered-out bones.
+		/// </summary>
 		public void SetTransform(int boneIndex, SrtTransform transform, float weight)
 		{
+			if (BoneFilter != null && !BoneFilter.Contains(boneIndex))
+			{
+				return;
+			}
+
 			var curWeight = _bones[boneIndex].Weight;
 			if (curWeight == null)
 			{

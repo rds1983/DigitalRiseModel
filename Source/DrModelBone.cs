@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace DigitalRiseModel
 {
@@ -88,6 +89,44 @@ namespace DigitalRiseModel
 		/// </summary>
 		/// <returns>The transformation matrix of the default pose.</returns>
 		public Matrix CalculateDefaultLocalTransform() => DefaultPose.ToMatrix();
+
+		/// <summary>
+		/// Recursively adds this bone and its descendants to a bone filter set.
+		/// </summary>
+		/// <param name="filter">The filter set to add bone indices to.</param>
+		internal void InternalCreateBoneFilterRecursive(HashSet<int> filter)
+		{
+			filter.Add(Index);
+
+			if (Children != null)
+			{
+				foreach (var child in Children)
+				{
+					child.InternalCreateBoneFilterRecursive(filter);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a bone filter containing this bone and optionally all its descendants.
+		/// </summary>
+		/// <param name="recursive">If true, includes all descendants; if false, only this bone.</param>
+		/// <returns>A set of bone indices for use with animation layer filters.</returns>
+		public HashSet<int> CreateBoneFilter(bool recursive = true)
+		{
+			var result = new HashSet<int>();
+
+			if (!recursive)
+			{
+				result.Add(Index);
+			}
+			else
+			{
+				InternalCreateBoneFilterRecursive(result);
+			}
+
+			return result;
+		}
 
 		/// <summary>
 		/// Returns the name of this bone.
