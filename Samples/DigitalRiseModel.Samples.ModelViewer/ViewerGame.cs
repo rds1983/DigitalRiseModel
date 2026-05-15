@@ -318,13 +318,20 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			else
 			{
 				var clip = (AnimationClip)((Label)_mainPanel._comboAnimations.SelectedItem).Tag;
+
+				var flags = AnimationFlags.Looped;
+				if (_mainPanel._comboPlaybackMode.SelectedIndex == 1)
+				{
+					flags |= AnimationFlags.PlayBackwards;
+				}
+
 				if (_mainPanel._checkCrossfade.IsChecked)
 				{
-					_player.CrossfadeToClip(clip, TimeSpan.FromSeconds(0.5f), true);
+					_player.CrossfadeToClip(clip, TimeSpan.FromSeconds(0.5f), flags);
 				}
 				else
 				{
-					_player.StartClip(clip, true);
+					_player.StartClip(clip, flags);
 				}
 			}
 

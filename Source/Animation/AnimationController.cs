@@ -33,6 +33,10 @@ namespace DigitalRiseModel.Animation
 			get => _currentTime;
 			set
 			{
+				// Clamp value according to the root node flags(except PlayBackwards)
+				var flags = RootNode.Flags & ~AnimationFlags.PlayBackwards;
+				value = value.GetEffectiveTime(RootNode.Duration, flags);
+
 				if (_currentTime.EpsilonEquals(value))
 				{
 					return;
@@ -71,8 +75,7 @@ namespace DigitalRiseModel.Animation
 				if (_rootNode == null || (_rootNode.Flags & AnimationFlags.Looped) != 0)
 					return false;
 
-				bool isPlayingBackward = (_rootNode.Flags & AnimationFlags.PlayBackwards) != 0;
-				return isPlayingBackward ? _currentTime <= TimeSpan.Zero : _currentTime >= _rootNode.Duration;
+				return _currentTime >= _rootNode.Duration;
 			}
 		}
 
@@ -347,9 +350,6 @@ namespace DigitalRiseModel.Animation
 		{
 			// Advance time with speed and direction
 			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
-			if (_rootNode != null && (_rootNode.Flags & AnimationFlags.PlayBackwards) != 0)
-				deltaSeconds = -deltaSeconds;
-
 			Time += TimeSpan.FromSeconds(deltaSeconds);
 		}
 	}
