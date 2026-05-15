@@ -1,5 +1,7 @@
-﻿using DigitalRiseModel.Animation;
+﻿using AssetManagementBase;
+using DigitalRiseModel.Animation;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace DigitalRiseModel
@@ -8,7 +10,7 @@ namespace DigitalRiseModel
 	/// Manages character animation and physics-based movement.
 	/// Handles animation state transitions, skeletal animation blending, jumping physics, and weapon state.
 	/// </summary>
-	internal class ControllerService
+	internal class CharacterService
 	{
 		// Physics constants for jump arc calculation
 		private const float Gravity = 0.015f;           // Gravity acceleration applied each frame
@@ -25,7 +27,9 @@ namespace DigitalRiseModel
 		{
 			Idle,
 			Run,
-			Jump
+			Jump,
+			DrawingWeapon,
+			SheathingWeapon
 		}
 
 		/// <summary>
@@ -48,7 +52,13 @@ namespace DigitalRiseModel
 		private readonly AnimationController _player;
 
 		// Reference to the model node for position and rotation updates
-		private readonly ModelInstanceNode _modelNode;
+		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
+		{
+			ModelInstance = new DrModelInstance()
+		};
+		private readonly ModelBoneAttachment _weaponAttachment = new ModelBoneAttachment();
+
+		public ModelInstanceNode ModelNode => _modelNode;
 
 		// Current movement state (idle, running, or jumping)
 		private LocomotionState _locomotionState = LocomotionState.Idle;
@@ -94,24 +104,56 @@ namespace DigitalRiseModel
 		/// Initializes the controller with a reference to the character model.
 		/// Sets up initial animation state and position.
 		/// </summary>
-		public ControllerService(ModelInstanceNode modelNode)
+		public CharacterService(GraphicsDevice graphicsDevice, AssetManager assetManager)
 		{
-			// Validate input to prevent null reference exceptions
-			if (modelNode == null || modelNode.ModelInstance == null)
+			if (assetManager == null)
 			{
-				throw new ArgumentNullException(nameof(modelNode));
+				throw new ArgumentNullException(nameof(assetManager));
 			}
 
-			_modelNode = modelNode;
+			// Load and add the animated character model (mixamo format)
+			var characterModel = assetManager.LoadModel(graphicsDevice, "Models/mixamo.gltf");
+			_modelNode.ModelInstance.Model = characterModel;
+
+			var swordModel = assetManager.LoadModel(graphicsDevice, "Models/sword.gltf");
+			_weaponAttachment.Model = new DrModelInstance(swordModel);
+			_modelNode.BonesAttachments.Add(_weaponAttachment);
+			SetSheathedState();
 
 			// Create animation controller for this character model
-			_player = new AnimationController(modelNode.ModelInstance);
+			_player = new AnimationController(_modelNode.ModelInstance);
 
 			// Start with idle animation (non-looping initial state)
 			_player.StartClip("Idle", true);
 
 			// Position character at ground level at world origin
 			_modelNode.Translation = new Vector3(0, DefaultY, 0);
+		}
+
+		private void SetSheathedState()
+		{
+			_weaponAttachment.Bone = _modelNode.ModelInstance.Model.FindBoneByName("mixamorig:Spine");
+
+			var transform = new SrtTransform
+			{
+				Translation = new Vector3(-0.6f, 0, -1.4f),
+				Scale = new Vector3(16),
+				Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(180.0f))
+			};
+			_weaponAttachment.Transform = transform.ToMatrix();
+		}
+
+		private void SetDrawnState()
+		{
+			_weaponAttachment.Bone = _modelNode.ModelInstance.Model.FindBoneByName("mixamorig:RightHand");
+
+			var transform = new SrtTransform
+			{
+				Translation = new Vector3(3.5f, 0f, 0f),
+				Scale = new Vector3(16),
+				Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(270.0f))
+			};
+			_weaponAttachment.Transform = transform.ToMatrix();
 		}
 
 		/// <summary>
@@ -195,6 +237,7 @@ namespace DigitalRiseModel
 			// Play weapon draw animation (0.1s blend-in, non-looping)
 			_player.CrossfadeToClip("DrawGreatSword", TimeSpan.FromSeconds(0.1), false);
 			WeaponDrawn = true;
+			SetDrawnState();
 		}
 
 		/// <summary>
@@ -212,6 +255,17 @@ namespace DigitalRiseModel
 			// Play weapon sheathe animation (0.1s blend-in, non-looping)
 			_player.CrossfadeToClip("SheathGreatSword", TimeSpan.FromSeconds(0.1), false);
 			WeaponDrawn = false;
+			SetSheathedState();
+		}
+
+		public void Slash()
+		{
+			if (IsBusy || !WeaponDrawn)
+			{
+				return;
+			}
+
+			_player.CrossfadeToClip("SlashGreatSword", TimeSpan.FromSeconds(0.1), false);
 		}
 
 		/// <summary>

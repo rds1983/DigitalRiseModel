@@ -21,13 +21,8 @@ namespace DigitalRiseModel.Samples.Character
 		private readonly GraphicsDeviceManager _graphics;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
 		private InputService _inputService;
-		private ControllerService _controllerService;
+		private CharacterService _controllerService;
 		private readonly SceneNode _rootNode = new SceneNode();
-		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode()
-		{
-			ModelInstance = new DrModelInstance()
-		};
-		private readonly ModelBoneAttachment _weaponAttachment = new ModelBoneAttachment();
 		private readonly SceneNode _cameraMount = new SceneNode();
 		private readonly CameraNode _mainCamera = new CameraNode();
 		private ForwardRenderer _renderer;
@@ -36,6 +31,8 @@ namespace DigitalRiseModel.Samples.Character
 
 		/// <summary>Singleton instance of the ViewerGame for global access.</summary>
 		public static ViewerGame Instance { get; private set; }
+
+		private ModelInstanceNode ModelNode => _controllerService.ModelNode;
 
 		/// <summary>
 		/// Initializes the game with graphics settings and input configuration.
@@ -90,27 +87,14 @@ namespace DigitalRiseModel.Samples.Character
 			};
 			_rootNode.Children.Add(planeNode);
 
-			// Load and add the animated character model (mixamo format)
-			var characterModel = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.gltf");
-			_modelNode.ModelInstance.Model = characterModel;
-			_rootNode.Children.Add(_modelNode);
-
-			var swordModel = assetManager.LoadModel(GraphicsDevice, "Models/sword.gltf");
-			_weaponAttachment.Model = new DrModelInstance(swordModel);
-			_weaponAttachment.Bone = characterModel.FindBoneByName("mixamorig:Spine");
-
-			var transform = new SrtTransform();
-			transform.Translation = new Vector3(-0.6f, 0, -1.4f);
-			transform.Scale = new Vector3(16);
-			transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(180.0f));
-			_weaponAttachment.Transform = transform.ToMatrix();
-			_modelNode.BonesAttachments.Add(_weaponAttachment);
+			_controllerService = new CharacterService(GraphicsDevice, assetManager);
+			_rootNode.Children.Add(_controllerService.ModelNode);
 
 			// === Camera setup ===
 			// Position camera mount on the model's head (1.3 units up from model origin)
 			// This allows the camera to follow the character's head position as the model moves
 			_cameraMount.Translation = new Vector3(0, 1.3f, 0);
-			_modelNode.Children.Add(_cameraMount);
+			ModelNode.Children.Add(_cameraMount);
 
 			// Position camera 2 units behind the camera mount (first-person view)
 			_mainCamera.Translation = new Vector3(0, 0, -2);
@@ -128,7 +112,6 @@ namespace DigitalRiseModel.Samples.Character
 
 			// === Initialize animation controller ===
 			// The controller manages character animations (idle, run, jump, weapon draw/sheathe)
-			_controllerService = new ControllerService(_modelNode);
 
 			// === Initialize input system ===
 			// Handles keyboard and mouse input with event-based feedback
@@ -179,9 +162,9 @@ namespace DigitalRiseModel.Samples.Character
 			}
 
 			// Horizontal mouse movement rotates the character around the Y axis (look left/right)
-			var playerRotation = _modelNode.Rotation;
+			var playerRotation = ModelNode.Rotation;
 			playerRotation.Y += -(int)((e.NewValue.X - e.OldValue.X) * MouseSensitivity);
-			_modelNode.Rotation = playerRotation;
+			ModelNode.Rotation = playerRotation;
 
 			// Vertical mouse movement rotates the camera mount around the X axis (look up/down)
 			// This creates a standard first-person camera that pitches while the character yaws
@@ -209,25 +192,25 @@ namespace DigitalRiseModel.Samples.Character
 			if (_inputService.IsKeyDown(Keys.W))
 			{
 				// W moves forward in the direction the character is facing
-				velocity = _modelNode.GlobalTransform.Forward * -MovementSpeed;
+				velocity = ModelNode.GlobalTransform.Forward * -MovementSpeed;
 				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.S))
 			{
 				// S moves backward
-				velocity = _modelNode.GlobalTransform.Forward * MovementSpeed;
+				velocity = ModelNode.GlobalTransform.Forward * MovementSpeed;
 				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.A))
 			{
 				// A strafes left
-				velocity = _modelNode.GlobalTransform.Right * MovementSpeed;
+				velocity = ModelNode.GlobalTransform.Right * MovementSpeed;
 				isRunning = true;
 			}
 			else if (_inputService.IsKeyDown(Keys.D))
 			{
 				// D strafes right
-				velocity = _modelNode.GlobalTransform.Right * -MovementSpeed;
+				velocity = ModelNode.GlobalTransform.Right * -MovementSpeed;
 				isRunning = true;
 			}
 
@@ -235,6 +218,11 @@ namespace DigitalRiseModel.Samples.Character
 			if (_inputService.IsKeyDown(Keys.Space))
 			{
 				_controllerService.Jump(velocity);
+			}
+
+			if (_inputService.IsKeyDown(Keys.LeftShift))
+			{
+				_controllerService.Slash();
 			}
 
 			// === Process R key to toggle weapon draw/sheathe ===
