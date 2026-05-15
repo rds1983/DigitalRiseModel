@@ -5,16 +5,16 @@
 <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/33d25562-ed14-493c-83dd-ff0ac37e622f" />
 
 ### Overview
-DigitalRiseModel is MonoGame/FNA library that provides alternative API to XNA's 3D modelling.
-DigitalRiseModel has following features(that XNA lacks):
+DigitalRiseModel is a MonoGame/FNA library that provides an alternative API to XNA's 3D modelling.
+DigitalRiseModel has the following features (that XNA lacks):
 * Construct 3D models in code
-* Load 3D models from GLTF/GLB in the run-time
+* Load 3D models from GLTF/GLB at runtime
 * Skeletal animation
-* Create 3D primitives(boxes, spheres, toruses, etc) in the run-time
+* Create 3D primitives (boxes, spheres, toruses, etc.) at runtime
 
-It's important to note that DigitalRiseModel lacks functionality to render models. That is the responsibility of the developer. 
+It's important to note that DigitalRiseModel does not include rendering functionality. That is the responsibility of the developer. 
 
-However [Samples](Samples) section demonstrates how it could be done. It implements simple rendering engine that is based on XNA stock effects such as BasicEffect and SkinnedEffect.
+However, the [Samples](Samples) section demonstrates how this can be done. It implements a simple rendering engine based on XNA stock effects such as BasicEffect and SkinnedEffect.
 
 ### Adding Reference For MonoGame
 https://www.nuget.org/packages/DigitalRiseModel.MonoGame
@@ -40,28 +40,31 @@ Now load the model in the GLTF/GLB format:
 ```c#
 DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
 ```
-The DrModel API is pretty much similar to XNA Model.
+The DrModel API is quite similar to the XNA Model API.
 
 ### Samples
-Right now, [Samples](Samples) is the best way to learn how to work with the library.
+The [Samples](Samples) directory is the best way to learn how to work with the library.
 
 Name|Description
 ----|-----------
 BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
 ModelViewer|Application to load and view 3D models in all supported formats. Skeletal animation is supported
-ThirdPerson|Application that demonstrates how simple third person controller could be done
+Character|Application that demonstrates how a third-person character controller with skeletal animation can be implemented
+
+### Documentation
+For detailed information about the skeletal animation API, see [SkeletalAnimationAPI.md](SkeletalAnimationAPI.md).
 
 ### Building From Source For MonoGame
 Open DigitalRiseModel.MonoGame.sln in the IDE and run.
 
 ### Building From Source For FNA
-Clone following projects in one folder:
+Clone the following projects in one folder:
 Link|Description
 ----|-----------
 https://github.com/FNA-XNA/FNA|FNA
 https://github.com/rds1983/XNAssets|Asset management library
-https://github.com/FontStashSharp/FontStashSharp|Text rendering library(required for samples)
-https://github.com/rds1983/Myra|UI library(required for samples)
+https://github.com/FontStashSharp/FontStashSharp|Text rendering library (required for samples)
+https://github.com/rds1983/Myra|UI library (required for samples)
 this repo|
 
 Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
