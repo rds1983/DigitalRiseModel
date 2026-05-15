@@ -263,10 +263,15 @@ namespace DigitalRiseModel.Primitives
 			new Vector3(-0.375f, -0.31125f, -0.21f),
 		};
 
-		// Performs a cubic bezier interpolation between four control points,
-		// returning the value at the specified time (t ranges 0 to 1).
-		// This template implementation can be used to interpolate Vector3,
-		// float, or any other types that define suitable * and + operators.
+		/// <summary>
+		/// Performs a cubic bezier interpolation between four control points.
+		/// </summary>
+		/// <param name="p1">The first control point.</param>
+		/// <param name="p2">The second control point.</param>
+		/// <param name="p3">The third control point.</param>
+		/// <param name="p4">The fourth control point.</param>
+		/// <param name="t">The interpolation parameter (ranges 0 to 1).</param>
+		/// <returns>The interpolated value at the specified time.</returns>
 		public static Vector3 CubicInterpolate(ref Vector3 p1, ref Vector3 p2, ref Vector3 p3, ref Vector3 p4, float t)
 		{
 			var t2 = t * t;

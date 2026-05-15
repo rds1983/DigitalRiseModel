@@ -32,8 +32,17 @@ namespace DigitalRiseModel.Primitives
 	/// </summary>
 	public enum NormalDirection
 	{
+		/// <summary>
+		/// Normal points in the positive Z direction.
+		/// </summary>
 		UpZ,
+		/// <summary>
+		/// Normal points in the positive Y direction.
+		/// </summary>
 		UpY,
+		/// <summary>
+		/// Normal points in the positive X direction.
+		/// </summary>
 		UpX,
 	}
 

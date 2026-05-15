@@ -7,6 +7,12 @@ namespace DigitalRiseModel.Primitives
 {
 	partial class MeshPrimitives
 	{
+		/// <summary>
+		/// Creates a new meshpart that represents a plane using grid lines.
+		/// </summary>
+		/// <param name="graphicsDevice">The graphics device.</param>
+		/// <param name="size">The size of the grid.</param>
+		/// <returns>A new <see cref="DrMeshPart"/> that represents a plane line list.</returns>
 		public static DrMeshPart CreatePlaneLinesMeshPart(GraphicsDevice graphicsDevice, int size)
 		{
 			var vertices = new List<VertexPosition>();

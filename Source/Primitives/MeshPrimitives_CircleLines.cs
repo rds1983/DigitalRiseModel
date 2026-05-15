@@ -21,7 +21,7 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A new <see cref="DrMeshPart"/> that represents a circle line list.</returns>
 		/// <remarks>
 		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetCircleLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
+		/// to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// <paramref name="numberOfSegments"/> is less than or equal to 2.

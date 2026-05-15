@@ -14,7 +14,7 @@ namespace DigitalRiseModel.Primitives
 		/// <returns>A new <see cref="DrMeshPart"/> that represents a box line list.</returns>
 		/// <remarks>
 		/// If the returned <see cref="DrMeshPart"/> is not going to be modified, then it is better
-		/// to call <see cref="GetBoxLines"/> to retrieve a shared <see cref="DrMeshPart"/> instance.
+		/// to retrieve a shared <see cref="DrMeshPart"/> instance.
 		/// </remarks>
 		public static DrMeshPart CreateBoxLinesMeshPart(GraphicsDevice graphicsDevice, BoundingBox box)
 		{

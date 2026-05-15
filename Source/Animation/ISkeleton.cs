@@ -5,6 +5,9 @@
 	/// </summary>
 	public interface ISkeleton
 	{
+		/// <summary>
+		/// Gets the number of bones in the skeleton.
+		/// </summary>
 		int BonesCount { get; }
 
 		/// <summary>

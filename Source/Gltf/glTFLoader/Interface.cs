@@ -481,8 +481,8 @@ namespace glTFLoader
                         if (!bufferData.TryGetValue(bufferView.Buffer, out data))
                         {
                             // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-stored-buffer
-                            /// "glTF Buffer referring to GLB-stored BIN chunk, must have buffer.uri
-                            /// property undefined, and it must be the first element of buffers array"
+                            // "glTF Buffer referring to GLB-stored BIN chunk, must have buffer.uri
+                            // property undefined, and it must be the first element of buffers array"
                             data = bufferView.Buffer == 0 && glbBinChunck != null
                                         ? glbBinChunck
                                         : model.LoadBinaryBuffer(bufferView.Buffer, gltfFilePath);

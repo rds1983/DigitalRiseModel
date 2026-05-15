@@ -78,6 +78,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace DigitalRiseModel.Primitives
 {
+	/// <summary>
+	/// Provides methods to create various mesh primitives.
+	/// </summary>
 	public static partial class MeshPrimitives
 	{
 		private const int CubeFaceCount = 6;

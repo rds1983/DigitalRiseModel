@@ -12,7 +12,8 @@ namespace DigitalRiseModel.Utility
 		/// <summary>
 		/// Gets the number of primitives for the given vertex/index buffer and primitive type.
 		/// </summary>
-		/// <param name="count"></param>
+		/// <param name="primitiveType">The primitive type.</param>
+		/// <param name="count">The number of vertices or indices.</param>
 		/// <returns>The number of primitives in the given vertex and index buffer.</returns>
 		public static int GetPrimitiveCount(this PrimitiveType primitiveType, int count)
 		{

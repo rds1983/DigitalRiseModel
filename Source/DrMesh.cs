@@ -103,6 +103,10 @@ namespace DigitalRiseModel
 			_boundingBox = null;
 		}
 
+		/// <summary>
+		/// Disposes the mesh and its resources.
+		/// </summary>
+		/// <param name="disposing">True if called from Dispose(); false if called from finalizer.</param>
 		public override void Dispose(bool disposing)
 		{
 			if (disposing)

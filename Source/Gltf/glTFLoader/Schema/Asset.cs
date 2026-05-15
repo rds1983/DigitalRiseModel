@@ -72,7 +72,7 @@ namespace glTFLoader.Schema {
         }
         
         /// <summary>
-        /// The glTF version in the form of `<major>.<minor>` that this asset targets.
+        /// The glTF version in the form of `&lt;major&gt;.&lt;minor&gt;` that this asset targets.
         /// </summary>
         [Newtonsoft.Json.JsonRequiredAttribute()]
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -86,7 +86,7 @@ namespace glTFLoader.Schema {
         }
         
         /// <summary>
-        /// The minimum glTF version in the form of `<major>.<minor>` that this asset targets. This property **MUST NOT** be greater than the asset version.
+        /// The minimum glTF version in the form of `&lt;major&gt;.&lt;minor&gt;` that this asset targets. This property **MUST NOT** be greater than the asset version.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minVersion")]
         public string MinVersion {
