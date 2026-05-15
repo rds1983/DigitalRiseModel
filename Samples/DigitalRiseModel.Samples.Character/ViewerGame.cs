@@ -23,10 +23,11 @@ namespace DigitalRiseModel.Samples.Character
 		private InputService _inputService;
 		private ControllerService _controllerService;
 		private readonly SceneNode _rootNode = new SceneNode();
-		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode
+		private readonly ModelInstanceNode _modelNode = new ModelInstanceNode()
 		{
 			ModelInstance = new DrModelInstance()
 		};
+		private readonly ModelBoneAttachment _weaponAttachment = new ModelBoneAttachment();
 		private readonly SceneNode _cameraMount = new SceneNode();
 		private readonly CameraNode _mainCamera = new CameraNode();
 		private ForwardRenderer _renderer;
@@ -90,9 +91,20 @@ namespace DigitalRiseModel.Samples.Character
 			_rootNode.Children.Add(planeNode);
 
 			// Load and add the animated character model (mixamo format)
-			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.gltf");
-			_modelNode.ModelInstance.Model = model;
+			var characterModel = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.gltf");
+			_modelNode.ModelInstance.Model = characterModel;
 			_rootNode.Children.Add(_modelNode);
+
+			var swordModel = assetManager.LoadModel(GraphicsDevice, "Models/sword.gltf");
+			_weaponAttachment.Model = new DrModelInstance(swordModel);
+			_weaponAttachment.Bone = characterModel.FindBoneByName("mixamorig:Spine");
+
+			var transform = new SrtTransform();
+			transform.Translation = new Vector3(-0.6f, 0, -1.4f);
+			transform.Scale = new Vector3(16);
+			transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(180.0f));
+			_weaponAttachment.Transform = transform.ToMatrix();
+			_modelNode.BonesAttachments.Add(_weaponAttachment);
 
 			// === Camera setup ===
 			// Position camera mount on the model's head (1.3 units up from model origin)
