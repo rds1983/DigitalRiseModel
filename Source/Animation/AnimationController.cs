@@ -202,8 +202,8 @@ namespace DigitalRiseModel.Animation
 			// Create transition blend
 			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: node.IsLooped);
 			_transitionOldClip = _currentClipNode;
-			_transitionBlend.AddChild(_transitionOldClip, weight: 1.0f);
-			_transitionBlend.AddChild(node, weight: 0.0f);
+			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f);
+			_transitionBlend.AddLayer(node, weight: 0.0f);
 
 			_rootNode = _transitionBlend;
 			_currentClipNode = node;
@@ -307,8 +307,9 @@ namespace DigitalRiseModel.Animation
 				_transitionTime += elapsedTime;
 				float progress = Math.Min(1.0f, (float)(_transitionTime.TotalSeconds / _transitionDuration.TotalSeconds));
 
-				_transitionBlend.SetChildWeight(_transitionOldClip, 1.0f - progress);
-				_transitionBlend.SetChildWeight(_currentClipNode, progress);
+				// Adjust layer weights: outgoing clip fades out, incoming clip fades in
+				_transitionBlend.Layers[0].Weight = 1.0f - progress;
+				_transitionBlend.Layers[1].Weight = progress;
 
 				// Complete transition when done
 				if (progress >= 1.0f)
