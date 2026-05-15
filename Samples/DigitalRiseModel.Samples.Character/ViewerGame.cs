@@ -16,6 +16,12 @@ namespace DigitalRiseModel.Samples.Character
 {
 	public class ViewerGame : Game
 	{
+		private const float MouseSensitivity = 0.2f;
+		private const float MovementSpeed = 0.1f;
+		private const float JumpForce = 0.5f;
+		private const float Gravity = 0.015f;
+		private const float DefaultY = 0.0f;
+
 		/// <summary>
 		/// Represents the main character animation state.
 		/// </summary>
@@ -41,12 +47,6 @@ namespace DigitalRiseModel.Samples.Character
 			/// <summary>Playing the landing animation.</summary>
 			Land
 		}
-
-		private const float MouseSensitivity = 0.2f;
-		private const float MovementSpeed = 0.1f;
-		private const float JumpForce = 0.5f;
-		private const float Gravity = 0.015f;
-		private const float DefaultY = 0.0f;
 
 		private readonly GraphicsDeviceManager _graphics;
 		private AnimationController _player;
@@ -111,7 +111,7 @@ namespace DigitalRiseModel.Samples.Character
 			_rootNode.Children.Add(planeNode);
 
 			// Model - Load Sinbad model
-			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.glb");
+			var model = assetManager.LoadModel(GraphicsDevice, "Models/mixamo.gltf");
 			_modelNode.ModelInstance.Model = model;
 			_modelNode.Translation = new Vector3(0, DefaultY, 0);
 
@@ -194,8 +194,9 @@ namespace DigitalRiseModel.Samples.Character
 		{
 			if (isMoving && _animationState != AnimationState.Running)
 			{
+				Debug.WriteLine("Run");
 				_animationState = AnimationState.Running;
-				_player.CrossfadeToClip("Running", TimeSpan.FromSeconds(0.1), true);
+				_player.CrossfadeToClip("Run", TimeSpan.FromSeconds(0.1), true);
 			}
 			else if (!isMoving && _animationState != AnimationState.Idle)
 			{
@@ -242,7 +243,7 @@ namespace DigitalRiseModel.Samples.Character
 				_animationState = AnimationState.Jumping;
 				_jumpState = JumpState.Start;
 				_jumpForwardVelocity = velocity;
-				_player.CrossfadeToClip("JumpingStart", TimeSpan.FromSeconds(0.2), false);
+				_player.CrossfadeToClip("JumpStart", TimeSpan.FromSeconds(0.2), false);
 			}
 
 			// Handle jump physics and animation state transitions
@@ -263,7 +264,7 @@ namespace DigitalRiseModel.Samples.Character
 						if (_player.HasFinished)
 						{
 							_jumpState = JumpState.Loop;
-							_player.CrossfadeToClip("JumpingLoop", TimeSpan.FromSeconds(0.1), true);
+							_player.CrossfadeToClip("JumpLoop", TimeSpan.FromSeconds(0.2), true);
 						}
 						break;
 
@@ -273,7 +274,7 @@ namespace DigitalRiseModel.Samples.Character
 						{
 							_modelNode.Translation = new Vector3(_modelNode.Translation.X, DefaultY, _modelNode.Translation.Z);
 							_jumpState = JumpState.Land;
-							_player.CrossfadeToClip("JumpingEnd", TimeSpan.FromSeconds(0.1), false);
+							_player.CrossfadeToClip("JumpEnd", TimeSpan.FromSeconds(0.2), false);
 						}
 						break;
 
@@ -295,7 +296,6 @@ namespace DigitalRiseModel.Samples.Character
 
 				_modelNode.Translation += velocity;
 			}
-
 
 			_fpsCounter.Update(gameTime);
 			_player.Update(gameTime.ElapsedGameTime);

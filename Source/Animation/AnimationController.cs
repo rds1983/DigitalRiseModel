@@ -1,3 +1,4 @@
+using DigitalRiseModel.Utility;
 using System;
 
 namespace DigitalRiseModel.Animation
@@ -22,7 +23,7 @@ namespace DigitalRiseModel.Animation
 	/// Manages skeletal animation playback with hierarchical blending and crossfading.
 	/// Uses a recursive "Process" pipeline: tree → AnimationContext → blended poses → skeleton.
 	/// </summary>
-	public class AnimationController : IDisposable
+	public class AnimationController
 	{
 		private readonly AnimationContext _context;
 		private AnimationTreeNode _rootNode;
@@ -30,12 +31,10 @@ namespace DigitalRiseModel.Animation
 		private AnimationBlendNode _transitionBlend;
 		private AnimationTreeNode _transitionOldClip;
 		private TimeSpan _currentTime;
-		private TimeSpan _transitionTime;
 		private TimeSpan _transitionDuration;
 		private float _speed = 1.0f;
 		private PlaybackMode _playbackMode = PlaybackMode.Forward;
 		private bool _isPlaying;
-		private bool _disposed;
 
 		/// <summary>
 		/// Raised when the playback time changes.
@@ -44,14 +43,23 @@ namespace DigitalRiseModel.Animation
 
 		/// <summary>
 		/// Gets or sets the current playback time.
+		/// When set, updates the skeleton pose and raises the <see cref="TimeChanged"/> event.
 		/// </summary>
 		public TimeSpan Time
 		{
 			get => _currentTime;
 			set
 			{
+				if (_currentTime.EpsilonEquals(value))
+				{
+					return;
+				}
+
 				_currentTime = value;
+
 				OnTimeChanged();
+
+				TimeChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -108,7 +116,6 @@ namespace DigitalRiseModel.Animation
 		public AnimationController(ISkeleton skeleton)
 		{
 			_context = new AnimationContext(skeleton);
-			_currentTime = TimeSpan.Zero;
 			_isPlaying = false;
 		}
 
@@ -124,10 +131,8 @@ namespace DigitalRiseModel.Animation
 
 			_rootNode = node;
 			_currentClipNode = node;
-			_currentTime = TimeSpan.Zero;
 			_isPlaying = true;
-
-			OnTimeChanged();
+			Time = TimeSpan.Zero;
 		}
 
 		/// <summary>
@@ -170,11 +175,9 @@ namespace DigitalRiseModel.Animation
 		{
 			_currentClipNode = null;
 			_rootNode = null;
-			_currentTime = TimeSpan.Zero;
 			_isPlaying = false;
 			Skeleton.ResetTransforms();
-
-			OnTimeChanged();
+			Time = TimeSpan.Zero;
 		}
 
 		/// <summary>
@@ -202,13 +205,14 @@ namespace DigitalRiseModel.Animation
 			// Create transition blend
 			_transitionBlend = new AnimationBlendNode("Crossfade", isLooped: node.IsLooped);
 			_transitionOldClip = _currentClipNode;
-			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f);
+			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f).TimeOffset = Time;
 			_transitionBlend.AddLayer(node, weight: 0.0f);
 
 			_rootNode = _transitionBlend;
 			_currentClipNode = node;
-			_transitionTime = TimeSpan.Zero;
 			_transitionDuration = fadeDuration;
+
+			Time = TimeSpan.Zero;
 		}
 
 		/// <summary>
@@ -270,9 +274,7 @@ namespace DigitalRiseModel.Animation
 		public void Stop()
 		{
 			_isPlaying = false;
-			_currentTime = TimeSpan.Zero;
-
-			OnTimeChanged();
+			Time = TimeSpan.Zero;
 		}
 
 		/// <summary>
@@ -283,29 +285,17 @@ namespace DigitalRiseModel.Animation
 			Skeleton.ResetTransforms();
 		}
 
-		/// <summary>
-		/// Main update function: advances time, updates transitions, and applies skeleton poses.
-		/// Call once per frame. Pipeline: advance time → update crossfade → evaluate tree → apply poses.
-		/// </summary>
-		/// <param name="elapsedTime">Elapsed time since last update.</param>
-		public void Update(TimeSpan elapsedTime)
+		private void OnTimeChanged()
 		{
-			ThrowIfDisposed();
-
 			if (!_isPlaying || _rootNode == null)
+			{
 				return;
-
-			// Advance time with speed and direction
-			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
-			if (_playbackMode == PlaybackMode.Backward)
-				deltaSeconds = -deltaSeconds;
-			_currentTime += TimeSpan.FromSeconds(deltaSeconds);
+			}
 
 			// Update crossfade: fade out old clip, fade in new clip
 			if (_transitionBlend != null)
 			{
-				_transitionTime += elapsedTime;
-				float progress = Math.Min(1.0f, (float)(_transitionTime.TotalSeconds / _transitionDuration.TotalSeconds));
+				float progress = Math.Min(1.0f, (float)(_currentTime.TotalSeconds / _transitionDuration.TotalSeconds));
 
 				// Adjust layer weights: outgoing clip fades out, incoming clip fades in
 				_transitionBlend.Layers[0].Weight = 1.0f - progress;
@@ -317,61 +307,34 @@ namespace DigitalRiseModel.Animation
 					_rootNode = _currentClipNode;
 					_transitionBlend = null;
 					_transitionOldClip = null;
-					_transitionTime = TimeSpan.Zero;
 					_transitionDuration = TimeSpan.Zero;
 				}
 			}
 
-			// Handle looping and clamping
-			var activeNode = _currentClipNode ?? _rootNode;
-			_currentTime = _currentTime.GetEffectiveTime(activeNode.Duration, activeNode.IsLooped);
-
-			Process();
-			OnTimeChanged();
-		}
-
-		/// <summary>
-		/// Evaluates the animation tree and applies poses to skeleton.
-		/// Pipeline: reset skeleton → reset context → process tree → apply transforms.
-		/// </summary>
-		private void Process()
-		{
-			ThrowIfDisposed();
-
-			if (_rootNode == null)
-				return;
-
 			// Reset skeleton to default pose
 			Skeleton.ResetTransforms();
 
-			// Clear context and evaluate animation tree
+			// Evaluate animation tree and apply poses
 			_context.Reset();
 			_rootNode.Process(_context, _currentTime, 1.0f);
 
-			// Apply accumulated transforms
+			// Apply accumulated transforms to skeleton
 			_context.SetPoses();
 		}
 
 		/// <summary>
-		/// Disposes the controller.
+		/// Advances animation time and updates the skeleton pose.
+		/// Call once per frame. Automatically handles crossfading and pose evaluation via the Time property.
 		/// </summary>
-		public void Dispose()
+		/// <param name="elapsedTime">Elapsed time since last update.</param>
+		public void Update(TimeSpan elapsedTime)
 		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
-		}
+			// Advance time with speed and direction
+			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
+			if (_playbackMode == PlaybackMode.Backward)
+				deltaSeconds = -deltaSeconds;
 
-		private void OnTimeChanged()
-		{
-			TimeChanged?.Invoke(this, EventArgs.Empty);
-		}
-
-		private void ThrowIfDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException(GetType().Name);
+			Time += TimeSpan.FromSeconds(deltaSeconds);
 		}
 	}
 }

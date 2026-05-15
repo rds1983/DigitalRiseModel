@@ -51,6 +51,21 @@ namespace DigitalRiseModel.Utility
 				a.W.EpsilonEquals(b.W, epsilon);
 		}
 
+		/// <summary>
+		/// Compares two <see cref="TimeSpan"/> values based on an epsilon zero tolerance.
+		/// </summary>
+		/// <param name="left">The first time span to compare.</param>
+		/// <param name="right">The second time span to compare.</param>
+		/// <param name="epsilon">The epsilon value to use for zero tolerance.</param>
+		/// <returns><c>true</c> if <paramref name="left"/> is within epsilon of <paramref name="right"/>; otherwise, <c>false</c>.</returns>
+		public static bool EpsilonEquals(this TimeSpan left, TimeSpan right, float epsilon = ZeroTolerance)
+		{
+			var fl = (float)left.TotalSeconds;
+			var fr = (float)right.TotalSeconds;
+
+			return fl.EpsilonEquals(fr, epsilon);
+		}
+
 		public static bool IsZero(this float a, float epsilon = ZeroTolerance)
 		{
 			return a.EpsilonEquals(0.0f, epsilon);

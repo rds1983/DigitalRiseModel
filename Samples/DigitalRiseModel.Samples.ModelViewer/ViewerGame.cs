@@ -31,7 +31,6 @@ namespace DigitalRiseModel.Samples.ModelViewer
 		{
 			ModelInstance = new DrModelInstance()
 		};
-
 		private DrModelInstance ModelInstance => _modelNode.ModelInstance;
 
 		public ViewerGame(string path)
@@ -168,7 +167,8 @@ namespace DigitalRiseModel.Samples.ModelViewer
 			_mainPanel._sliderTime.ValueChangedByUser += _sliderTime_ValueChanged;
 			_mainPanel._sliderTime.ValueChanged += (s, a) =>
 			{
-				_mainPanel._labelTime.Text = _mainPanel._sliderTime.Value.ToString("0.00");
+				var time = _player.Time * _mainPanel._sliderTime.Value / 100.0f;
+				_mainPanel._labelTime.Text = time.TotalSeconds.ToString("0.00") + "s";
 			};
 
 			_mainPanel._buttonPlayStop.Click += _buttonPlayStop_Click;

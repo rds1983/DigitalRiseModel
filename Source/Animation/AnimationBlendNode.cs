@@ -57,36 +57,43 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
+		/// Adds an animation layer with a tree node and the specified weight.
+		/// </summary>
+		/// <param name="node">The animation tree node to add.</param>
+		/// <param name="weight">The blend weight for this layer (0.0 to 1.0). Weights are normalized.</param>
+		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
+		/// <exception cref="ArgumentException"><paramref name="weight"/> is negative or greater than 1.0.</exception>
+		public AnimationBlendLayer AddLayer(AnimationTreeNode node, float weight = 1.0f)
+		{
+			if (node == null)
+			{
+				throw new ArgumentNullException(nameof(node));
+			}
+
+			var result = new AnimationBlendLayer(node, weight);
+			Layers.Add(result);
+
+			return result;
+		}
+
+		/// <summary>
 		/// Adds an animation layer with a clip and the specified weight.
 		/// </summary>
 		/// <param name="clip">The animation clip to add.</param>
 		/// <param name="weight">The blend weight for this layer (0.0 to 1.0). Weights are normalized.</param>
 		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
+		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
 		/// <exception cref="ArgumentException"><paramref name="weight"/> is negative or greater than 1.0.</exception>
-		public void AddLayer(AnimationClip clip, float weight = 1.0f, bool isLooped = false)
+		public AnimationBlendLayer AddLayer(AnimationClip clip, float weight = 1.0f, bool isLooped = false)
 		{
 			if (clip == null)
 			{
 				throw new ArgumentNullException(nameof(clip));
 			}
 
-			AddLayer(new AnimationClipNode(clip, isLooped), weight);
-		}
-
-		/// <summary>
-		/// Adds an animation layer with a tree node and the specified weight.
-		/// </summary>
-		/// <param name="node">The animation tree node to add.</param>
-		/// <param name="weight">The blend weight for this layer (0.0 to 1.0). Weights are normalized.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="node"/> is null.</exception>
-		/// <exception cref="ArgumentException"><paramref name="weight"/> is negative or greater than 1.0.</exception>
-		public void AddLayer(AnimationTreeNode node, float weight = 1.0f)
-		{
-			if (node == null)
-				throw new ArgumentNullException(nameof(node));
-
-			Layers.Add(new AnimationBlendLayer(node, weight));
+			return AddLayer(new AnimationClipNode(clip, isLooped), weight);
 		}
 
 		/// <summary>
@@ -99,6 +106,7 @@ namespace DigitalRiseModel.Animation
 
 		/// <summary>
 		/// Recursively processes layers and blends their results with weighted mixing.
+		/// Each layer's animation is offset by its <see cref="AnimationBlendLayer.TimeOffset"/> value.
 		/// </summary>
 		internal override void Process(AnimationContext context, TimeSpan time, float weight)
 		{
@@ -108,12 +116,10 @@ namespace DigitalRiseModel.Animation
 			if (weight < 0 || weight > 1)
 				throw new ArgumentException("Weight must be between 0.0 and 1.0 inclusive.", nameof(weight));
 
-			TimeSpan effectiveTime = GetEffectiveTime(time);
-
 			// Process each child with its weight
 			foreach (var layer in Layers)
 			{
-				layer.Node.Process(context, effectiveTime, layer.Weight);
+				layer.Node.Process(context, time + layer.TimeOffset, layer.Weight);
 			}
 
 			context.SetWeights(weight);

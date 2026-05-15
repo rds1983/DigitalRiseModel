@@ -34,6 +34,11 @@ namespace DigitalRiseModel.Animation
 		}
 
 		/// <summary>
+		/// Gets or sets the time offset applied when processing this layer's animation.
+		/// </summary>
+		public TimeSpan TimeOffset { get; set; } = TimeSpan.Zero;
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="AnimationBlendLayer"/> class.
 		/// </summary>
 		/// <param name="node">The animation tree node for this layer.</param>
