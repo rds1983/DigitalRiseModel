@@ -25,12 +25,6 @@ DrModel characterModel = assetManager.LoadModel(graphicsDevice, "Models/mixamo.g
 DrModelInstance characterInstance = new DrModelInstance(characterModel);
 ```
 
-### DrModel, DrModelInstance, and AnimationController
-
-- **DrModel**: The shared model data containing the skeleton hierarchy, all bones, meshes, and animation clips
-- **DrModelInstance**: A runtime instance that tracks bone transformations for rendering. Multiple instances can share the same DrModel
-- **AnimationController**: Controls which animation is playing and manages time/state
-
 ### Basic Animation Playback
 
 ```csharp
@@ -134,50 +128,6 @@ var bottomFilter = characterModel.CreateInverseBoneFilter(topFilter);
 // bottomFilter: All bones except those in topFilter (lower body)
 ```
 
-### AnimationBlendNode Construction
-
-Example from CharacterService - blending run animation with draw animation:
-
-```csharp
-// Create a blend node
-var runDrawAnimation = new AnimationBlendNode();
-
-// Add lower body layer (run loop)
-runDrawAnimation.AddLayer(characterModel.Animations["Run"], isLooped: true)
-    .BoneFilter = bottomFilter;
-
-// Add upper body layer (draw animation)
-runDrawAnimation.AddLayer(characterModel.Animations["DrawGreatSword"])
-    .BoneFilter = topFilter;
-
-// Use it in the controller
-controller.CrossfadeToClip(runDrawAnimation, TimeSpan.FromSeconds(0.1));
-```
-
-### Complex Blending Example
-
-```csharp
-// Create a blend node for run + slash combination
-var runSlashAnimation = new AnimationBlendNode(isLooped: true);
-
-// Lower body: running in place
-var runLayer = runSlashAnimation.AddLayer(
-    characterModel.Animations["RunGreatSword"], 
-    weight: 1.0f
-);
-runLayer.BoneFilter = bottomFilter;
-
-// Upper body: slash attack
-var slashLayer = runSlashAnimation.AddLayer(
-    characterModel.Animations["SlashGreatSword"], 
-    weight: 1.0f
-);
-slashLayer.BoneFilter = topFilter;
-
-// Use in controller
-controller.CrossfadeToClip(runSlashAnimation, TimeSpan.FromSeconds(0.2));
-```
-
 ### Weighted Blending
 
 Control layer influence with weights:
@@ -205,6 +155,30 @@ layer1.TimeOffset = TimeSpan.Zero;
 
 var layer2 = blend.AddLayer(clip2);
 layer2.TimeOffset = TimeSpan.FromSeconds(0.5f); // Starts 0.5s into the animation
+```
+
+### Complex Blending Example
+
+```csharp
+// Create a blend node for run + slash combination
+var runSlashAnimation = new AnimationBlendNode(isLooped: true);
+
+// Lower body: running in place
+var runLayer = runSlashAnimation.AddLayer(
+    characterModel.Animations["RunGreatSword"], 
+    weight: 1.0f
+);
+runLayer.BoneFilter = bottomFilter;
+
+// Upper body: slash attack
+var slashLayer = runSlashAnimation.AddLayer(
+    characterModel.Animations["SlashGreatSword"], 
+    weight: 1.0f
+);
+slashLayer.BoneFilter = topFilter;
+
+// Use in controller
+controller.CrossfadeToClip(runSlashAnimation, TimeSpan.FromSeconds(0.2));
 ```
 
 ## Character Sample Reference
