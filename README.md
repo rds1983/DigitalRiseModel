@@ -45,6 +45,8 @@ The DrModel API is quite similar to the XNA Model API.
 ### Documentation
 For detailed information about the skeletal animation API, see [SkeletalAnimationAPI.md](SkeletalAnimationAPI.md).
 
+For detailed information about creating 3D primitives, see [Create3DPrimitivesAPI.md](Create3DPrimitivesAPI.md).
+
 ### Samples
 The [Samples](Samples) directory is the best way to learn how to work with the library.
 
@@ -53,10 +55,6 @@ Name|Description
 BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
 ModelViewer|Application to load and view 3D models in all supported formats. Skeletal animation is supported
 Character|Application that demonstrates how a third-person character controller with skeletal animation can be implemented
-
-### Documentation
-For detailed information about the skeletal animation API, see [SkeletalAnimationAPI.md](SkeletalAnimationAPI.md).
-For detailed information about creating 3D primitives, see [Create3DPrimitivesAPI.md](Create3DPrimitivesAPI.md).
 
 ### Building From Source For MonoGame
 Open DigitalRiseModel.MonoGame.sln in the IDE and run.
