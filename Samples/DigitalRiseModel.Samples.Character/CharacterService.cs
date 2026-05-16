@@ -112,7 +112,7 @@ namespace DigitalRiseModel
 
 			var transform = new SrtTransform
 			{
-				Translation = new Vector3(-0.6f, 0, -1.4f),
+				Translation = new Vector3(-12f, 0, -20f),
 				Scale = new Vector3(16),
 				Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(180.0f))
 			};
@@ -125,7 +125,7 @@ namespace DigitalRiseModel
 
 			var transform = new SrtTransform
 			{
-				Translation = new Vector3(3.5f, 0f, 0f),
+				Translation = new Vector3(50f, 0f, 0f),
 				Scale = new Vector3(16),
 				Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(270.0f))
 			};
