@@ -54,13 +54,10 @@ BasicEngine|Simple rendering engine that implements tree-like scenes and forward
 ModelViewer|Application to load and view 3D models in all supported formats. Skeletal animation is supported
 Character|Application that demonstrates how a third-person character controller with skeletal animation can be implemented
 
-<<<<<<< HEAD
-=======
 ### Documentation
 For detailed information about the skeletal animation API, see [SkeletalAnimationAPI.md](SkeletalAnimationAPI.md).
 For detailed information about creating 3D primitives, see [Create3DPrimitivesAPI.md](Create3DPrimitivesAPI.md).
 
->>>>>>> 3fa114b (Docs updates)
 ### Building From Source For MonoGame
 Open DigitalRiseModel.MonoGame.sln in the IDE and run.
 
