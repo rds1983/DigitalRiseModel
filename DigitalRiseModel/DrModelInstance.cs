@@ -11,6 +11,7 @@ namespace DigitalRiseModel
 	/// </summary>
 	public class DrModelInstance : ISkeleton
 	{
+		// Caches bone transform data for a specific skin to optimize rendering.
 		private class SkinInfo
 		{
 			public DrSkin Skin { get; }
@@ -86,9 +87,14 @@ namespace DigitalRiseModel
 				{
 					BoundingBox = null;
 				}
+
+				ModelChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
+		/// <summary>
+		/// Gets the number of bones in the skeleton.
+		/// </summary>
 		int ISkeleton.BonesCount
 		{
 			get
@@ -106,6 +112,11 @@ namespace DigitalRiseModel
 		/// Gets or sets an arbitrary object associated with this model instance.
 		/// </summary>
 		public object Tag { get; set; }
+
+		/// <summary>
+		/// Occurs when the model associated with this instance changes.
+		/// </summary>
+		public event EventHandler ModelChanged;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DrModelInstance"/> class with no model.
@@ -137,6 +148,7 @@ namespace DigitalRiseModel
 			_transformsDirty = true;
 		}
 
+		// Recalculates world transforms and skin transforms if local transforms have changed.
 		private void UpdateTransforms()
 		{
 			if (!_transformsDirty)
@@ -176,6 +188,7 @@ namespace DigitalRiseModel
 			_transformsDirty = false;
 		}
 
+		// Computes the axis-aligned bounding box encompassing all mesh parts in the current pose.
 		private BoundingBox CalculateBoundingBox()
 		{
 			UpdateTransforms();
