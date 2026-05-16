@@ -128,35 +128,6 @@ var bottomFilter = characterModel.CreateInverseBoneFilter(topFilter);
 // bottomFilter: All bones except those in topFilter (lower body)
 ```
 
-### Weighted Blending
-
-Control layer influence with weights:
-
-```csharp
-var blend = new AnimationBlendNode();
-
-// Blend between walk and run based on speed
-var walkLayer = blend.AddLayer(walkClip, weight: 0.7f);
-var runLayer = blend.AddLayer(runClip, weight: 0.3f);
-
-// Adjust weights dynamically
-walkLayer.Weight = 0.6f;
-runLayer.Weight = 0.4f;
-```
-
-### Time Offset
-
-Time offset allows different animations to start at different points:
-
-```csharp
-var blend = new AnimationBlendNode();
-var layer1 = blend.AddLayer(clip1);
-layer1.TimeOffset = TimeSpan.Zero;
-
-var layer2 = blend.AddLayer(clip2);
-layer2.TimeOffset = TimeSpan.FromSeconds(0.5f); // Starts 0.5s into the animation
-```
-
 ### Complex Blending Example
 
 ```csharp
