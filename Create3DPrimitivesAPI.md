@@ -10,8 +10,6 @@ The 3D primitives system provides a set of static methods to generate common geo
 - **DrMeshPart**: A single mesh part containing vertices and indices
 - **DrMesh**: A mesh that wraps one or more mesh parts
 
-All primitive creation methods take a `GraphicsDevice` parameter and return XNA-compatible vertex and index buffers suitable for rendering.
-
 ## Common Parameters
 
 Most primitive creation methods share these parameters:
