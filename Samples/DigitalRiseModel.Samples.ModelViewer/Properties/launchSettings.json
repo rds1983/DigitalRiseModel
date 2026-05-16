@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DigitalRiseModel.Samples.ModelViewer.MonoGame": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\Projects\\DigitalRiseModel\\Samples\\DigitalRiseModel.Samples.Character\\Assets\\Models\\mixamo.gltf"
+    }
+  }
+}

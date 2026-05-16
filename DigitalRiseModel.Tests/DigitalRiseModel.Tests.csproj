@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\DigitalRiseModel.MonoGame.csproj" />
+    <ProjectReference Include="..\DigitalRiseModel\DigitalRiseModel.MonoGame.csproj" />
   </ItemGroup>
 
   <ItemGroup>

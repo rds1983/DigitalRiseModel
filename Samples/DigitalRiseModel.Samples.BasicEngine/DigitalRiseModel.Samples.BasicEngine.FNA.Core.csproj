@@ -5,6 +5,6 @@
     <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\DigitalRiseModel.FNA.Core.csproj" />
+    <ProjectReference Include="..\..\DigitalRiseModel\DigitalRiseModel.FNA.Core.csproj" />
   </ItemGroup>
 </Project>
