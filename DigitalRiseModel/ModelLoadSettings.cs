@@ -38,7 +38,7 @@ namespace DigitalRiseModel
 		/// <summary>
 		/// Ignore loading all materials (both external and embedded). Equivalent to IgnoreExternalMaterials | IgnoreEmbeddedMaterials.
 		/// </summary>
-		IgnoreMaterials = (1 << 2) | (1 << 3),
+		IgnoreMaterials = IgnoreExternalMaterials | IgnoreEmbeddedMaterials,
 	}
 
 	/// <summary>
