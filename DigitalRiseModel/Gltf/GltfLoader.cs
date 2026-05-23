@@ -246,6 +246,11 @@ namespace DigitalRiseModel
 
 				if (image.BufferView.HasValue)
 				{
+					if (_loadSettings.Flags.HasFlag(ModelLoadFlags.IgnoreEmbeddedMaterials))
+					{
+						return null;
+					}
+
 					var bufferView = _gltf.BufferViews[image.BufferView.Value];
 					var buffer = GetBuffer(bufferView.Buffer);
 
@@ -265,6 +270,11 @@ namespace DigitalRiseModel
 				}
 				else
 				{
+					if (_loadSettings.Flags.HasFlag(ModelLoadFlags.IgnoreExternalMaterials))
+					{
+						return null;
+					}
+
 					var result = _assetManager.LoadTexture2D(_device, image.Uri);
 					result.Name = image.Uri;
 

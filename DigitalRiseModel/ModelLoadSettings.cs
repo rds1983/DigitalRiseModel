@@ -16,19 +16,29 @@ namespace DigitalRiseModel
 		None = 0,
 
 		/// <summary>
-		/// Ignore loading materials and only load geometry.
-		/// </summary>
-		IgnoreMaterials = 1 << 0,
-
-		/// <summary>
 		/// Create vertex and index buffers that support reading data through GetData.
 		/// </summary>
-		ReadableBuffers = 1 << 1,
+		ReadableBuffers = 1 << 0,
 
 		/// <summary>
 		/// Automatically add a zero-valued UV channel to meshes that don't have one.
 		/// </summary>
-		EnsureUVs = 1 << 2,
+		EnsureUVs = 1 << 1,
+
+		/// <summary>
+		/// Ignore loading external materials (materials from external files).
+		/// </summary>
+		IgnoreExternalMaterials = 1 << 2,
+
+		/// <summary>
+		/// Ignore loading embedded materials (materials embedded in the model file).
+		/// </summary>
+		IgnoreEmbeddedMaterials = 1 << 3,
+
+		/// <summary>
+		/// Ignore loading all materials (both external and embedded). Equivalent to IgnoreExternalMaterials | IgnoreEmbeddedMaterials.
+		/// </summary>
+		IgnoreMaterials = (1 << 2) | (1 << 3),
 	}
 
 	/// <summary>

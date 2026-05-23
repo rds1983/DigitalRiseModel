@@ -275,5 +275,48 @@ namespace DigitalRiseModel.Tests
 				}
 			}
 		}
+
+		[Fact]
+		public void TestIgnoreExternalMaterials()
+		{
+			var manager = Utility.CreateAssetManager();
+
+			// The model has external materials
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "CesiumMilkTruck.gltf", ModelLoadFlags.IgnoreEmbeddedMaterials);
+			var mat = model.Meshes[0].MeshParts[0].Material;
+			Assert.NotNull(mat.DiffuseTexture);
+			Assert.Equal("CesiumMilkTruck.jpg", mat.DiffuseTexture.Name);
+
+			// Ignore external materials only
+			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "CesiumMilkTruck.gltf", ModelLoadFlags.IgnoreExternalMaterials);
+			mat = model.Meshes[0].MeshParts[0].Material;
+			Assert.Null(mat.DiffuseTexture);
+
+			// Since different settings produce different cache keys
+			// manager should hold 2 models
+			var modelCount = (from pair in manager.Cache where pair.Value is DrModel select pair.Key).Count();
+			Assert.Equal(2, modelCount);
+		}
+
+		[Fact]
+		public void TestIgnoreEmbeddedMaterials()
+		{
+			var manager = Utility.CreateAssetManager();
+
+			// orange_flower.glb has embedded textures
+			var model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "orange_flower.glb", ModelLoadFlags.IgnoreExternalMaterials);
+			var mat = model.Meshes[0].MeshParts[0].Material;
+			Assert.NotNull(mat.DiffuseTexture);
+
+			// Load with IgnoreEmbeddedMaterials - embedded textures should be null
+			model = manager.LoadModel(TestsEnvironment.GraphicsDevice, "orange_flower.glb", ModelLoadFlags.IgnoreEmbeddedMaterials);
+			mat = model.Meshes[0].MeshParts[0].Material;
+			Assert.Null(mat.DiffuseTexture);
+
+			// Since different settings produce different cache keys
+			// manager should hold 2 models
+			var modelCount = (from pair in manager.Cache where pair.Value is DrModel select pair.Key).Count();
+			Assert.Equal(2, modelCount);
+		}
 	}
 }
