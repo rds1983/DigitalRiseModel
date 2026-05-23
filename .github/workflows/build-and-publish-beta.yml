@@ -3,9 +3,9 @@ name: Build & Publish Beta
 on:
     push:
         paths:
-            - 'Source/**'
+            - 'DigitalRiseModel/**'
             - 'Samples/**'
-            - 'Tests/**'
+            - 'DigitalRiseModel.Tests/**'
     workflow_dispatch:
 
 jobs:
