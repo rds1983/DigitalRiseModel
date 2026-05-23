@@ -5,14 +5,14 @@
 <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/614e473f-a153-4fa2-96db-f50fef3dbc41" />
 
 ### Overview
-DigitalRiseModel is a MonoGame/FNA library that provides an alternative API to XNA's 3D modelling.
+DigitalRiseModel is a MonoGame/FNA library that provides an alternative API to XNA's 3D model handling.
 DigitalRiseModel has the following features (that XNA lacks):
 * Construct 3D models in code
 * Load 3D models from GLTF/GLB at runtime
 * Skeletal animation
 * Create 3D primitives (boxes, spheres, toruses, etc.) at runtime
 
-It's important to note that DigitalRiseModel does not include rendering functionality. That is the responsibility of the developer. 
+It is important to note that DigitalRiseModel does not include rendering functionality. That is the responsibility of the developer. 
 
 However, the [Samples](Samples) section demonstrates how this can be done. It implements a simple rendering engine based on XNA stock effects such as BasicEffect and SkinnedEffect.
 
@@ -20,27 +20,86 @@ However, the [Samples](Samples) section demonstrates how this can be done. It im
 https://www.nuget.org/packages/DigitalRiseModel.MonoGame
 
 ### Adding Reference For FNA
-Clone following projects in one folder:
+Clone the following projects in one folder:
 Link|Description
 ----|-----------
 https://github.com/FNA-XNA/FNA|FNA
 https://github.com/rds1983/XNAssets|Assets management library
 this repo|
 
-Now add every required project .FNA.Core.csproj to your project
+Now add each required project's .FNA.Core.csproj to your project
 
 ### Usage
 Models are loaded through [XNAssets](https://github.com/rds1983/XNAssets).
 
-Firstly create the AssetManager:
+#### Creating an AssetManager
+
+First, create the AssetManager:
 ```c#
 AssetManager assetManager = AssetManager.CreateFileAssetManager(@"c:\MyGame\Models");
 ```
-Now load the model in the GLTF/GLB format:
+
+#### Loading Models
+
+Load models in GLTF/GLB format:
 ```c#
-DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf")
+DrModel model = assetManager.LoadModel(GraphicsDevice, "myModel.gltf");
 ```
-The DrModel API is quite similar to the XNA Model API.
+
+You can optionally pass `ModelLoadFlags` to control how the model is loaded:
+```c#
+DrModel model = assetManager.LoadModel(
+    GraphicsDevice, 
+    "myModel.gltf", 
+    ModelLoadFlags.IgnoreMaterials | ModelLoadFlags.ReadableBuffers
+);
+```
+
+#### Model Load Flags
+
+The following flags can be combined to control model loading behavior:
+
+| Flag | Description |
+|------|-------------|
+| `None` | No additional options (default). |
+| `IgnoreExternalMaterials` | Skip loading materials from external files (e.g., separate texture files referenced in the model). Material structure is still created, but external textures are not loaded. |
+| `IgnoreEmbeddedMaterials` | Skip loading materials embedded in the model file (e.g., textures packed inside the GLB file). Material structure is still created, but embedded textures are not loaded. |
+| `IgnoreMaterials` | Skip loading all materials (equivalent to `IgnoreExternalMaterials \| IgnoreEmbeddedMaterials`). Material structure is still created, but no textures are loaded. |
+| `ReadableBuffers` | Create vertex and index buffers with `BufferUsage.None` instead of `BufferUsage.WriteOnly`, allowing you to read buffer data using `GetData()`. This is useful for analysis or serialization but may have performance implications. |
+| `EnsureUVs` | Automatically add a zero-valued UV channel (TextureCoordinate) to meshes that do not have one. This is useful when you need all meshes to have UV coordinates. |
+
+#### Example Usage Patterns
+
+Load a model without materials (geometry only):
+```c#
+DrModel model = assetManager.LoadModel(
+    GraphicsDevice, 
+    "myModel.glb", 
+    ModelLoadFlags.IgnoreMaterials
+);
+```
+
+Load a model with readable buffers for data access:
+```c#
+DrModel model = assetManager.LoadModel(
+    GraphicsDevice, 
+    "myModel.gltf", 
+    ModelLoadFlags.ReadableBuffers
+);
+```
+
+Load a model but ignore external texture files (use only embedded textures):
+```c#
+DrModel model = assetManager.LoadModel(
+    GraphicsDevice, 
+    "myModel.gltf", 
+    ModelLoadFlags.IgnoreExternalMaterials
+);
+```
+
+#### DrModel API
+
+The `DrModel` API is similar to the XNA `Model` API, providing access to meshes, bones, animations, and material information.
 
 ### Documentation
 For detailed information about the skeletal animation API, see [SkeletalAnimationAPI.md](SkeletalAnimationAPI.md).
