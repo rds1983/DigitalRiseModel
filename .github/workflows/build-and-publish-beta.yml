@@ -3,6 +3,7 @@ name: Build & Publish Beta
 on:
     push:
         paths:
+            - '.github/workflows/**'
             - 'DigitalRiseModel/**'
             - 'Samples/**'
             - 'DigitalRiseModel.Tests/**'
