@@ -21,7 +21,7 @@ namespace DigitalRiseModel.Samples.Character
 		private readonly GraphicsDeviceManager _graphics;
 		private readonly FramesPerSecondCounter _fpsCounter = new FramesPerSecondCounter();
 		private InputService _inputService;
-		private CharacterService _controllerService;
+		private CharacterService _characterService;
 		private readonly SceneNode _rootNode = new SceneNode();
 		private readonly SceneNode _cameraMount = new SceneNode();
 		private readonly CameraNode _mainCamera = new CameraNode();
@@ -32,7 +32,7 @@ namespace DigitalRiseModel.Samples.Character
 		/// <summary>Singleton instance of the ViewerGame for global access.</summary>
 		public static ViewerGame Instance { get; private set; }
 
-		private ModelInstanceNode ModelNode => _controllerService.ModelNode;
+		private ModelInstanceNode ModelNode => _characterService.ModelNode;
 
 		/// <summary>Initializes game with graphics and input configuration.</summary>
 		public ViewerGame()
@@ -74,8 +74,8 @@ namespace DigitalRiseModel.Samples.Character
 			};
 			_rootNode.Children.Add(planeNode);
 
-			_controllerService = new CharacterService(GraphicsDevice, assetManager);
-			_rootNode.Children.Add(_controllerService.ModelNode);
+			_characterService = new CharacterService(GraphicsDevice, assetManager);
+			_rootNode.Children.Add(_characterService.ModelNode);
 
 			// Setup camera on character's head
 			_cameraMount.Translation = new Vector3(0, 1.3f, 0);
@@ -170,25 +170,25 @@ namespace DigitalRiseModel.Samples.Character
 			}
 
 			if (_inputService.IsKeyDown(Keys.Space))
-				_controllerService.Jump(velocity);
+				_characterService.Jump(velocity);
 
 			if (_inputService.IsKeyDown(Keys.LeftShift))
-				_controllerService.Slash();
+				_characterService.Slash();
 
 			if (_inputService.IsKeyDown(Keys.R))
 			{
-				if (_controllerService.WeaponDrawn)
-					_controllerService.SheathWeapon();
+				if (_characterService.WeaponDrawn)
+					_characterService.SheathWeapon();
 				else
-					_controllerService.DrawWeapon();
+					_characterService.DrawWeapon();
 			}
 
 			if (isRunning)
-				_controllerService.Run(velocity);
+				_characterService.Run(velocity);
 			else
-				_controllerService.Idle();
+				_characterService.Idle();
 
-			_controllerService.Update(gameTime.ElapsedGameTime);
+			_characterService.Update(gameTime.ElapsedGameTime);
 			_fpsCounter.Update(gameTime);
 		}
 
