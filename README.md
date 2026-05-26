@@ -130,7 +130,7 @@ this repo|
 
 Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
 
-## Sponsor 
+## Sponsor
 If this project is useful for you, you can support development:
 - Boosty: https://boosty.to/rds1983
 - Telegram Wallet: https://t.me/rds1983
