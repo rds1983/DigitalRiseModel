@@ -68,35 +68,6 @@ The following flags can be combined to control model loading behavior:
 | `ReadableBuffers` | Create vertex and index buffers with `BufferUsage.None` instead of `BufferUsage.WriteOnly`, allowing you to read buffer data using `GetData()`. This is useful for analysis or serialization but may have performance implications. |
 | `EnsureUVs` | Automatically add a zero-valued UV channel (TextureCoordinate) to meshes that do not have one. This is useful when you need all meshes to have UV coordinates. |
 
-#### Example Usage Patterns
-
-Load a model without materials (geometry only):
-```c#
-DrModel model = assetManager.LoadModel(
-    GraphicsDevice, 
-    "myModel.glb", 
-    ModelLoadFlags.IgnoreMaterials
-);
-```
-
-Load a model with readable buffers for data access:
-```c#
-DrModel model = assetManager.LoadModel(
-    GraphicsDevice, 
-    "myModel.gltf", 
-    ModelLoadFlags.ReadableBuffers
-);
-```
-
-Load a model but ignore external texture files (use only embedded textures):
-```c#
-DrModel model = assetManager.LoadModel(
-    GraphicsDevice, 
-    "myModel.gltf", 
-    ModelLoadFlags.IgnoreExternalMaterials
-);
-```
-
 #### DrModel API
 
 The `DrModel` API is similar to the XNA `Model` API, providing access to meshes, bones, animations, and material information.
