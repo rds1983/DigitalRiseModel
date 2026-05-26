@@ -130,6 +130,17 @@ this repo|
 
 Open DigitalRiseModel.FNA.Core.sln in the IDE and run.
 
+## Sponsor 
+If this project is useful for you, you can support development:
+- Boosty: https://boosty.to/rds1983
+- Telegram Wallet: https://t.me/rds1983
+
+### Crypto
+
+USDT (TON): `UQCQy6tFInPvqinE44zHY4R0rYS3niaBikkqiSyGmyoAMwyO`
+
+TON: `UQCQy6tFInPvqinE44zHY4R0rYS3niaBikkqiSyGmyoAMwyO`
+
 ### Credits
 * [MonoGame](http://www.monogame.net/)
 * [FNA](https://github.com/FNA-XNA/FNA)
