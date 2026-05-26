@@ -16,12 +16,12 @@ namespace DigitalRiseModel.Animation
 		/// <summary>
 		/// Animation loops when time exceeds duration.
 		/// </summary>
-		Looped = 1,
+		Looped = 1 << 0,
 
 		/// <summary>
 		/// Animation plays backward instead of forward.
 		/// </summary>
-		PlayBackwards = 2
+		PlayBackwards = 1 << 1
 	}
 
 	/// <summary>

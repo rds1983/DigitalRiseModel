@@ -127,13 +127,6 @@ namespace DigitalRiseModel.Animation
 			StartClip(new AnimationClipNode(clip, flags));
 		}
 
-		/// <summary>
-		/// Starts playing a single animation clip.
-		/// </summary>
-		/// <param name="clip">The animation clip to play.</param>
-		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		public void StartClip(AnimationClip clip, bool isLooped) => StartClip(clip, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Starts playing an animation clip by name.
@@ -154,14 +147,6 @@ namespace DigitalRiseModel.Animation
 			StartClip(clip, flags);
 		}
 
-		/// <summary>
-		/// Starts playing an animation clip by name.
-		/// </summary>
-		/// <param name="name">The name of the animation clip to play.</param>
-		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
-		/// <exception cref="ArgumentException">No clip found with the specified name.</exception>
-		public void StartClip(string name, bool isLooped) => StartClip(name, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Stops the currently playing animation clip.
@@ -198,8 +183,7 @@ namespace DigitalRiseModel.Animation
 			}
 
 			// Create transition blend
-			var isLooped = (node.Flags & AnimationFlags.Looped) != 0;
-			_transitionBlend = new AnimationBlendNode(isLooped);
+			_transitionBlend = new AnimationBlendNode(node.Flags & AnimationFlags.Looped);
 			_transitionOldClip = _currentClipNode;
 			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f).TimeOffset = Time;
 			_transitionBlend.AddLayer(node, weight: 0.0f);
@@ -229,16 +213,6 @@ namespace DigitalRiseModel.Animation
 			CrossfadeToClip(newClipNode, fadeDuration);
 		}
 
-		/// <summary>
-		/// Smoothly transitions from the current clip to a new clip using crossfading.
-		/// </summary>
-		/// <param name="clip">The animation clip to transition to.</param>
-		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
-		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		/// <exception cref="ArgumentException"><paramref name="fadeDuration"/> is negative.</exception>
-		public void CrossfadeToClip(AnimationClip clip, TimeSpan fadeDuration, bool isLooped)
-			=> CrossfadeToClip(clip, fadeDuration, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Smoothly transitions to an animation clip by name using crossfading.
@@ -260,16 +234,6 @@ namespace DigitalRiseModel.Animation
 			CrossfadeToClip(clip, fadeDuration, flags);
 		}
 
-		/// <summary>
-		/// Smoothly transitions to an animation clip by name using crossfading.
-		/// </summary>
-		/// <param name="clipName">The name of the animation clip to transition to.</param>
-		/// <param name="fadeDuration">The duration of the crossfade transition.</param>
-		/// <param name="isLooped">Whether the new clip should loop when it reaches the end.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="clipName"/> is null.</exception>
-		/// <exception cref="ArgumentException">No clip found with the specified name, or fade duration is negative.</exception>
-		public void CrossfadeToClip(string clipName, TimeSpan fadeDuration, bool isLooped)
-			=> CrossfadeToClip(clipName, fadeDuration, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Plays the animation.

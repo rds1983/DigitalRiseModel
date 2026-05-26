@@ -31,15 +31,6 @@ namespace DigitalRiseModel.Animation
 			Flags = flags;
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AnimationClipNode"/> class.
-		/// </summary>
-		/// <param name="clip">The animation clip to play.</param>
-		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		public AnimationClipNode(AnimationClip clip, bool isLooped) : this(clip, isLooped ? AnimationFlags.Looped : AnimationFlags.None)
-		{
-		}
 
 		/// Samples the clip at the given time and contributes bone transforms to the context.
 		internal override void Process(AnimationContext context, TimeSpan time, float weight)

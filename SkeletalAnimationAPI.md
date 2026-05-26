@@ -32,7 +32,7 @@ DrModelInstance characterInstance = new DrModelInstance(characterModel);
 AnimationController controller = new AnimationController(characterInstance);
 
 // Start playing an animation by name
-controller.StartClip("Idle", isLooped: true);
+controller.StartClip("Idle");
 
 // Update animation each frame
 controller.Update(gameTime.ElapsedGameTime);
@@ -43,19 +43,20 @@ controller.Update(gameTime.ElapsedGameTime);
 AnimationFlags control playback behavior:
 
 ```csharp
+[Flags]
 public enum AnimationFlags
 {
-    None = 0,             // Play once forward (default)
-    Looped = 1,           // Loop when time exceeds duration
-    PlayBackwards = 2     // Play in reverse
+    None = 0,                    // Play once forward (default)
+    Looped = 1 << 0,             // Loop when time exceeds duration
+    PlayBackwards = 1 << 1       // Play in reverse
 }
 ```
 
 Usage:
 
 ```csharp
-// Play once, forward
-controller.StartClip("Attack", AnimationFlags.None);
+// Play once, forward (default)
+controller.StartClip("Attack");
 
 // Play with looping
 controller.StartClip("Run", AnimationFlags.Looped);
@@ -80,16 +81,16 @@ Crossfading provides smooth transitions between animations by blending the outgo
 
 ```csharp
 // Start the initial animation
-controller.StartClip("Idle", isLooped: true);
+controller.StartClip("Idle", AnimationFlags.Looped);
 
 // Later, smoothly transition to running over 0.1 seconds
-controller.CrossfadeToClip("Run", TimeSpan.FromSeconds(0.1), isLooped: true);
+controller.CrossfadeToClip("Run", TimeSpan.FromSeconds(0.1), AnimationFlags.Looped);
 
-// Transition to an attack animation
-controller.CrossfadeToClip("Slash", TimeSpan.FromSeconds(0.2), isLooped: false);
+// Transition to an attack animation (plays once)
+controller.CrossfadeToClip("Slash", TimeSpan.FromSeconds(0.2));
 
-// Crossfade using flags
-controller.CrossfadeToClip("Draw", TimeSpan.FromSeconds(0.15), AnimationFlags.None);
+// Crossfade using flags with multiple combined flags
+controller.CrossfadeToClip("Draw", TimeSpan.FromSeconds(0.15), AnimationFlags.Looped | AnimationFlags.PlayBackwards);
 ```
 
 How it works internally:
@@ -132,12 +133,13 @@ var bottomFilter = characterModel.CreateInverseBoneFilter(topFilter);
 
 ```csharp
 // Create a blend node for run + slash combination
-var runSlashAnimation = new AnimationBlendNode(isLooped: true);
+var runSlashAnimation = new AnimationBlendNode();
 
 // Lower body: running in place
 var runLayer = runSlashAnimation.AddLayer(
     characterModel.Animations["RunGreatSword"], 
-    weight: 1.0f
+    weight: 1.0f,
+    AnimationFlags.Looped
 );
 runLayer.BoneFilter = bottomFilter;
 
@@ -163,12 +165,12 @@ The `CharacterService` class in the Character sample is a comprehensive example 
 ```csharp
 // Starting animations
 controller.StartClip(string name, AnimationFlags flags);
-controller.StartClip(AnimationClip clip, bool isLooped);
+controller.StartClip(AnimationClip clip, AnimationFlags flags);
 controller.StartClip(AnimationTreeNode node);
 
 // Smooth transitions
 controller.CrossfadeToClip(string name, TimeSpan duration, AnimationFlags flags);
-controller.CrossfadeToClip(AnimationClip clip, TimeSpan duration, bool isLooped);
+controller.CrossfadeToClip(AnimationClip clip, TimeSpan duration, AnimationFlags flags);
 controller.CrossfadeToClip(AnimationTreeNode node, TimeSpan duration);
 
 // Playback control

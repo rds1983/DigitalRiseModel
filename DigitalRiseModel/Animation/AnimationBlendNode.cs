@@ -38,13 +38,6 @@ namespace DigitalRiseModel.Animation
 			Flags = flags;
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AnimationBlendNode"/> class.
-		/// </summary>
-		/// <param name="isLooped">Whether the animation loops when time exceeds duration.</param>
-		public AnimationBlendNode(bool isLooped) : this(isLooped ? AnimationFlags.Looped : AnimationFlags.None)
-		{
-		}
 
 		/// <summary>
 		/// Adds an animation layer with a tree node and the specified weight.
@@ -86,15 +79,6 @@ namespace DigitalRiseModel.Animation
 		public AnimationBlendLayer AddLayer(AnimationClip clip, AnimationFlags flags)
 			=> AddLayer(clip, 1.0f, flags);
 
-		/// <summary>
-		/// Adds an animation layer with a clip and loop flag.
-		/// </summary>
-		/// <param name="clip">The animation clip to add.</param>
-		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
-		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		public AnimationBlendLayer AddLayer(AnimationClip clip, bool isLooped)
-			=> AddLayer(clip, 1.0f, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Adds an animation layer with a clip and the specified weight.
@@ -115,17 +99,6 @@ namespace DigitalRiseModel.Animation
 			return AddLayer(new AnimationClipNode(clip, flags), weight);
 		}
 
-		/// <summary>
-		/// Adds an animation layer with a clip and the specified weight.
-		/// </summary>
-		/// <param name="clip">The animation clip to add.</param>
-		/// <param name="weight">The blend weight for this layer (0.0 to 1.0). Weights are normalized.</param>
-		/// <param name="isLooped">Whether the clip should loop when it reaches the end.</param>
-		/// <returns>The newly created <see cref="AnimationBlendLayer"/> that can be further configured.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="clip"/> is null.</exception>
-		/// <exception cref="ArgumentException"><paramref name="weight"/> is negative or greater than 1.0.</exception>
-		public AnimationBlendLayer AddLayer(AnimationClip clip, float weight, bool isLooped)
-			=> AddLayer(clip, weight, isLooped ? AnimationFlags.Looped : AnimationFlags.None);
 
 		/// <summary>
 		/// Clears all animation layers.
