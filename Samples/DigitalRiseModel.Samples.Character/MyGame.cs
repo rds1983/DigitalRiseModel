@@ -216,6 +216,7 @@ public class MyGame : Game
 		_oldMouse = mouse;
 	}
 
+	// Transition to idle animation based on current weapon state
 	private void AnimateIdle()
 	{
 		if (_animationState == AnimationState.Idle)
@@ -226,22 +227,27 @@ public class MyGame : Game
 		switch (_weaponState)
 		{
 			case WeaponState.Sheathed:
+				// Play standard idle
 				_player.CrossfadeToClip("Idle", AnimationCrossfadeDelay, AnimationFlags.Looped);
 				break;
 
 			case WeaponState.Drawing:
+				// Continue drawing from where we left off
 				_player.CrossfadeToClip("DrawGreatSword", AnimationCrossfadeDelay, AnimationFlags.KeepTime);
 				break;
 
 			case WeaponState.Drawn:
+				// Idle with sword in hand
 				_player.CrossfadeToClip("IdleGreatSword", AnimationCrossfadeDelay, AnimationFlags.Looped);
 				break;
 
 			case WeaponState.Sheathing:
+				// Continue sheathing from where we left off
 				_player.CrossfadeToClip("DrawGreatSword", AnimationCrossfadeDelay, AnimationFlags.PlayBackwards | AnimationFlags.KeepTime);
 				break;
 
 			case WeaponState.Slashing:
+				// Continue slash from where we left off
 				_player.CrossfadeToClip("SlashGreatSword", AnimationCrossfadeDelay, AnimationFlags.KeepTime);
 				break;
 		}
@@ -249,6 +255,7 @@ public class MyGame : Game
 		_animationState = AnimationState.Idle;
 	}
 
+	// Transition to running animation based on current weapon state
 	private void AnimateRunning()
 	{
 		if (_animationState == AnimationState.Running)
@@ -259,24 +266,29 @@ public class MyGame : Game
 		switch (_weaponState)
 		{
 			case WeaponState.Sheathed:
+				// Run with empty hands
 				_player.CrossfadeToClip("Run", AnimationCrossfadeDelay, AnimationFlags.Looped);
 				break;
 
 			case WeaponState.Drawing:
+				// Blend run (lower) with draw (upper), synced to current time
 				_runDrawAnimation.Layers[1].TimeOffset = _player.Time;
 				_player.CrossfadeToClip(_runDrawAnimation, AnimationCrossfadeDelay);
 				break;
 
 			case WeaponState.Drawn:
+				// Run with sword in hand
 				_player.CrossfadeToClip("RunGreatSword", AnimationCrossfadeDelay, AnimationFlags.Looped);
 				break;
 
 			case WeaponState.Sheathing:
+				// Blend run with greatsword (lower) and reversed draw (upper), synced
 				_runSheathAnimation.Layers[1].TimeOffset = _player.Time;
 				_player.CrossfadeToClip(_runSheathAnimation, AnimationCrossfadeDelay);
 				break;
 
 			case WeaponState.Slashing:
+				// Blend run with greatsword (lower) and slash (upper), synced
 				_runSlashAnimation.Layers[1].TimeOffset = _player.Time;
 				_player.CrossfadeToClip(_runSlashAnimation, AnimationCrossfadeDelay);
 				break;
@@ -285,6 +297,7 @@ public class MyGame : Game
 		_animationState = AnimationState.Running;
 	}
 
+	// Transition weapon state with appropriate animation for idle or running
 	private void AnimateWeapon(WeaponState newWeaponState)
 	{
 		if (_weaponState == newWeaponState)
@@ -294,6 +307,7 @@ public class MyGame : Game
 
 		if (_animationState == AnimationState.Running)
 		{
+			// Transitions while maintaining running lower body
 			switch (newWeaponState)
 			{
 				case WeaponState.Sheathed:
@@ -301,6 +315,7 @@ public class MyGame : Game
 					break;
 
 				case WeaponState.Drawing:
+					// Start draw from beginning, keep running below
 					_runDrawAnimation.Layers[1].TimeOffset = TimeSpan.Zero;
 					_player.CrossfadeToClip(_runDrawAnimation, AnimationCrossfadeDelay);
 					break;
@@ -310,11 +325,13 @@ public class MyGame : Game
 					break;
 
 				case WeaponState.Sheathing:
+					// Start sheath from beginning, keep running below
 					_runSheathAnimation.Layers[1].TimeOffset = TimeSpan.Zero;
 					_player.CrossfadeToClip(_runSheathAnimation, AnimationCrossfadeDelay);
 					break;
 
 				case WeaponState.Slashing:
+					// Start slash from beginning, keep running below
 					_runSlashAnimation.Layers[1].TimeOffset = TimeSpan.Zero;
 					_player.CrossfadeToClip(_runSlashAnimation, AnimationCrossfadeDelay);
 					break;
@@ -322,6 +339,7 @@ public class MyGame : Game
 		}
 		else
 		{
+			// Transitions while standing idle
 			switch (newWeaponState)
 			{
 				case WeaponState.Sheathed:
