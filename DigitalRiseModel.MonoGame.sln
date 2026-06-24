@@ -5,13 +5,9 @@ VisualStudioVersion = 18.5.11723.231
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.BasicEngine.MonoGame", "Samples\DigitalRiseModel.Samples.BasicEngine\DigitalRiseModel.Samples.BasicEngine.MonoGame.csproj", "{9876750C-9A62-09EA-3954-309DF950F1AD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.MonoGame", "DigitalRiseModel\DigitalRiseModel.MonoGame.csproj", "{F5D82392-65B8-E10C-0563-DF130FB4BF42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Tests", "DigitalRiseModel.Tests\DigitalRiseModel.Tests.csproj", "{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.ModelViewer.MonoGame", "Samples\DigitalRiseModel.Samples.ModelViewer\DigitalRiseModel.Samples.ModelViewer.MonoGame.csproj", "{815C4AA5-A784-5EC0-52DD-605A711D1F07}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.Character.MonoGame", "Samples\DigitalRiseModel.Samples.Character\DigitalRiseModel.Samples.Character.MonoGame.csproj", "{FCF12402-FAC7-423B-07A4-808D3BDC1D97}"
 EndProject
@@ -21,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9876750C-9A62-09EA-3954-309DF950F1AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9876750C-9A62-09EA-3954-309DF950F1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9876750C-9A62-09EA-3954-309DF950F1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9876750C-9A62-09EA-3954-309DF950F1AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5D82392-65B8-E10C-0563-DF130FB4BF42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5D82392-65B8-E10C-0563-DF130FB4BF42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5D82392-65B8-E10C-0563-DF130FB4BF42}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,10 +25,6 @@ Global
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{830F8F8D-96D5-449B-5DBC-4683FCD1DFD2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{815C4AA5-A784-5EC0-52DD-605A711D1F07}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF12402-FAC7-423B-07A4-808D3BDC1D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,8 +34,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9876750C-9A62-09EA-3954-309DF950F1AD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{815C4AA5-A784-5EC0-52DD-605A711D1F07} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FCF12402-FAC7-423B-07A4-808D3BDC1D97} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
