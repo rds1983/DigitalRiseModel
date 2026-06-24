@@ -1,5 +1,6 @@
 using DigitalRiseModel.Utility;
 using System;
+using System.Diagnostics;
 
 namespace DigitalRiseModel.Animation
 {
@@ -15,7 +16,7 @@ namespace DigitalRiseModel.Animation
 		private AnimationBlendNode _transitionBlend;
 		private AnimationTreeNode _transitionOldClip;
 		private TimeSpan _currentTime;
-		private TimeSpan _transitionDuration;
+		private TimeSpan _transitionDuration, _transitionTimeOffset;
 		private float _speed = 1.0f;
 		private bool _isPlaying;
 
@@ -113,7 +114,11 @@ namespace DigitalRiseModel.Animation
 			_rootNode = node;
 			_currentClipNode = node;
 			_isPlaying = true;
-			Time = TimeSpan.Zero;
+
+			if (!node.Flags.HasFlag(AnimationFlags.KeepTime))
+			{
+				Time = TimeSpan.Zero;
+			}
 		}
 
 		/// <summary>
@@ -186,16 +191,26 @@ namespace DigitalRiseModel.Animation
 			}
 
 			// Create transition blend
-			_transitionBlend = new AnimationBlendNode(node.Flags & AnimationFlags.Looped);
+			_transitionBlend = new AnimationBlendNode(node.Flags & ~AnimationFlags.PlayBackwards);
 			_transitionOldClip = _currentClipNode;
-			_transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f).TimeOffset = Time;
+
+			var oldLayer = _transitionBlend.AddLayer(_transitionOldClip, weight: 1.0f);
 			_transitionBlend.AddLayer(node, weight: 0.0f);
 
 			_rootNode = _transitionBlend;
 			_currentClipNode = node;
 			_transitionDuration = fadeDuration;
 
-			Time = TimeSpan.Zero;
+			if (!node.Flags.HasFlag(AnimationFlags.KeepTime))
+			{
+				oldLayer.TimeOffset = Time;
+				_transitionTimeOffset = TimeSpan.Zero;
+				Time = TimeSpan.Zero;
+			} else
+			{
+				_transitionTimeOffset = -Time;
+			}
+
 			_isPlaying = true;
 		}
 
@@ -281,7 +296,8 @@ namespace DigitalRiseModel.Animation
 			// Update crossfade: fade out old clip, fade in new clip
 			if (_transitionBlend != null)
 			{
-				float progress = Math.Min(1.0f, (float)(_currentTime.TotalSeconds / _transitionDuration.TotalSeconds));
+				var time = _currentTime + _transitionTimeOffset;
+				float progress = Math.Min(1.0f, (float)(time.TotalSeconds / _transitionDuration.TotalSeconds));
 
 				// Adjust layer weights: outgoing clip fades out, incoming clip fades in
 				_transitionBlend.Layers[0].Weight = 1.0f - progress;

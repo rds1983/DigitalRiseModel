@@ -21,7 +21,12 @@ namespace DigitalRiseModel.Animation
 		/// <summary>
 		/// Animation plays backward instead of forward.
 		/// </summary>
-		PlayBackwards = 1 << 1
+		PlayBackwards = 1 << 1,
+
+		/// <summary>
+		/// Preserves the current playback time when starting a new clip.
+		/// </summary>
+		KeepTime = 1 << 2,
 	}
 
 	/// <summary>
