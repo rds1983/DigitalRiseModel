@@ -33,9 +33,12 @@ namespace DigitalRiseModel.Animation
 			get => _currentTime;
 			set
 			{
-				// Clamp value according to the root node flags(except PlayBackwards)
-				var flags = RootNode.Flags & ~AnimationFlags.PlayBackwards;
-				value = value.GetEffectiveTime(RootNode.Duration, flags);
+				if (_rootNode != null)
+				{
+					// Clamp value according to the root node flags(except PlayBackwards)
+					var flags = RootNode.Flags & ~AnimationFlags.PlayBackwards;
+					value = value.GetEffectiveTime(RootNode.Duration, flags);
+				}
 
 				if (_currentTime.EpsilonEquals(value))
 				{
@@ -312,6 +315,11 @@ namespace DigitalRiseModel.Animation
 		/// <param name="elapsedTime">Elapsed time since last update.</param>
 		public void Update(TimeSpan elapsedTime)
 		{
+			if (_rootNode == null)
+			{
+				throw new Exception("Animation isn't set");
+			}
+
 			// Advance time with speed and direction
 			float deltaSeconds = (float)elapsedTime.TotalSeconds * _speed;
 			Time += TimeSpan.FromSeconds(deltaSeconds);
