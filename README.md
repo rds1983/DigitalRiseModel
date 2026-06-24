@@ -14,7 +14,7 @@ DigitalRiseModel has the following features (that XNA lacks):
 
 It is important to note that DigitalRiseModel does not include rendering functionality. That is the responsibility of the developer. 
 
-However, the [Samples](Samples) section demonstrates how this can be done. It implements a simple rendering engine based on XNA stock effects such as BasicEffect and SkinnedEffect.
+However, the [Character sample](Samples/DigitalRiseModel.Samples.Character) demonstrates how this can be done, implementing a third-person character controller with skeletal animation.
 
 ### Adding Reference For MonoGame
 https://www.nuget.org/packages/DigitalRiseModel.MonoGame
@@ -78,12 +78,10 @@ For detailed information about the skeletal animation API, see [SkeletalAnimatio
 For detailed information about creating 3D primitives, see [Create3DPrimitivesAPI.md](Create3DPrimitivesAPI.md).
 
 ### Samples
-The [Samples](Samples) directory is the best way to learn how to work with the library.
+The [Character sample](Samples/DigitalRiseModel.Samples.Character) is the best way to learn how to work with the library.
 
 Name|Description
 ----|-----------
-BasicEngine|Simple rendering engine that implements tree-like scenes and forward rendering, based on XNA stock effects such as BasicEffect and SkinnedEffect
-ModelViewer|Application to load and view 3D models in all supported formats. Skeletal animation is supported
 Character|Application that demonstrates how a third-person character controller with skeletal animation can be implemented
 
 ### Building From Source For MonoGame
