@@ -48,7 +48,8 @@ public enum AnimationFlags
 {
     None = 0,                    // Play once forward (default)
     Looped = 1 << 0,             // Loop when time exceeds duration
-    PlayBackwards = 1 << 1       // Play in reverse
+    PlayBackwards = 1 << 1,      // Play in reverse
+    KeepTime = 1 << 2            // Preserve current playback time when starting a new clip
 }
 ```
 
