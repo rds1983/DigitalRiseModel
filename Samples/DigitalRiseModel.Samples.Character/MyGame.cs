@@ -512,7 +512,11 @@ public class MyGame : Game
 		foreach (var pass in effect.CurrentTechnique.Passes)
 		{
 			pass.Apply();
-			GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, part.PrimitiveCount);
+#if MONOGAME
+			GraphicsDevice.DrawIndexedPrimitives(part.PrimitiveType, part.VertexOffset, part.StartIndex, part.PrimitiveCount);
+#else
+			GraphicsDevice.DrawIndexedPrimitives(part.PrimitiveType, part.VertexOffset, 0, part.NumVertices, part.StartIndex, part.PrimitiveCount);
+#endif
 		}
 	}
 
