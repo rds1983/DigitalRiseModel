@@ -1,6 +1,7 @@
 using AssetManagementBase;
 using DigitalRiseModel.Animation;
 using DigitalRiseModel.Primitives;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -51,6 +52,7 @@ public class MyGame : Game
 	private static readonly Matrix SwordSheathedTransform = ToMatrix(new Vector3(-12, 0, -20), new Vector3(16), 0, 0, 180);
 	// Sword local transform: position offset (50, 0, 0), scale 16x, rotated 270 degrees on Z axis (drawn in hand)
 	private static readonly Matrix SwordDrawnTransform = ToMatrix(new Vector3(50f, 0f, 0f), new Vector3(16), 0, 0, 270);
+	private const int TextLineHeight = 24;
 
 	private readonly GraphicsDeviceManager _graphics;
 
@@ -102,16 +104,21 @@ public class MyGame : Game
 	// Camera mount pitch rotation in degrees
 	private float _cameraMountPitch;
 
-	// Previous mouse state for delta calculation
-	private MouseState? _oldMouse = null;
-
 	// Jump state and physics
 	private DateTime? _jumpStarted;
 	private Vector3 _jumpMovement;
 
+	private SpriteBatch _spriteBatch;
+	private SpriteFontBase _font;
+	private bool _wasEscapeDown = false;
+
+	public static MyGame Instance { get; private set; }
+
 	/// <summary>Initializes the game with graphics and input configuration.</summary>
 	public MyGame()
 	{
+		Instance = this;
+
 		// Set up graphics device with preferred window resolution
 		_graphics = new GraphicsDeviceManager(this)
 		{
@@ -186,34 +193,39 @@ public class MyGame : Game
 
 		// Start hero at world center
 		_heroPosition = new Vector3(0, DefaultY, 0);
+
+		_spriteBatch = new SpriteBatch(GraphicsDevice);
+
+		var fontSystem = assetManager.LoadFontSystem("Fonts/DroidSans.ttf");
+		_font = fontSystem.GetFont(24);
+
+		MouseService.Locked = true;
 	}
 
 	// Handle mouse input for camera rotation and slash attack
 	private void ProcessMouse()
 	{
-		var mouse = Mouse.GetState();
+		MouseService.Update();
 
-		if (_oldMouse != null)
-		{
-			// Rotate hero by mouse X delta
-			var horizontalRotation = -(int)((mouse.X - _oldMouse.Value.X) * MouseSensitivity);
-			_heroYaw += horizontalRotation;
+		var delta = MouseService.Delta;
 
-			// Tilt camera by mouse Y delta
-			var verticalRotation = -(int)((mouse.Y - _oldMouse.Value.Y) * MouseSensitivity);
-			_cameraMountPitch += verticalRotation;
+		// Rotate hero by mouse X delta
+		var horizontalRotation = -(int)(delta.X * MouseSensitivity);
+		_heroYaw += horizontalRotation;
 
-			// Clamp pitch to valid range (5 to 90 degrees)
-			_cameraMountPitch = MathHelper.Clamp(_cameraMountPitch, 5, 90);
-		}
+		// Tilt camera by mouse Y delta
+		var verticalRotation = -(int)(delta.Y * MouseSensitivity);
+		_cameraMountPitch += verticalRotation;
+
+		// Clamp pitch to valid range (5 to 90 degrees)
+		_cameraMountPitch = MathHelper.Clamp(_cameraMountPitch, 5, 90);
 
 		// Left click to slash when sword is drawn
+		var mouse = Mouse.GetState();
 		if (mouse.LeftButton == ButtonState.Pressed && _weaponState == WeaponState.Drawn)
 		{
 			AnimateWeapon(WeaponState.Slashing);
 		}
-
-		_oldMouse = mouse;
 	}
 
 	// Transition to idle animation based on current weapon state
@@ -370,57 +382,71 @@ public class MyGame : Game
 	// Handle keyboard input for movement, weapon draw/sheath, and jump
 	private void ProcessKeyboard()
 	{
-		// Calculate movement velocity based on hero orientation
-		var velocity = Vector3.Zero;
-		var heroTransform = ToMatrix(_heroPosition, Vector3.One, _heroYaw, 0, 0);
 		var keyboard = Keyboard.GetState();
-
-		// Track if hero is moving (for animation transitions)
-		var isRunning = true;
-		if (keyboard.IsKeyDown(Keys.W))
-			velocity = heroTransform.Forward * -MovementSpeed;
-		else if (keyboard.IsKeyDown(Keys.S))
-			velocity = heroTransform.Forward * MovementSpeed;
-		else if (keyboard.IsKeyDown(Keys.A))
-			velocity = heroTransform.Right * MovementSpeed;
-		else if (keyboard.IsKeyDown(Keys.D))
-			velocity = heroTransform.Right * -MovementSpeed;
-		else
-			isRunning = false;
-
-		// Apply velocity to hero position
-		_heroPosition += velocity;
-
-		if (isRunning)
+		if (_jumpStarted == null)
 		{
-			AnimateRunning();
-		}
-		else
-		{
-			AnimateIdle();
-		}
+			// Calculate movement velocity based on hero orientation
+			var velocity = Vector3.Zero;
+			var heroTransform = ToMatrix(_heroPosition, Vector3.One, _heroYaw, 0, 0);
 
-		// Press R to toggle weapon draw/sheath
-		if (keyboard.IsKeyDown(Keys.R))
-		{
-			if (_weaponState == WeaponState.Sheathed)
+			// Track if hero is moving (for animation transitions)
+			var isRunning = true;
+			if (keyboard.IsKeyDown(Keys.W))
+				velocity = heroTransform.Forward * -MovementSpeed;
+			else if (keyboard.IsKeyDown(Keys.S))
+				velocity = heroTransform.Forward * MovementSpeed;
+			else if (keyboard.IsKeyDown(Keys.A))
+				velocity = heroTransform.Right * MovementSpeed;
+			else if (keyboard.IsKeyDown(Keys.D))
+				velocity = heroTransform.Right * -MovementSpeed;
+			else
+				isRunning = false;
+
+			// Apply velocity to hero position
+			_heroPosition += velocity;
+
+			if (isRunning)
 			{
-				AnimateWeapon(WeaponState.Drawing);
+				AnimateRunning();
 			}
-			else if (_weaponState == WeaponState.Drawn)
+			else
 			{
-				AnimateWeapon(WeaponState.Sheathing);
+				AnimateIdle();
 			}
+
+			// Press R to toggle weapon draw/sheath
+			if (keyboard.IsKeyDown(Keys.R))
+			{
+				if (_weaponState == WeaponState.Sheathed)
+				{
+					AnimateWeapon(WeaponState.Drawing);
+				}
+				else if (_weaponState == WeaponState.Drawn)
+				{
+					AnimateWeapon(WeaponState.Sheathing);
+				}
+			}
+
+			// Initiate jump with momentum preservation
+			if ((_weaponState == WeaponState.Sheathed || _weaponState == WeaponState.Drawn) && keyboard.IsKeyDown(Keys.Space))
+			{
+				_jumpStarted = DateTime.Now;
+				_animationState = AnimationState.Jumping;
+				_jumpMovement = velocity;
+				_player.CrossfadeToClip("JumpStart", AnimationCrossfadeDelay);
+			}
+		} else
+		{
+			UpdateJump();
 		}
 
-		// Initiate jump with momentum preservation
-		if ((_weaponState == WeaponState.Sheathed || _weaponState == WeaponState.Drawn) && keyboard.IsKeyDown(Keys.Space))
+		var isEscapeDown = keyboard.IsKeyDown(Keys.Escape);
+		if (isEscapeDown && !_wasEscapeDown)
 		{
-			_jumpStarted = DateTime.Now;
-			_animationState = AnimationState.Jumping;
-			_jumpMovement = velocity;
-			_player.CrossfadeToClip("JumpStart", AnimationCrossfadeDelay);
+			MouseService.Locked = !MouseService.Locked;
 		}
+
+		_wasEscapeDown = isEscapeDown;
 	}
 
 	// Update hero position and animation during jump using projectile motion
@@ -487,17 +513,13 @@ public class MyGame : Game
 	{
 		base.Update(gameTime);
 
+		if (!IsActive)
+		{
+			return;
+		}
+
 		ProcessMouse();
-
-		if (_jumpStarted == null)
-		{
-			ProcessKeyboard();
-		}
-		else
-		{
-			UpdateJump();
-		}
-
+		ProcessKeyboard();
 		UpdateAnimations();
 
 		_player.Update(gameTime.ElapsedGameTime);
@@ -627,6 +649,26 @@ public class MyGame : Game
 
 		// Draw sword
 		DrawModel(_modelSword, swordTransform);
+
+		// Draw Help
+		_spriteBatch.Begin();
+
+		var y = 0;
+		_spriteBatch.DrawString(_font, "WASD - Move", new Vector2(0, 0), Color.White);
+
+		y += TextLineHeight;
+		_spriteBatch.DrawString(_font, "Space - Jump", new Vector2(0, y), Color.White);
+
+		y += TextLineHeight;
+		_spriteBatch.DrawString(_font, "R - Draw/Sheath Weapon", new Vector2(0, y), Color.White);
+
+		y += TextLineHeight;
+		_spriteBatch.DrawString(_font, "Left Click - Slash Weapon", new Vector2(0, y), Color.White);
+
+		y += TextLineHeight;
+		_spriteBatch.DrawString(_font, "Escape - Turn Mouse Lock On/Off", new Vector2(0, y), Color.White);
+
+		_spriteBatch.End();
 	}
 
 	/// <summary>Build transform matrix from position, scale, and rotation (TRS order).</summary>

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+    <PackageReference Include="XNAssets.FontStashSharp.MonoGame" Version="0.8.5" />
   </ItemGroup>
 
   <ItemGroup>

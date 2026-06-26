@@ -13,9 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "..\FNA\FNA.Core
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.FNA.Core", "..\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{2535A45B-38CA-0551-63AC-19F2D00C17EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.Character.FNA.Core", "Samples\DigitalRiseModel.Samples.Character\DigitalRiseModel.Samples.Character.FNA.Core.csproj", "{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XNAssets.FNA.Core", "..\XNAssets\src\XNAssets\XNAssets.FNA.Core.csproj", "{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalRiseModel.Samples.Character.FNA.Core", "Samples\DigitalRiseModel.Samples.Character\DigitalRiseModel.Samples.Character.FNA.Core.csproj", "{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XNAssets.FontStashSharp.FNA.Core", "..\XNAssets\src\XNAssets.FontStashSharp\XNAssets.FontStashSharp.FNA.Core.csproj", "{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,14 +37,18 @@ Global
 		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2535A45B-38CA-0551-63AC-19F2D00C17EB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D519D8C-C6EB-31B4-0743-F937EF77AFAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,8 +56,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B955E668-3D04-C971-D3D3-26D12AA164FE} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
 		{2535A45B-38CA-0551-63AC-19F2D00C17EB} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
-		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
 		{4D519D8C-C6EB-31B4-0743-F937EF77AFAB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{55A6A49E-FCB0-0FA9-0CEC-734EB69F8855} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
+		{6C90CE78-ED1F-AA5B-A8DB-7958E76C8DCF} = {FB955119-43B2-4F31-888B-E2DBCEBE68A1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {35ACDF4E-2CE2-46B1-A19F-35DC131069A1}
