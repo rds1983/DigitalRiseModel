@@ -1,41 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System;
 
 namespace DigitalRiseModel.Samples;
 
 internal static class MouseService
 {
-	private static Point? _oldPosition;
-	private static Point? _position;
+	private static Point? _lastPosition = null;
 
-	public static Point OldPosition
-	{
-		get
-		{
-			if (_oldPosition == null)
-			{
-				throw new Exception("Update() wasn't called.");
-			}
-
-			return _oldPosition.Value;
-		}
-	}
-
-	public static Point Position
-	{
-		get
-		{
-			if (_position == null)
-			{
-				throw new Exception("Update() wasn't called.");
-			}
-
-			return _position.Value;
-		}
-	}
-
-	public static Point Delta => new Point(Position.X - OldPosition.X, Position.Y - OldPosition.Y);
+	public static Point Delta { get; private set; }
 
 	public static bool Locked
 	{
@@ -47,7 +19,8 @@ internal static class MouseService
 				return;
 
 			MyGame.Instance.IsMouseVisible = !value;
-			_position = null;
+			_lastPosition = null;
+			Delta = Point.Zero;
 			UpdateLockedMouse();
 		}
 	}
@@ -57,26 +30,25 @@ internal static class MouseService
 		var mouseState = Mouse.GetState();
 		var newPosition = new Point(mouseState.X, mouseState.Y);
 
-		if (_position == null)
+		if (_lastPosition != null)
 		{
-			_oldPosition = _position = newPosition;
-		}
-		else
-		{
+			Point oldPosition;
 			if (!Locked)
 			{
-				_oldPosition = _position;
+				oldPosition = _lastPosition.Value;
 			}
 			else
 			{
 				var cb = MyGame.Instance.Window.ClientBounds;
 				var center = new Point(cb.Width / 2, cb.Height / 2);
 
-				_oldPosition = center;
+				oldPosition = center;
 			}
 
-			_position = newPosition;
+			Delta = new Point(newPosition.X - oldPosition.X, newPosition.Y - oldPosition.Y);
 		}
+
+		_lastPosition = newPosition;
 
 		UpdateLockedMouse();
 	}
