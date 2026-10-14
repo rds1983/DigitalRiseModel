@@ -39,6 +39,12 @@ namespace DigitalRiseModel
 		/// Ignore loading all materials (both external and embedded). Equivalent to IgnoreExternalMaterials | IgnoreEmbeddedMaterials.
 		/// </summary>
 		IgnoreMaterials = IgnoreExternalMaterials | IgnoreEmbeddedMaterials,
+
+		/// <summary>
+		/// Keep a CPU-side copy of each mesh part's source vertex positions and indices, exposed
+		/// through <see cref="DrMeshPart.SourcePositions"/> and <see cref="DrMeshPart.SourceIndices"/>.
+		/// </summary>
+		KeepSourceGeometry = 1 << 4,
 	}
 
 	/// <summary>

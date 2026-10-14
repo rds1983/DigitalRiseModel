@@ -305,6 +305,7 @@ namespace DigitalRiseModel
 					// Read vertex declaration
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
+					int? positionAccessorIndex = null;
 					var hasSkinning = false;
 					var hasUvs = false;
 					foreach (var pair in primitive.Attributes)
@@ -332,6 +333,7 @@ namespace DigitalRiseModel
 							}
 
 							element.Usage = VertexElementUsage.Position;
+							positionAccessorIndex = pair.Value;
 						}
 						else if (pair.Key == "NORMAL")
 						{
@@ -488,6 +490,21 @@ namespace DigitalRiseModel
 
 					// Store for later bounding boxes calculation
 					vertexBuffer.Tag = boundingBoxData;
+
+					// Keep a CPU-side copy of the source geometry when requested.
+					if (_loadSettings.Flags.HasFlag(ModelLoadFlags.KeepSourceGeometry) && positionAccessorIndex.HasValue)
+					{
+						meshPart.SourcePositions = GetAccessorAs<Vector3>(positionAccessorIndex.Value);
+
+						var uintIndices = (uint[])indexBuffer.Tag;
+						var sourceIndices = new int[uintIndices.Length];
+						for (var i = 0; i < uintIndices.Length; ++i)
+						{
+							sourceIndices[i] = (int)uintIndices[i];
+						}
+
+						meshPart.SourceIndices = sourceIndices;
+					}
 
 					if (!_loadSettings.Flags.HasFlag(ModelLoadFlags.IgnoreMaterials) && primitive.Material != null)
 					{

@@ -81,6 +81,20 @@ namespace DigitalRiseModel
 		/// </summary>
 		public object Tag { get; set; }
 
+		/// <summary>
+		/// Gets or sets the source vertex positions of this mesh part. This is populated only when
+		/// the model was loaded with <see cref="ModelLoadFlags.KeepSourceGeometry"/>; otherwise it
+		/// is <c>null</c>.
+		/// </summary>
+		public Vector3[] SourcePositions { get; set; }
+
+		/// <summary>
+		/// Gets or sets the source indices of this mesh part. This is populated only when the model
+		/// was loaded with <see cref="ModelLoadFlags.KeepSourceGeometry"/>; otherwise it is
+		/// <c>null</c>.
+		/// </summary>
+		public int[] SourceIndices { get; set; }
+
 		private DrMeshPart(PrimitiveType primitiveType, int primitiveCount, VertexBuffer vertexBuffer, int vertexOffset, int numVertices,
 			IndexBuffer indexBuffer, int startIndex, BoundingBox boundingBox, bool hasNormals, VertexElementFormat? tangentsFormat)
 		{
@@ -275,7 +289,9 @@ namespace DigitalRiseModel
 			return new DrMeshPart(PrimitiveType, PrimitiveCount, VertexBuffer, VertexOffset, NumVertices, IndexBuffer, StartIndex, BoundingBox, HasNormals, TangentsFormat)
 			{
 				Material = Material?.Clone(),
-				Tag = Tag
+				Tag = Tag,
+				SourcePositions = SourcePositions,
+				SourceIndices = SourceIndices
 			};
 		}
 	}
