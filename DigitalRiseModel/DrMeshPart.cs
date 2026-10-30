@@ -82,11 +82,12 @@ namespace DigitalRiseModel
 		public object Tag { get; set; }
 
 		/// <summary>
-		/// Gets or sets the source vertex positions of this mesh part. This is populated only when
-		/// the model was loaded with <see cref="ModelLoadFlags.KeepSourceGeometry"/>; otherwise it
-		/// is <c>null</c>.
+		/// Gets or sets the source vertices (position, normal and texture coordinate) of this mesh
+		/// part. Elements the source geometry does not provide are zero. This is populated only
+		/// when the model was loaded with <see cref="ModelLoadFlags.KeepSourceGeometry"/>; otherwise
+		/// it is <c>null</c>.
 		/// </summary>
-		public Vector3[] SourcePositions { get; set; }
+		public VertexPositionNormalTexture[] SourceVertices { get; set; }
 
 		/// <summary>
 		/// Gets or sets the source indices of this mesh part. This is populated only when the model
@@ -290,7 +291,7 @@ namespace DigitalRiseModel
 			{
 				Material = Material?.Clone(),
 				Tag = Tag,
-				SourcePositions = SourcePositions,
+				SourceVertices = SourceVertices,
 				SourceIndices = SourceIndices
 			};
 		}

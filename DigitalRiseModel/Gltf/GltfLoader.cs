@@ -90,15 +90,20 @@ namespace DigitalRiseModel
 		private T[] GetAccessorAs<T>(int accessorIndex)
 		{
 			var type = typeof(T);
-			if (type != typeof(float) && type != typeof(Vector3) && type != typeof(Vector4) && type != typeof(Quaternion) && type != typeof(Matrix))
+			if (type != typeof(float) && type != typeof(Vector2) && type != typeof(Vector3) && type != typeof(Vector4) && type != typeof(Quaternion) && type != typeof(Matrix))
 			{
-				throw new NotSupportedException("Only float/Vector3/Vector4 types are supported");
+				throw new NotSupportedException("Only float/Vector2/Vector3/Vector4 types are supported");
 			}
 
 			var accessor = _gltf.Accessors[accessorIndex];
 			if (accessor.Type == TypeEnum.SCALAR && type != typeof(float))
 			{
 				throw new NotSupportedException("Scalar type could be converted only to float");
+			}
+
+			if (accessor.Type == TypeEnum.VEC2 && type != typeof(Vector2))
+			{
+				throw new NotSupportedException("VEC2 type could be converted only to Vector2");
 			}
 
 			if (accessor.Type == TypeEnum.VEC3 && type != typeof(Vector3))
@@ -306,6 +311,8 @@ namespace DigitalRiseModel
 					var vertexInfos = new List<VertexElementInfo>();
 					int? vertexCount = null;
 					int? positionAccessorIndex = null;
+					int? normalAccessorIndex = null;
+					int? texCoordAccessorIndex = null;
 					var hasSkinning = false;
 					var hasUvs = false;
 					foreach (var pair in primitive.Attributes)
@@ -338,6 +345,7 @@ namespace DigitalRiseModel
 						else if (pair.Key == "NORMAL")
 						{
 							element.Usage = VertexElementUsage.Normal;
+							normalAccessorIndex = pair.Value;
 						}
 						else if (pair.Key == "TANGENT" || pair.Key == "_TANGENT")
 						{
@@ -352,6 +360,11 @@ namespace DigitalRiseModel
 							element.Usage = VertexElementUsage.TextureCoordinate;
 							element.UsageIndex = int.Parse(pair.Key.Substring(9));
 							hasUvs = true;
+
+							if (element.UsageIndex == 0)
+							{
+								texCoordAccessorIndex = pair.Value;
+							}
 						}
 						else if (pair.Key.StartsWith("JOINTS_"))
 						{
@@ -492,9 +505,24 @@ namespace DigitalRiseModel
 					vertexBuffer.Tag = boundingBoxData;
 
 					// Keep a CPU-side copy of the source geometry when requested.
-					if (_loadSettings.Flags.HasFlag(ModelLoadFlags.KeepSourceGeometry) && positionAccessorIndex.HasValue)
+					if (_loadSettings.Flags.HasFlag(ModelLoadFlags.KeepSourceGeometry))
 					{
-						meshPart.SourcePositions = GetAccessorAs<Vector3>(positionAccessorIndex.Value);
+						var positions = positionAccessorIndex.HasValue ? GetAccessorAs<Vector3>(positionAccessorIndex.Value) : null;
+						var normals = normalAccessorIndex.HasValue ? GetAccessorAs<Vector3>(normalAccessorIndex.Value) : null;
+						var texCoords = texCoordAccessorIndex.HasValue ? GetAccessorAs<Vector2>(texCoordAccessorIndex.Value) : null;
+
+						// Elements the source geometry does not provide (e.g. no normals or no uvs)
+						// are filled with zero.
+						var sourceVertices = new VertexPositionNormalTexture[vertexCount.Value];
+						for (var i = 0; i < sourceVertices.Length; ++i)
+						{
+							sourceVertices[i] = new VertexPositionNormalTexture(
+								positions != null ? positions[i] : Vector3.Zero,
+								normals != null ? normals[i] : Vector3.Zero,
+								texCoords != null ? texCoords[i] : Vector2.Zero);
+						}
+
+						meshPart.SourceVertices = sourceVertices;
 
 						var uintIndices = (uint[])indexBuffer.Tag;
 						var sourceIndices = new int[uintIndices.Length];
