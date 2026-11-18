@@ -67,6 +67,25 @@ The following flags can be combined to control model loading behavior:
 | `IgnoreMaterials` | Skip loading all materials (equivalent to `IgnoreExternalMaterials \| IgnoreEmbeddedMaterials`). Material structure is still created, but no textures are loaded. |
 | `ReadableBuffers` | Create vertex and index buffers with `BufferUsage.None` instead of `BufferUsage.WriteOnly`, allowing you to read buffer data using `GetData()`. This is useful for analysis or serialization but may have performance implications. |
 | `EnsureUVs` | Automatically add a zero-valued UV channel (TextureCoordinate) to meshes that do not have one. This is useful when you need all meshes to have UV coordinates. |
+| `KeepSourceGeometry` | Keep a CPU-side copy of each mesh part's source geometry, exposed through `DrMeshPart.SourceVertices` (`VertexPositionNormalTexture[]`) and `DrMeshPart.SourceIndices` (`int[]`). Elements the source geometry does not provide (e.g. normals or UVs) are zero. If the flag is not set, both properties are `null`. Useful when the original vertex data is needed after loading (e.g. for collision or mesh processing) but increases memory usage. |
+
+Example of accessing the source geometry:
+```c#
+DrModel model = assetManager.LoadModel(
+    GraphicsDevice, 
+    "myModel.gltf", 
+    ModelLoadFlags.KeepSourceGeometry
+);
+
+foreach (var mesh in model.Meshes)
+{
+    foreach (var meshPart in mesh.MeshParts)
+    {
+        VertexPositionNormalTexture[] sourceVertices = meshPart.SourceVertices;
+        int[] sourceIndices = meshPart.SourceIndices;
+    }
+}
+```
 
 #### DrModel API
 
