@@ -239,10 +239,19 @@ namespace DigitalRiseModel
 		}
 
 		/// <summary>
-		/// Clears the tag property from all bones, meshes, and buffers in the model.
+		/// Clears the tag property from all bones, meshes, buffers, and animations in the model.
 		/// </summary>
 		public void ClearAllTags()
 		{
+			if (Animations != null)
+			{
+				foreach (var animation in Animations.Values)
+				{
+					animation.Tag = null;
+				}
+			}
+
+
 			foreach (var bone in Bones)
 			{
 				bone.Tag = null;

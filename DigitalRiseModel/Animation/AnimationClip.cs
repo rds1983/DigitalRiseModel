@@ -41,6 +41,11 @@ namespace DigitalRiseModel.Animation
 		public AnimationChannel[] Channels { get; }
 
 		/// <summary>
+		/// Gets or sets an arbitrary object associated with this animation clip.
+		/// </summary>
+		public object Tag { get; set; }
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="AnimationClip"/> class.
 		/// </summary>
 		/// <param name="name">The name of the animation clip.</param>
